@@ -1,0 +1,20 @@
+# import * from 'user.graphql'
+
+scalar Date
+scalar Cursor
+
+type Query {
+  ping: String!
+}
+
+type PageInfo {
+  hasNextPage: Boolean!
+  endCursor: Cursor
+  # hasPreviousPage: Boolean!
+  # startCursor: Cursor
+}
+
+input PaginationInput {
+  first: Int! = 25
+  after: Cursor
+}

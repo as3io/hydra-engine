@@ -1,0 +1,96 @@
+{
+  "name": "hydra-engine",
+  "version": "0.1.0",
+  "main": "src/index.js",
+  "repository": "https://github.com/cygnusb2b/hydra-engine.git",
+  "author": "Josh Worden <solocommand@gmail.com>",
+  "license": "Proprietary",
+  "private": true,
+  "scripts": {
+    "pretest": "yarn run posttest && $npm_package_docker_test_install",
+    "posttest": "$npm_package_docker_test_down && $npm_package_docker_test_prune",
+    "test": "$npm_package_docker_test_test",
+    "prestart": "$npm_package_docker_dev_install",
+    "start": "$npm_package_docker_dev_up",
+    "stop": "$npm_package_docker_dev_down",
+    "terminal": "docker exec -it hydraengine_app_1 /bin/bash",
+    "prelint": "$npm_package_docker_test_install",
+    "lint": "$npm_package_docker_test_lint",
+    "postlint": "$npm_package_docker_test_down",
+    "precoverage": "yarn run postcoverage && $npm_package_docker_test_install",
+    "coverage": "$npm_package_docker_test_coverage",
+    "postcoverage": "$npm_package_docker_test_down && $npm_package_docker_test_prune",
+    "test:ci": "yarn run lint:run && ./node_modules/.bin/mocha --reporter mocha-junit-reporter --reporter-options mochaFile=./coverage/test-results.xml",
+    "test:run": "yarn run lint:run && ./node_modules/.bin/mocha --reporter spec",
+    "lint:run": "./node_modules/.bin/eslint \"src/**/*.js\"",
+    "coverage:run": "./node_modules/.bin/nyc yarn run test:ci"
+  },
+  "docker": {
+    "dev": {
+      "install": "docker-compose -p hydraengine run --no-deps --entrypoint yarn app",
+      "up": "docker-compose -p hydraengine up",
+      "down": "docker-compose -p hydraengine down"
+    },
+    "test": {
+      "install": "docker-compose -p hydraenginetest -f test/docker-compose.yml run --no-deps --entrypoint yarn test",
+      "test": "docker-compose -p hydraenginetest -f test/docker-compose.yml run test",
+      "coverage": "docker-compose -p hydraenginetest -f test/docker-compose.yml run --entrypoint yarn test run coverage:run",
+      "lint": "docker-compose -p hydraenginetest -f test/docker-compose.yml run --entrypoint yarn test run lint:run",
+      "down": "docker-compose -p hydraenginetest -f test/docker-compose.yml down",
+      "prune": "docker volume prune --filter label=io.as3.appname=hydra-engine --filter label=io.as3.env=test --filter label=io.as3.discard=true --force"
+    }
+  },
+  "dependencies": {
+    "apollo-server-express": "^1.3.2",
+    "base64-url": "^2.1.0",
+    "bcrypt": "^1.0.3",
+    "bluebird": "^3.5.1",
+    "body-parser": "^1.18.2",
+    "deep-assign": "^2.0.0",
+    "dotenv": "^4.0.0",
+    "express": "^4.16.2",
+    "faker": "^4.1.0",
+    "graphql": "^0.13.1",
+    "graphql-import": "^0.4.3",
+    "graphql-tools": "^2.21.0",
+    "helmet": "^3.11.0",
+    "http-errors": "^1.6.2",
+    "jsonwebtoken": "^8.1.1",
+    "moment": "^2.20.1",
+    "mongoose": "^5.0.1",
+    "newrelic": "^2.9.1",
+    "object-hash": "^1.2.0",
+    "passport": "^0.4.0",
+    "passport-http-bearer": "^1.0.1",
+    "redis": "^2.8.0",
+    "uuid": "^3.2.1",
+    "uuid-parse": "^1.0.0",
+    "validator": "^9.4.0"
+  },
+  "devDependencies": {
+    "chai": "^4.1.2",
+    "chai-as-promised": "^7.1.1",
+    "eslint": "^4.16.0",
+    "eslint-config-airbnb-base": "^12.1.0",
+    "eslint-plugin-import": "^2.8.0",
+    "gulp": "^3.9.1",
+    "mocha": "^5.0.0",
+    "mocha-junit-reporter": "^1.17.0",
+    "nyc": "^11.4.1",
+    "sinon": "^4.2.2",
+    "supertest": "^3.0.0"
+  },
+  "nyc": {
+    "check-coverage": false,
+    "per-file": true,
+    "reporter": [
+      "text",
+      "cobertura"
+    ],
+    "all": true,
+    "cache": false,
+    "include": [
+      "src/**/*.js"
+    ]
+  }
+}
