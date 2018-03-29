@@ -1,15 +1,15 @@
 {
 	"_type": "export",
 	"__export_format": 3,
-	"__export_date": "2018-03-29T14:50:43.100Z",
+	"__export_date": "2018-03-29T18:29:31.182Z",
 	"__export_source": "insomnia.desktop.app:v5.14.8",
 	"resources": [
 		{
 			"_id": "wrk_8f194dd04cd243739bb73d3b0624510b",
 			"created": 1522333061863,
 			"description": "",
-			"modified": 1522333061863,
-			"name": "HYDRA Engine",
+			"modified": 1522348154413,
+			"name": "HYDRA Content Engine",
 			"parentId": null,
 			"_type": "workspace"
 		},
@@ -77,9 +77,9 @@
 			"created": 1522333061887,
 			"description": "",
 			"headers": [],
-			"metaSortKey": -1516648445331,
+			"metaSortKey": -1512076476860.917,
 			"method": "GET",
-			"modified": 1522333182510,
+			"modified": 1522348140192,
 			"name": "ping",
 			"parameters": [],
 			"parentId": "wrk_8f194dd04cd243739bb73d3b0624510b",
@@ -106,9 +106,9 @@
 					"value": "application/json"
 				}
 			],
-			"metaSortKey": -1513081826004.5,
+			"metaSortKey": -1512064867736.0488,
 			"method": "POST",
-			"modified": 1522333501760,
+			"modified": 1522348126184,
 			"name": "createUser",
 			"parameters": [],
 			"parentId": "wrk_8f194dd04cd243739bb73d3b0624510b",
@@ -296,6 +296,102 @@
 			"method": "POST",
 			"modified": 1522333924512,
 			"name": "user",
+			"parameters": [],
+			"parentId": "wrk_8f194dd04cd243739bb73d3b0624510b",
+			"settingDisableRenderRequestBody": false,
+			"settingEncodeUrl": true,
+			"settingSendCookies": true,
+			"settingStoreCookies": true,
+			"url": "{{ url  }}",
+			"_type": "request"
+		},
+		{
+			"_id": "req_c320ad2e7ba7424faef15ad56830b041",
+			"authentication": {
+				"token": "{% response 'body', 'req_2d4af28ab2c9440fb66122542c155dfd', '$.data.loginUser.session.token' %}",
+				"type": "bearer"
+			},
+			"body": {
+				"mimeType": "application/graphql",
+				"text": "{\"query\":\"query allStories($pagination: PaginationInput, $sort: StorySortInput) {\\n  allStories(pagination: $pagination, sort: $sort) {\\n    totalCount\\n    edges {\\n      node {\\n        id\\n\\t\\t\\t\\ttitle\\n\\t\\t\\t\\tcreatedAt\\n\\t\\t\\t\\tupdatedAt\\n      }\\n      cursor\\n    }\\n    pageInfo {\\n      hasNextPage\\n      endCursor\\n    }\\n  }\\n}\\n\",\"variables\":{\"pagination\":{\"first\":5}},\"operationName\":\"allStories\"}"
+			},
+			"created": 1522347802961,
+			"description": "",
+			"headers": [
+				{
+					"id": "pair_3f34c0e36f404366b28ee6ff400cbbc4",
+					"name": "Content-Type",
+					"value": "application/json"
+				}
+			],
+			"metaSortKey": -1512029708296.7617,
+			"method": "POST",
+			"modified": 1522347836975,
+			"name": "allStories",
+			"parameters": [],
+			"parentId": "wrk_8f194dd04cd243739bb73d3b0624510b",
+			"settingDisableRenderRequestBody": false,
+			"settingEncodeUrl": true,
+			"settingSendCookies": true,
+			"settingStoreCookies": true,
+			"url": "{{ url  }}",
+			"_type": "request"
+		},
+		{
+			"_id": "req_436a58a4aa4e4d52ac2ff9490860ce2f",
+			"authentication": {
+				"token": "{% response 'body', 'req_2d4af28ab2c9440fb66122542c155dfd', '$.data.loginUser.session.token' %}",
+				"type": "bearer"
+			},
+			"body": {
+				"mimeType": "application/graphql",
+				"text": "{\"query\":\"mutation createStory($input: CreateStoryInput!) {\\n\\tcreateStory(input: $input) {\\n\\t\\tid\\n\\t\\ttitle\\n\\t\\tslug\\n\\t\\ttext\\n\\t\\tupdatedAt\\n\\t\\tcreatedAt\\n\\t}\\n}\",\"variables\":{\"input\":{\"payload\":{\"title\":\" My Super Awesome Content Title!!! \",\"text\":\"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum eu euismod erat. Nam ut nisi sollicitudin, congue odio quis, scelerisque mi. In dapibus tristique tristique. Integer eu diam vel urna venenatis ultricies. Nullam et lorem id neque dignissim finibus in ac ipsum. Donec ac odio tincidunt, malesuada enim id, convallis orci. Aenean ligula quam, vulputate sit amet sapien eu, iaculis mattis ipsum. Aenean laoreet massa non tristique cursus. Praesent pulvinar aliquam fermentum. Praesent viverra tincidunt maximus.\\n\\nNullam malesuada tortor in libero dictum sodales. Donec eget interdum turpis. In quis dolor rhoncus, scelerisque ipsum nec, feugiat ipsum. Cras imperdiet hendrerit nunc non consequat. Ut eu aliquam nulla. Cras ac mi euismod purus pulvinar rhoncus. Duis eleifend enim sed ultrices fringilla. Duis sed ullamcorper velit. Integer id pretium lorem. Suspendisse a dolor non erat suscipit semper. Vestibulum et dictum tellus. Suspendisse tincidunt, leo elementum eleifend tristique, sem tellus ultricies ex, a accumsan tortor ex vitae lacus. Vivamus ultricies in risus ut ornare. Aenean egestas purus in lacinia iaculis. Quisque auctor nunc id auctor viverra. Pellentesque accumsan tincidunt nisi, at sollicitudin felis.\\n\\nMauris posuere justo sed feugiat sollicitudin. Fusce euismod eros dui, ut iaculis dui suscipit condimentum. Vivamus bibendum semper ante, vitae scelerisque ipsum volutpat sed. Fusce aliquet dapibus fringilla. Nam suscipit, leo rutrum tincidunt posuere, risus mauris viverra turpis, nec dapibus orci massa at est. Etiam semper massa sed enim condimentum, ac maximus ipsum varius. Donec nec ipsum eget ligula malesuada varius viverra a orci.\\n\\nAenean mollis lacus vitae dui lacinia ullamcorper. Maecenas ac turpis vitae diam maximus malesuada et id turpis. Duis fringilla arcu ut dapibus egestas. Nam enim risus, scelerisque vel diam quis, fringilla dictum lacus. Pellentesque euismod dapibus porta. Vestibulum porttitor maximus augue, vel tempor turpis consequat eget. Etiam luctus laoreet odio, et porttitor nisl ultrices eget. Mauris non egestas metus. Sed ipsum risus, pretium eget orci ac, fermentum semper neque. Cras eget ipsum lacus. Aliquam aliquam quam non dignissim gravida. Pellentesque lorem nulla, placerat molestie pharetra eget, placerat vitae orci. Suspendisse ut lorem finibus, pellentesque quam a, fermentum orci. Pellentesque eu odio vehicula, suscipit nibh id, pharetra felis. Etiam pharetra aliquam nisi sodales tempus. Nulla libero ante, volutpat nec volutpat et, aliquam pharetra elit.\\n\\nCras eu justo tempus, maximus urna in, consequat urna. In lectus nisi, viverra eget orci volutpat, lacinia semper felis. Nulla enim quam, blandit et elit ac, cursus aliquet felis. Nullam vitae ante efficitur, aliquet lectus ac, placerat est. Phasellus ultrices nec mi in imperdiet. Aliquam ut leo in eros pulvinar ullamcorper. Donec a augue porta, feugiat risus ullamcorper, mollis risus. Aenean mattis consectetur est, vel mollis urna sollicitudin pellentesque. Nulla at sagittis elit. Donec et risus semper, auctor urna sed, mattis purus. Suspendisse ornare metus enim, eu placerat metus feugiat sed. In vehicula aliquam ante eget malesuada. Vivamus quis ante congue elit rutrum venenatis auctor in neque. Vivamus in egestas lectus, ut cursus enim. Donec eu velit vitae risus pulvinar viverra.\"}}},\"operationName\":\"createStory\"}"
+			},
+			"created": 1522347869318,
+			"description": "",
+			"headers": [
+				{
+					"id": "pair_3f34c0e36f404366b28ee6ff400cbbc4",
+					"name": "Content-Type",
+					"value": "application/json"
+				}
+			],
+			"metaSortKey": -1512053258611.1807,
+			"method": "POST",
+			"modified": 1522348128674,
+			"name": "createStory",
+			"parameters": [],
+			"parentId": "wrk_8f194dd04cd243739bb73d3b0624510b",
+			"settingDisableRenderRequestBody": false,
+			"settingEncodeUrl": true,
+			"settingSendCookies": true,
+			"settingStoreCookies": true,
+			"url": "{{ url  }}",
+			"_type": "request"
+		},
+		{
+			"_id": "req_5d9c60e382ce499bbb3e5c91f9522779",
+			"authentication": {
+				"token": "{% response 'body', 'req_2d4af28ab2c9440fb66122542c155dfd', '$.data.loginUser.session.token' %}",
+				"type": "bearer"
+			},
+			"body": {
+				"mimeType": "application/graphql",
+				"text": "{\"query\":\"query Story($input: ModelIdInput!) {\\n\\tstory(input: $input) {\\n\\t\\tid\\n\\t\\ttitle\\n\\t\\tslug\\n\\t\\ttext\\n\\t\\tupdatedAt\\n\\t\\tcreatedAt\\n\\t}\\n}\",\"variables\":{\"input\":{\"id\":\"{% response 'body', 'req_c320ad2e7ba7424faef15ad56830b041', '$.data.allStories.edges.0.node.id' %}\"}},\"operationName\":\"Story\"}"
+			},
+			"created": 1522348043422,
+			"description": "",
+			"headers": [
+				{
+					"id": "pair_3f34c0e36f404366b28ee6ff400cbbc4",
+					"name": "Content-Type",
+					"value": "application/json"
+				}
+			],
+			"metaSortKey": -1512005825917.6602,
+			"method": "POST",
+			"modified": 1522348105120,
+			"name": "story",
 			"parameters": [],
 			"parentId": "wrk_8f194dd04cd243739bb73d3b0624510b",
 			"settingDisableRenderRequestBody": false,
@@ -581,7 +677,7 @@
 		{
 			"_id": "req_c1a6f0573ede40c08de8be104d71adaf.graphql",
 			"authentication": {
-				"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI5OWRhMDRhNC02ZjBhLTU5ZTktYTQzNS05OWQ4YTQwOGZjZDQiLCJleHAiOjE1MjA5NzQ5NDAsImlhdCI6MTUyMDk3MTM0MH0.uzr21fJDGshHJvZuSQbfljfUbuyAECBp2L8Nxk_euOs",
+				"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI4MGU3ZGM0ZS03MTVhLTUyYjctYjA4NC0yY2JjYTYwNTlhMGIiLCJleHAiOjE1MjI0MzQyNDgsImlhdCI6MTUyMjM0Nzg0OH0.Gi4stN8ZzybSdvojrwHszuiNP4bGVLUBaCzFEb22MEI",
 				"type": "bearer"
 			},
 			"body": {
@@ -599,7 +695,7 @@
 			],
 			"metaSortKey": -1512041649486.3125,
 			"method": "POST",
-			"modified": 1522333414244,
+			"modified": 1522333575693,
 			"name": "allUsers",
 			"parameters": [],
 			"parentId": "req_c1a6f0573ede40c08de8be104d71adaf",
@@ -674,7 +770,7 @@
 		{
 			"_id": "req_296564a47cd24ac892b2be27fff1c695.graphql",
 			"authentication": {
-				"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI1YjhlYjE0NS01MWQ2LTVmNzItYWY0Ni04MjhkMDFkOGJkOTMiLCJleHAiOjE1MjI0MTk5MTAsImlhdCI6MTUyMjMzMzUxMH0.9kHtoGUcrW_9SKzmPxdyshgv-wd33A8v3JQ9x9XIBs0",
+				"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI4MGU3ZGM0ZS03MTVhLTUyYjctYjA4NC0yY2JjYTYwNTlhMGIiLCJleHAiOjE1MjI0MzQyNDgsImlhdCI6MTUyMjM0Nzg0OH0.Gi4stN8ZzybSdvojrwHszuiNP4bGVLUBaCzFEb22MEI",
 				"type": "bearer"
 			},
 			"body": {
@@ -692,7 +788,7 @@
 			],
 			"metaSortKey": -1512017767107.211,
 			"method": "POST",
-			"modified": 1522333812094,
+			"modified": 1522333924512,
 			"name": "user",
 			"parameters": [],
 			"parentId": "req_296564a47cd24ac892b2be27fff1c695",
@@ -760,6 +856,320 @@
 			"name": "allAdvertisers",
 			"parameters": [],
 			"parentId": "req_296564a47cd24ac892b2be27fff1c695",
+			"settingDisableRenderRequestBody": false,
+			"settingEncodeUrl": true,
+			"settingSendCookies": true,
+			"settingStoreCookies": true,
+			"url": "http://localhost:8100/graph",
+			"_type": "request"
+		},
+		{
+			"_id": "req_c320ad2e7ba7424faef15ad56830b041.graphql",
+			"authentication": {
+				"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI4MGU3ZGM0ZS03MTVhLTUyYjctYjA4NC0yY2JjYTYwNTlhMGIiLCJleHAiOjE1MjI0MzQyNDgsImlhdCI6MTUyMjM0Nzg0OH0.Gi4stN8ZzybSdvojrwHszuiNP4bGVLUBaCzFEb22MEI",
+				"type": "bearer"
+			},
+			"body": {
+				"mimeType": "application/json",
+				"text": "{\"query\":\"\\n  query IntrospectionQuery {\\n    __schema {\\n      queryType { name }\\n      mutationType { name }\\n      subscriptionType { name }\\n      types {\\n        ...FullType\\n      }\\n      directives {\\n        name\\n        description\\n        locations\\n        args {\\n          ...InputValue\\n        }\\n      }\\n    }\\n  }\\n\\n  fragment FullType on __Type {\\n    kind\\n    name\\n    description\\n    fields(includeDeprecated: true) {\\n      name\\n      description\\n      args {\\n        ...InputValue\\n      }\\n      type {\\n        ...TypeRef\\n      }\\n      isDeprecated\\n      deprecationReason\\n    }\\n    inputFields {\\n      ...InputValue\\n    }\\n    interfaces {\\n      ...TypeRef\\n    }\\n    enumValues(includeDeprecated: true) {\\n      name\\n      description\\n      isDeprecated\\n      deprecationReason\\n    }\\n    possibleTypes {\\n      ...TypeRef\\n    }\\n  }\\n\\n  fragment InputValue on __InputValue {\\n    name\\n    description\\n    type { ...TypeRef }\\n    defaultValue\\n  }\\n\\n  fragment TypeRef on __Type {\\n    kind\\n    name\\n    ofType {\\n      kind\\n      name\\n      ofType {\\n        kind\\n        name\\n        ofType {\\n          kind\\n          name\\n          ofType {\\n            kind\\n            name\\n            ofType {\\n              kind\\n              name\\n              ofType {\\n                kind\\n                name\\n                ofType {\\n                  kind\\n                  name\\n                }\\n              }\\n            }\\n          }\\n        }\\n      }\\n    }\\n  }\\n\"}"
+			},
+			"created": 1522347802961,
+			"description": "",
+			"headers": [
+				{
+					"id": "pair_3f34c0e36f404366b28ee6ff400cbbc4",
+					"name": "Content-Type",
+					"value": "application/json"
+				}
+			],
+			"metaSortKey": -1512029708296.7617,
+			"method": "POST",
+			"modified": 1522347836975,
+			"name": "allStories",
+			"parameters": [],
+			"parentId": "req_c320ad2e7ba7424faef15ad56830b041",
+			"settingDisableRenderRequestBody": false,
+			"settingEncodeUrl": true,
+			"settingSendCookies": true,
+			"settingStoreCookies": true,
+			"url": "http://localhost:8400/graph",
+			"_type": "request"
+		},
+		{
+			"_id": "req_ee55f57c86fa4dcfa21f1e64359238f1",
+			"authentication": {
+				"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI1YjhlYjE0NS01MWQ2LTVmNzItYWY0Ni04MjhkMDFkOGJkOTMiLCJleHAiOjE1MjI0MTk5MTAsImlhdCI6MTUyMjMzMzUxMH0.9kHtoGUcrW_9SKzmPxdyshgv-wd33A8v3JQ9x9XIBs0",
+				"type": "bearer"
+			},
+			"body": {
+				"mimeType": "application/json",
+				"text": "{\"query\":\"\\n  query IntrospectionQuery {\\n    __schema {\\n      queryType { name }\\n      mutationType { name }\\n      subscriptionType { name }\\n      types {\\n        ...FullType\\n      }\\n      directives {\\n        name\\n        description\\n        locations\\n        args {\\n          ...InputValue\\n        }\\n      }\\n    }\\n  }\\n\\n  fragment FullType on __Type {\\n    kind\\n    name\\n    description\\n    fields(includeDeprecated: true) {\\n      name\\n      description\\n      args {\\n        ...InputValue\\n      }\\n      type {\\n        ...TypeRef\\n      }\\n      isDeprecated\\n      deprecationReason\\n    }\\n    inputFields {\\n      ...InputValue\\n    }\\n    interfaces {\\n      ...TypeRef\\n    }\\n    enumValues(includeDeprecated: true) {\\n      name\\n      description\\n      isDeprecated\\n      deprecationReason\\n    }\\n    possibleTypes {\\n      ...TypeRef\\n    }\\n  }\\n\\n  fragment InputValue on __InputValue {\\n    name\\n    description\\n    type { ...TypeRef }\\n    defaultValue\\n  }\\n\\n  fragment TypeRef on __Type {\\n    kind\\n    name\\n    ofType {\\n      kind\\n      name\\n      ofType {\\n        kind\\n        name\\n        ofType {\\n          kind\\n          name\\n          ofType {\\n            kind\\n            name\\n            ofType {\\n              kind\\n              name\\n              ofType {\\n                kind\\n                name\\n                ofType {\\n                  kind\\n                  name\\n                }\\n              }\\n            }\\n          }\\n        }\\n      }\\n    }\\n  }\\n\"}"
+			},
+			"created": 1522347802966,
+			"description": "",
+			"headers": [
+				{
+					"id": "pair_3f34c0e36f404366b28ee6ff400cbbc4",
+					"name": "Content-Type",
+					"value": "application/json"
+				}
+			],
+			"metaSortKey": -1512041649486.3125,
+			"method": "POST",
+			"modified": 1522347802966,
+			"name": "allUsers",
+			"parameters": [],
+			"parentId": "req_c320ad2e7ba7424faef15ad56830b041",
+			"settingDisableRenderRequestBody": false,
+			"settingEncodeUrl": true,
+			"settingSendCookies": true,
+			"settingStoreCookies": true,
+			"url": "http://localhost:8400/graph",
+			"_type": "request"
+		},
+		{
+			"_id": "req_abbe71a6d32f4dacac273cacd4d94dcf",
+			"authentication": {
+				"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI3ZWM1ZjliNi0yNThkLTU1ZTAtOWJmNy05ZTMyMWNlMmUyZTYiLCJleHAiOjE1MTkzOTk5NDYsImlhdCI6MTUxOTM5NjM0Nn0.gEvnMVVGOyJl_nblxa-nNHjWxY7DF74BFogQCzep4aQ",
+				"type": "bearer"
+			},
+			"body": {
+				"mimeType": "application/json",
+				"text": "{\"query\":\"\\n  query IntrospectionQuery {\\n    __schema {\\n      queryType { name }\\n      mutationType { name }\\n      subscriptionType { name }\\n      types {\\n        ...FullType\\n      }\\n      directives {\\n        name\\n        description\\n        locations\\n        args {\\n          ...InputValue\\n        }\\n      }\\n    }\\n  }\\n\\n  fragment FullType on __Type {\\n    kind\\n    name\\n    description\\n    fields(includeDeprecated: true) {\\n      name\\n      description\\n      args {\\n        ...InputValue\\n      }\\n      type {\\n        ...TypeRef\\n      }\\n      isDeprecated\\n      deprecationReason\\n    }\\n    inputFields {\\n      ...InputValue\\n    }\\n    interfaces {\\n      ...TypeRef\\n    }\\n    enumValues(includeDeprecated: true) {\\n      name\\n      description\\n      isDeprecated\\n      deprecationReason\\n    }\\n    possibleTypes {\\n      ...TypeRef\\n    }\\n  }\\n\\n  fragment InputValue on __InputValue {\\n    name\\n    description\\n    type { ...TypeRef }\\n    defaultValue\\n  }\\n\\n  fragment TypeRef on __Type {\\n    kind\\n    name\\n    ofType {\\n      kind\\n      name\\n      ofType {\\n        kind\\n        name\\n        ofType {\\n          kind\\n          name\\n          ofType {\\n            kind\\n            name\\n            ofType {\\n              kind\\n              name\\n              ofType {\\n                kind\\n                name\\n                ofType {\\n                  kind\\n                  name\\n                }\\n              }\\n            }\\n          }\\n        }\\n      }\\n    }\\n  }\\n\"}"
+			},
+			"created": 1522347802970,
+			"description": "",
+			"headers": [
+				{
+					"id": "pair_3f34c0e36f404366b28ee6ff400cbbc4",
+					"name": "Content-Type",
+					"value": "application/json"
+				}
+			],
+			"metaSortKey": -1512041649486.3125,
+			"method": "POST",
+			"modified": 1522347802970,
+			"name": "allAdvertisers",
+			"parameters": [],
+			"parentId": "req_c320ad2e7ba7424faef15ad56830b041",
+			"settingDisableRenderRequestBody": false,
+			"settingEncodeUrl": true,
+			"settingSendCookies": true,
+			"settingStoreCookies": true,
+			"url": "http://localhost:8100/graph",
+			"_type": "request"
+		},
+		{
+			"_id": "req_436a58a4aa4e4d52ac2ff9490860ce2f.graphql",
+			"authentication": {
+				"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI4MGU3ZGM0ZS03MTVhLTUyYjctYjA4NC0yY2JjYTYwNTlhMGIiLCJleHAiOjE1MjI0MzQyNDgsImlhdCI6MTUyMjM0Nzg0OH0.Gi4stN8ZzybSdvojrwHszuiNP4bGVLUBaCzFEb22MEI",
+				"type": "bearer"
+			},
+			"body": {
+				"mimeType": "application/json",
+				"text": "{\"query\":\"\\n  query IntrospectionQuery {\\n    __schema {\\n      queryType { name }\\n      mutationType { name }\\n      subscriptionType { name }\\n      types {\\n        ...FullType\\n      }\\n      directives {\\n        name\\n        description\\n        locations\\n        args {\\n          ...InputValue\\n        }\\n      }\\n    }\\n  }\\n\\n  fragment FullType on __Type {\\n    kind\\n    name\\n    description\\n    fields(includeDeprecated: true) {\\n      name\\n      description\\n      args {\\n        ...InputValue\\n      }\\n      type {\\n        ...TypeRef\\n      }\\n      isDeprecated\\n      deprecationReason\\n    }\\n    inputFields {\\n      ...InputValue\\n    }\\n    interfaces {\\n      ...TypeRef\\n    }\\n    enumValues(includeDeprecated: true) {\\n      name\\n      description\\n      isDeprecated\\n      deprecationReason\\n    }\\n    possibleTypes {\\n      ...TypeRef\\n    }\\n  }\\n\\n  fragment InputValue on __InputValue {\\n    name\\n    description\\n    type { ...TypeRef }\\n    defaultValue\\n  }\\n\\n  fragment TypeRef on __Type {\\n    kind\\n    name\\n    ofType {\\n      kind\\n      name\\n      ofType {\\n        kind\\n        name\\n        ofType {\\n          kind\\n          name\\n          ofType {\\n            kind\\n            name\\n            ofType {\\n              kind\\n              name\\n              ofType {\\n                kind\\n                name\\n                ofType {\\n                  kind\\n                  name\\n                }\\n              }\\n            }\\n          }\\n        }\\n      }\\n    }\\n  }\\n\"}"
+			},
+			"created": 1522347869318,
+			"description": "",
+			"headers": [
+				{
+					"id": "pair_3f34c0e36f404366b28ee6ff400cbbc4",
+					"name": "Content-Type",
+					"value": "application/json"
+				}
+			],
+			"metaSortKey": -1512784632727.875,
+			"method": "POST",
+			"modified": 1522348021935,
+			"name": "createStory",
+			"parameters": [],
+			"parentId": "req_436a58a4aa4e4d52ac2ff9490860ce2f",
+			"settingDisableRenderRequestBody": false,
+			"settingEncodeUrl": true,
+			"settingSendCookies": true,
+			"settingStoreCookies": true,
+			"url": "http://localhost:8400/graph",
+			"_type": "request"
+		},
+		{
+			"_id": "req_c6043843413b42178490e907df235535",
+			"authentication": {},
+			"body": {
+				"mimeType": "application/json",
+				"text": "{\"query\":\"\\n  query IntrospectionQuery {\\n    __schema {\\n      queryType { name }\\n      mutationType { name }\\n      subscriptionType { name }\\n      types {\\n        ...FullType\\n      }\\n      directives {\\n        name\\n        description\\n        locations\\n        args {\\n          ...InputValue\\n        }\\n      }\\n    }\\n  }\\n\\n  fragment FullType on __Type {\\n    kind\\n    name\\n    description\\n    fields(includeDeprecated: true) {\\n      name\\n      description\\n      args {\\n        ...InputValue\\n      }\\n      type {\\n        ...TypeRef\\n      }\\n      isDeprecated\\n      deprecationReason\\n    }\\n    inputFields {\\n      ...InputValue\\n    }\\n    interfaces {\\n      ...TypeRef\\n    }\\n    enumValues(includeDeprecated: true) {\\n      name\\n      description\\n      isDeprecated\\n      deprecationReason\\n    }\\n    possibleTypes {\\n      ...TypeRef\\n    }\\n  }\\n\\n  fragment InputValue on __InputValue {\\n    name\\n    description\\n    type { ...TypeRef }\\n    defaultValue\\n  }\\n\\n  fragment TypeRef on __Type {\\n    kind\\n    name\\n    ofType {\\n      kind\\n      name\\n      ofType {\\n        kind\\n        name\\n        ofType {\\n          kind\\n          name\\n          ofType {\\n            kind\\n            name\\n            ofType {\\n              kind\\n              name\\n              ofType {\\n                kind\\n                name\\n                ofType {\\n                  kind\\n                  name\\n                }\\n              }\\n            }\\n          }\\n        }\\n      }\\n    }\\n  }\\n\"}"
+			},
+			"created": 1522347869320,
+			"description": "",
+			"headers": [
+				{
+					"id": "pair_3f34c0e36f404366b28ee6ff400cbbc4",
+					"name": "Content-Type",
+					"value": "application/json"
+				}
+			],
+			"metaSortKey": -1513081826004.5,
+			"method": "POST",
+			"modified": 1522347869320,
+			"name": "createUser",
+			"parameters": [],
+			"parentId": "req_436a58a4aa4e4d52ac2ff9490860ce2f",
+			"settingDisableRenderRequestBody": false,
+			"settingEncodeUrl": true,
+			"settingSendCookies": true,
+			"settingStoreCookies": true,
+			"url": "http://localhost:8400/graph",
+			"_type": "request"
+		},
+		{
+			"_id": "req_cddb9a6479bb4bc880082a043cc02ad2",
+			"authentication": {},
+			"body": {
+				"mimeType": "application/json",
+				"text": "{\"query\":\"\\n  query IntrospectionQuery {\\n    __schema {\\n      queryType { name }\\n      mutationType { name }\\n      subscriptionType { name }\\n      types {\\n        ...FullType\\n      }\\n      directives {\\n        name\\n        description\\n        locations\\n        args {\\n          ...InputValue\\n        }\\n      }\\n    }\\n  }\\n\\n  fragment FullType on __Type {\\n    kind\\n    name\\n    description\\n    fields(includeDeprecated: true) {\\n      name\\n      description\\n      args {\\n        ...InputValue\\n      }\\n      type {\\n        ...TypeRef\\n      }\\n      isDeprecated\\n      deprecationReason\\n    }\\n    inputFields {\\n      ...InputValue\\n    }\\n    interfaces {\\n      ...TypeRef\\n    }\\n    enumValues(includeDeprecated: true) {\\n      name\\n      description\\n      isDeprecated\\n      deprecationReason\\n    }\\n    possibleTypes {\\n      ...TypeRef\\n    }\\n  }\\n\\n  fragment InputValue on __InputValue {\\n    name\\n    description\\n    type { ...TypeRef }\\n    defaultValue\\n  }\\n\\n  fragment TypeRef on __Type {\\n    kind\\n    name\\n    ofType {\\n      kind\\n      name\\n      ofType {\\n        kind\\n        name\\n        ofType {\\n          kind\\n          name\\n          ofType {\\n            kind\\n            name\\n            ofType {\\n              kind\\n              name\\n              ofType {\\n                kind\\n                name\\n                ofType {\\n                  kind\\n                  name\\n                }\\n              }\\n            }\\n          }\\n        }\\n      }\\n    }\\n  }\\n\"}"
+			},
+			"created": 1522347869324,
+			"description": "",
+			"headers": [
+				{
+					"id": "pair_3f34c0e36f404366b28ee6ff400cbbc4",
+					"name": "Content-Type",
+					"value": "application/json"
+				}
+			],
+			"metaSortKey": -1513081826004.5,
+			"method": "POST",
+			"modified": 1522347869324,
+			"name": "createUser",
+			"parameters": [],
+			"parentId": "req_436a58a4aa4e4d52ac2ff9490860ce2f",
+			"settingDisableRenderRequestBody": false,
+			"settingEncodeUrl": true,
+			"settingSendCookies": true,
+			"settingStoreCookies": true,
+			"url": "https://fortnight.as3.io/graph",
+			"_type": "request"
+		},
+		{
+			"_id": "req_5d9c60e382ce499bbb3e5c91f9522779.graphql",
+			"authentication": {
+				"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI4MGU3ZGM0ZS03MTVhLTUyYjctYjA4NC0yY2JjYTYwNTlhMGIiLCJleHAiOjE1MjI0MzQyNDgsImlhdCI6MTUyMjM0Nzg0OH0.Gi4stN8ZzybSdvojrwHszuiNP4bGVLUBaCzFEb22MEI",
+				"type": "bearer"
+			},
+			"body": {
+				"mimeType": "application/json",
+				"text": "{\"query\":\"\\n  query IntrospectionQuery {\\n    __schema {\\n      queryType { name }\\n      mutationType { name }\\n      subscriptionType { name }\\n      types {\\n        ...FullType\\n      }\\n      directives {\\n        name\\n        description\\n        locations\\n        args {\\n          ...InputValue\\n        }\\n      }\\n    }\\n  }\\n\\n  fragment FullType on __Type {\\n    kind\\n    name\\n    description\\n    fields(includeDeprecated: true) {\\n      name\\n      description\\n      args {\\n        ...InputValue\\n      }\\n      type {\\n        ...TypeRef\\n      }\\n      isDeprecated\\n      deprecationReason\\n    }\\n    inputFields {\\n      ...InputValue\\n    }\\n    interfaces {\\n      ...TypeRef\\n    }\\n    enumValues(includeDeprecated: true) {\\n      name\\n      description\\n      isDeprecated\\n      deprecationReason\\n    }\\n    possibleTypes {\\n      ...TypeRef\\n    }\\n  }\\n\\n  fragment InputValue on __InputValue {\\n    name\\n    description\\n    type { ...TypeRef }\\n    defaultValue\\n  }\\n\\n  fragment TypeRef on __Type {\\n    kind\\n    name\\n    ofType {\\n      kind\\n      name\\n      ofType {\\n        kind\\n        name\\n        ofType {\\n          kind\\n          name\\n          ofType {\\n            kind\\n            name\\n            ofType {\\n              kind\\n              name\\n              ofType {\\n                kind\\n                name\\n                ofType {\\n                  kind\\n                  name\\n                }\\n              }\\n            }\\n          }\\n        }\\n      }\\n    }\\n  }\\n\"}"
+			},
+			"created": 1522348043422,
+			"description": "",
+			"headers": [
+				{
+					"id": "pair_3f34c0e36f404366b28ee6ff400cbbc4",
+					"name": "Content-Type",
+					"value": "application/json"
+				}
+			],
+			"metaSortKey": -1512005825917.6602,
+			"method": "POST",
+			"modified": 1522348043422,
+			"name": "user (Copy)",
+			"parameters": [],
+			"parentId": "req_5d9c60e382ce499bbb3e5c91f9522779",
+			"settingDisableRenderRequestBody": false,
+			"settingEncodeUrl": true,
+			"settingSendCookies": true,
+			"settingStoreCookies": true,
+			"url": "http://localhost:8400/graph",
+			"_type": "request"
+		},
+		{
+			"_id": "req_e7b8df09cf6c4eeb9f179cd01b3c73e6",
+			"authentication": {
+				"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI4MGU3ZGM0ZS03MTVhLTUyYjctYjA4NC0yY2JjYTYwNTlhMGIiLCJleHAiOjE1MjI0MzQyNDgsImlhdCI6MTUyMjM0Nzg0OH0.Gi4stN8ZzybSdvojrwHszuiNP4bGVLUBaCzFEb22MEI",
+				"type": "bearer"
+			},
+			"body": {
+				"mimeType": "application/json",
+				"text": "{\"query\":\"\\n  query IntrospectionQuery {\\n    __schema {\\n      queryType { name }\\n      mutationType { name }\\n      subscriptionType { name }\\n      types {\\n        ...FullType\\n      }\\n      directives {\\n        name\\n        description\\n        locations\\n        args {\\n          ...InputValue\\n        }\\n      }\\n    }\\n  }\\n\\n  fragment FullType on __Type {\\n    kind\\n    name\\n    description\\n    fields(includeDeprecated: true) {\\n      name\\n      description\\n      args {\\n        ...InputValue\\n      }\\n      type {\\n        ...TypeRef\\n      }\\n      isDeprecated\\n      deprecationReason\\n    }\\n    inputFields {\\n      ...InputValue\\n    }\\n    interfaces {\\n      ...TypeRef\\n    }\\n    enumValues(includeDeprecated: true) {\\n      name\\n      description\\n      isDeprecated\\n      deprecationReason\\n    }\\n    possibleTypes {\\n      ...TypeRef\\n    }\\n  }\\n\\n  fragment InputValue on __InputValue {\\n    name\\n    description\\n    type { ...TypeRef }\\n    defaultValue\\n  }\\n\\n  fragment TypeRef on __Type {\\n    kind\\n    name\\n    ofType {\\n      kind\\n      name\\n      ofType {\\n        kind\\n        name\\n        ofType {\\n          kind\\n          name\\n          ofType {\\n            kind\\n            name\\n            ofType {\\n              kind\\n              name\\n              ofType {\\n                kind\\n                name\\n                ofType {\\n                  kind\\n                  name\\n                }\\n              }\\n            }\\n          }\\n        }\\n      }\\n    }\\n  }\\n\"}"
+			},
+			"created": 1522348043426,
+			"description": "",
+			"headers": [
+				{
+					"id": "pair_3f34c0e36f404366b28ee6ff400cbbc4",
+					"name": "Content-Type",
+					"value": "application/json"
+				}
+			],
+			"metaSortKey": -1512017767107.211,
+			"method": "POST",
+			"modified": 1522348043426,
+			"name": "user",
+			"parameters": [],
+			"parentId": "req_5d9c60e382ce499bbb3e5c91f9522779",
+			"settingDisableRenderRequestBody": false,
+			"settingEncodeUrl": true,
+			"settingSendCookies": true,
+			"settingStoreCookies": true,
+			"url": "http://localhost:8400/graph",
+			"_type": "request"
+		},
+		{
+			"_id": "req_9fbe71c41f85404c9e5c2bad12c48ce8",
+			"authentication": {
+				"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI5OWRhMDRhNC02ZjBhLTU5ZTktYTQzNS05OWQ4YTQwOGZjZDQiLCJleHAiOjE1MjA5NzQ5NDAsImlhdCI6MTUyMDk3MTM0MH0.uzr21fJDGshHJvZuSQbfljfUbuyAECBp2L8Nxk_euOs",
+				"type": "bearer"
+			},
+			"body": {
+				"mimeType": "application/json",
+				"text": "{\"query\":\"\\n  query IntrospectionQuery {\\n    __schema {\\n      queryType { name }\\n      mutationType { name }\\n      subscriptionType { name }\\n      types {\\n        ...FullType\\n      }\\n      directives {\\n        name\\n        description\\n        locations\\n        args {\\n          ...InputValue\\n        }\\n      }\\n    }\\n  }\\n\\n  fragment FullType on __Type {\\n    kind\\n    name\\n    description\\n    fields(includeDeprecated: true) {\\n      name\\n      description\\n      args {\\n        ...InputValue\\n      }\\n      type {\\n        ...TypeRef\\n      }\\n      isDeprecated\\n      deprecationReason\\n    }\\n    inputFields {\\n      ...InputValue\\n    }\\n    interfaces {\\n      ...TypeRef\\n    }\\n    enumValues(includeDeprecated: true) {\\n      name\\n      description\\n      isDeprecated\\n      deprecationReason\\n    }\\n    possibleTypes {\\n      ...TypeRef\\n    }\\n  }\\n\\n  fragment InputValue on __InputValue {\\n    name\\n    description\\n    type { ...TypeRef }\\n    defaultValue\\n  }\\n\\n  fragment TypeRef on __Type {\\n    kind\\n    name\\n    ofType {\\n      kind\\n      name\\n      ofType {\\n        kind\\n        name\\n        ofType {\\n          kind\\n          name\\n          ofType {\\n            kind\\n            name\\n            ofType {\\n              kind\\n              name\\n              ofType {\\n                kind\\n                name\\n                ofType {\\n                  kind\\n                  name\\n                }\\n              }\\n            }\\n          }\\n        }\\n      }\\n    }\\n  }\\n\"}"
+			},
+			"created": 1522348043429,
+			"description": "",
+			"headers": [
+				{
+					"id": "pair_3f34c0e36f404366b28ee6ff400cbbc4",
+					"name": "Content-Type",
+					"value": "application/json"
+				}
+			],
+			"metaSortKey": -1512041649486.3125,
+			"method": "POST",
+			"modified": 1522348043429,
+			"name": "allUsers",
+			"parameters": [],
+			"parentId": "req_5d9c60e382ce499bbb3e5c91f9522779",
+			"settingDisableRenderRequestBody": false,
+			"settingEncodeUrl": true,
+			"settingSendCookies": true,
+			"settingStoreCookies": true,
+			"url": "http://localhost:8400/graph",
+			"_type": "request"
+		},
+		{
+			"_id": "req_ef3c44aac0804d48917ea9ef78fd2b4d",
+			"authentication": {
+				"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI3ZWM1ZjliNi0yNThkLTU1ZTAtOWJmNy05ZTMyMWNlMmUyZTYiLCJleHAiOjE1MTkzOTk5NDYsImlhdCI6MTUxOTM5NjM0Nn0.gEvnMVVGOyJl_nblxa-nNHjWxY7DF74BFogQCzep4aQ",
+				"type": "bearer"
+			},
+			"body": {
+				"mimeType": "application/json",
+				"text": "{\"query\":\"\\n  query IntrospectionQuery {\\n    __schema {\\n      queryType { name }\\n      mutationType { name }\\n      subscriptionType { name }\\n      types {\\n        ...FullType\\n      }\\n      directives {\\n        name\\n        description\\n        locations\\n        args {\\n          ...InputValue\\n        }\\n      }\\n    }\\n  }\\n\\n  fragment FullType on __Type {\\n    kind\\n    name\\n    description\\n    fields(includeDeprecated: true) {\\n      name\\n      description\\n      args {\\n        ...InputValue\\n      }\\n      type {\\n        ...TypeRef\\n      }\\n      isDeprecated\\n      deprecationReason\\n    }\\n    inputFields {\\n      ...InputValue\\n    }\\n    interfaces {\\n      ...TypeRef\\n    }\\n    enumValues(includeDeprecated: true) {\\n      name\\n      description\\n      isDeprecated\\n      deprecationReason\\n    }\\n    possibleTypes {\\n      ...TypeRef\\n    }\\n  }\\n\\n  fragment InputValue on __InputValue {\\n    name\\n    description\\n    type { ...TypeRef }\\n    defaultValue\\n  }\\n\\n  fragment TypeRef on __Type {\\n    kind\\n    name\\n    ofType {\\n      kind\\n      name\\n      ofType {\\n        kind\\n        name\\n        ofType {\\n          kind\\n          name\\n          ofType {\\n            kind\\n            name\\n            ofType {\\n              kind\\n              name\\n              ofType {\\n                kind\\n                name\\n                ofType {\\n                  kind\\n                  name\\n                }\\n              }\\n            }\\n          }\\n        }\\n      }\\n    }\\n  }\\n\"}"
+			},
+			"created": 1522348043432,
+			"description": "",
+			"headers": [
+				{
+					"id": "pair_3f34c0e36f404366b28ee6ff400cbbc4",
+					"name": "Content-Type",
+					"value": "application/json"
+				}
+			],
+			"metaSortKey": -1512041649486.3125,
+			"method": "POST",
+			"modified": 1522348043432,
+			"name": "allAdvertisers",
+			"parameters": [],
+			"parentId": "req_5d9c60e382ce499bbb3e5c91f9522779",
 			"settingDisableRenderRequestBody": false,
 			"settingEncodeUrl": true,
 			"settingSendCookies": true,

@@ -63,6 +63,7 @@
     "passport": "^0.4.0",
     "passport-http-bearer": "^1.0.1",
     "redis": "^2.8.0",
+    "slug": "^0.9.1",
     "uuid": "^3.2.1",
     "uuid-parse": "^1.0.0",
     "validator": "^9.4.0"
