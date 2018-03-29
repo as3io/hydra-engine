@@ -18,3 +18,7 @@ input PaginationInput {
   first: Int! = 25
   after: Cursor
 }
+
+input ModelIdInput {
+  id: String!
+}

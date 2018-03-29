@@ -20,6 +20,17 @@ module.exports = {
     /**
      *
      */
+    user: async (root, { input }, { auth }) => {
+      auth.check();
+      const { id } = input;
+      const record = await UserRepo.findById(id);
+      if (!record) throw new Error(`No user record found for ID ${id}.`);
+      return record;
+    },
+
+    /**
+     *
+     */
     allUsers: (root, { pagination, sort }, { auth }) => {
       auth.check();
       return UserRepo.paginate({ pagination, sort });

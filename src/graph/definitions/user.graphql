@@ -1,4 +1,5 @@
 type Query {
+  user(input: ModelIdInput!): User!
   allUsers(pagination: PaginationInput = {}, sort: UserSortInput = {}): UserConnection!
   currentUser: User
   checkSession(input: SessionTokenInput!): Authentication
