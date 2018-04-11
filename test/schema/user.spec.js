@@ -115,30 +115,6 @@ describe('schema/user', function() {
     });
   });
 
-  describe('#role', function() {
-    let user;
-    beforeEach(function() {
-      user = generateUser();
-    });
-
-    [null, undefined].forEach((value) => {
-      it(`should be required and be rejected when the value is '${value}'`, function() {
-        return testRequiredField(User, user, 'role', value);
-      });
-    });
-    const allowed = ['Member', 'Admin'];
-    allowed.forEach((value) => {
-      it(`should be fulfilled when the enum value is '${value}'`, async function() {
-        user.set('role', value);
-        await expect(user.save()).to.be.fulfilled;
-      });
-    });
-    it('should reject when the value is not in the enum list.', async function() {
-      user.set('role', 'admin');
-      await expect(user.save()).to.be.rejectedWith(Error, /is not a valid enum value/);
-    });
-  });
-
   describe('#photoURL', function() {
     let user;
     beforeEach(function() {
