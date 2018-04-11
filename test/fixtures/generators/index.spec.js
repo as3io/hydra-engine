@@ -7,6 +7,9 @@ describe('fixtures/generators', function() {
   });
   const cases = [
     'user',
+    'story',
+    'project',
+    'organization',
   ];
   it(`should only contain the ${cases.join(', ')} properties`, function(done) {
     expect(generators).to.have.keys(cases);

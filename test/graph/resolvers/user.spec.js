@@ -4,25 +4,73 @@ const SessionRepo = require('../../../src/repositories/session');
 const UserRepo = require('../../../src/repositories/user');
 const { CursorType } = require('../../../src/graph/custom-types');
 
+const createUser = async () => {
+  const results = await UserRepo.seed();
+  return results.one();
+};
+
 const createUsers = async (count) => {
   const results = await UserRepo.seed({ count });
   return results.all();
 };
 
 describe('graph/resolvers/user', function() {
-  before(async function() {
+  beforeEach(async function() {
     await setup();
   });
-  after(async function() {
+  afterEach(async function() {
     await teardown();
   });
   describe('Query', function() {
 
+    describe('user', function() {
+      let user;
+      beforeEach(async () => user = await createUser());
+      afterEach(() => teardown());
+
+      const query = `
+        query User($input: ModelIdInput!) {
+          user(input: $input) {
+            id
+            email
+            givenName
+            familyName
+            logins
+          }
+        }
+      `;
+      it('should reject when no user is logged-in.', async function() {
+        const id = '507f1f77bcf86cd799439011';
+        const input = { id };
+        const variables = { input };
+        await expect(graphql({ query, variables, key: 'user', loggedIn: false })).to.be.rejectedWith(Error, /you must be logged-in/i);
+      });
+      it('should reject if no record was found.', async function() {
+        const id = '507f1f77bcf86cd799439011';
+        const input = { id };
+        const variables = { input };
+        await expect(graphql({ query, variables, key: 'user', loggedIn: true })).to.be.rejectedWith(Error, `No user record found for ID ${id}.`);
+      });
+      it('should return the requested user.', async function() {
+        const id = user.id;
+        const input = { id };
+        const variables = { input };
+        const promise = graphql({ query, variables, key: 'user', loggedIn: true });
+        await expect(promise).to.eventually.be.an('object').with.property('id', id);
+        const data = await promise;
+        expect(data).to.have.all.keys('id', 'email', 'givenName', 'familyName', 'logins');
+      });
+    });
+
     describe('allUsers', function() {
       let users;
-      before(async function() {
-        users = await createUsers(9);
-      });
+
+      beforeEach(async () => {
+        await UserRepo.remove();
+        users = await createUsers(10);
+      })
+      afterEach(() => teardown());
+
       const query = `
         query AllUsers($pagination: PaginationInput, $sort: UserSortInput) {
           allUsers(pagination: $pagination, sort: $sort) {

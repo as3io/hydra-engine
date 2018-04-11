@@ -7,6 +7,10 @@ const { app } = require('./server');
 const { PORT } = process.env;
 
 const server = app.listen(PORT);
-process.stdout.write(`Express app '${pkg.name}' listening on port ${PORT}\n`);
+
+/* istanbul ignore if */
+if (process.env.NODE_ENV !== 'test') {
+  process.stdout.write(`Express app '${pkg.name}' listening on port ${PORT}\n`);
+}
 
 module.exports = server;

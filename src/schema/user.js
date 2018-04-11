@@ -49,12 +49,6 @@ const schema = new Schema({
     required: true,
     default: false,
   },
-  role: {
-    type: String,
-    default: 'Member',
-    required: true,
-    enum: ['Member', 'Admin'],
-  },
   photoURL: {
     type: String,
     trim: true,
