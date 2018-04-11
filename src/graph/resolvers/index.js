@@ -3,10 +3,14 @@ const { DateType, CursorType } = require('../custom-types');
 
 const user = require('./user');
 const story = require('./story');
+const organization = require('./organization');
+const project = require('./project');
 
 module.exports = deepAssign(
   user,
   story,
+  organization,
+  project,
   {
     /**
      *

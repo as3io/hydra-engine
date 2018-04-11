@@ -1,14 +1,14 @@
 require('../connections');
-const Repo = require('../../src/repositories/story');
-const Model = require('../../src/models/story');
+const Repo = require('../../src/repositories/organization');
+const Model = require('../../src/models/organization');
 const Utils = require('../utils');
 
-const createStory = async () => {
+const createOrganization = async () => {
   const results = await Repo.seed();
   return results.one();
 };
 
-describe('repositories/story', function() {
+describe('repositories/organization', function() {
   before(function() {
     return Repo.remove();
   });
@@ -27,51 +27,50 @@ describe('repositories/story', function() {
     });
     it('should return a fulfilled promise with the model.', async function() {
       const payload = Repo.generate().one();
-      const story = await Repo.create(payload);
-      const found = await Repo.findById(story.get('id'));
+      const organization = await Repo.create(payload);
+      const found = await Repo.findById(organization.get('id'));
 
       expect(found).to.be.an.instanceof(Model);
-      expect(found).to.have.property('id').equal(story.get('id'));
+      expect(found).to.have.property('id').equal(organization.get('id'));
     });
   });
 
   describe('#update', function() {
-    let story;
+    let organization;
     before(async function() {
-      story = await createStory();
+      organization = await createOrganization();
     });
     it('should return a rejected promise when no ID is provided.', async function() {
-      await expect(Repo.update()).to.be.rejectedWith(Error, 'Unable to update story: no ID was provided.');
+      await expect(Repo.update()).to.be.rejectedWith(Error, 'Unable to update organization: no ID was provided.');
     });
     it('should return a rejected promise when the ID cannot be found.', async function() {
       const id = '507f1f77bcf86cd799439011';
-      await expect(Repo.update(id, { title: 'foo' })).to.be.rejectedWith(Error, `Unable to update story: no record was found for ID '${id}'`);
+      await expect(Repo.update(id, { name: 'foo' })).to.be.rejectedWith(Error, `Unable to update organization: no record was found for ID '${id}'`);
     });
     it('should return a rejected promise when valiation fails.', async function() {
-      await expect(Repo.update(story.id)).to.be.rejectedWith(Error, /validation/i);
+      await expect(Repo.update(organization.id)).to.be.rejectedWith(Error, /validation/i);
     });
     it('should return the updated model object.', async function() {
-      const updated = await Repo.update(story.id, { title: 'Updated title.' });
+      const updated = await Repo.update(organization.id, { name: 'Updated name.' });
       expect(updated).to.be.an('object');
-      expect(updated).to.be.an.instanceof(Model).with.property('title').equal('Updated title.');
+      expect(updated).to.be.an.instanceof(Model).with.property('name').equal('Updated name.');
     });
-    it('should only modify the submitted fields');
   });
 
   describe('#findById', function() {
-    let story;
+    let organization;
     before(async function() {
-      story = await createStory();
+      organization = await createOrganization();
     });
     it('should return a rejected promise when no ID is provided.', async function() {
-      await expect(Repo.findById()).to.be.rejectedWith(Error, 'Unable to find story: no ID was provided.');
+      await expect(Repo.findById()).to.be.rejectedWith(Error, 'Unable to find organization: no ID was provided.');
     });
     it('should return a fulfilled promise with a `null` document when not found.', async function() {
       const id = '507f1f77bcf86cd799439011';
       await expect(Repo.findById(id)).to.be.fulfilled.and.become(null);
     });
     it('should return a fulfilled promise with a document when found.', async function() {
-      await expect(Repo.findById(story.get('id'))).to.be.fulfilled.and.eventually.be.an.instanceof(Model).with.property('id').equal(story.get('id'));
+      await expect(Repo.findById(organization.get('id'))).to.be.fulfilled.and.eventually.be.an.instanceof(Model).with.property('id').equal(organization.get('id'));
     });
   });
 
@@ -118,16 +117,16 @@ describe('repositories/story', function() {
   });
 
   describe('#removeById', function() {
-    let story;
+    let organization;
     before(async function() {
-      story = await createStory();
+      organization = await createOrganization();
     });
     it('should return a rejected promise when no ID is provided.', async function() {
-      await expect(Repo.removeById()).to.be.rejectedWith(Error, 'Unable to remove story: no ID was provided.');
+      await expect(Repo.removeById()).to.be.rejectedWith(Error, 'Unable to remove organization: no ID was provided.');
     });
-    it('remove the requested story.', async function() {
-      await expect(Repo.removeById(story.id)).to.be.fulfilled;
-      await expect(Repo.findById(story.id)).to.be.fulfilled.and.eventually.be.null;
+    it('remove the requested organization.', async function() {
+      await expect(Repo.removeById(organization.id)).to.be.fulfilled;
+      await expect(Repo.findById(organization.id)).to.be.fulfilled.and.eventually.be.null;
     });
   });
 });

@@ -1,5 +1,7 @@
 # import * from 'user.graphql'
 # import * from 'story.graphql'
+# import * from 'organization.graphql'
+# import * from 'project.graphql'
 
 scalar Date
 scalar Cursor
@@ -22,4 +24,15 @@ input PaginationInput {
 
 input ModelIdInput {
   id: String!
+}
+
+enum Roles {
+  Owner
+  Administrator
+  Member
+}
+
+type ProjectRole {
+  project: Project!
+  role: Roles
 }

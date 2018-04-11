@@ -8,6 +8,7 @@ const { PORT } = process.env;
 
 const server = app.listen(PORT);
 
+/* istanbul ignore if */
 if (process.env.NODE_ENV !== 'test') {
   process.stdout.write(`Express app '${pkg.name}' listening on port ${PORT}\n`);
 }

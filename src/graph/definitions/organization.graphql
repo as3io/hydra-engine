@@ -1,0 +1,76 @@
+type Query {
+  allOrganizations(pagination: PaginationInput = {}, sort: OrganizationSortInput = {}): OrganizationConnection!
+  # searchOrganizations(pagination: PaginationInput = {}, search: OrganizationSearchInput!): OrganizationConnection!
+  # userOrganizations(pagination: PaginationInput = {}, sort: OrganizationSortInput = {}): OrganizationConnection!
+  organization(input: ModelIdInput!): Organization!
+}
+
+type Mutation {
+  createOrganization(input: CreateOrganizationInput!): Organization!
+  updateOrganization(input: UpdateOrganizationInput!): Organization!
+}
+
+enum OrganizationSortField {
+  name
+  createdAt
+  updatedAt
+}
+
+type Organization {
+  id: String!
+  name: String
+  createdAt: Date
+  updatedAt: Date
+
+  members: [OrganizationMembership]
+  projects: [Project]
+}
+
+type OrganizationMembership {
+  user: User!
+  role: Roles
+  projects: [ProjectRole]
+}
+
+type OrganizationConnection {
+  totalCount: Int!
+  edges: [OrganizationEdge]!
+  pageInfo: PageInfo!
+}
+
+type OrganizationEdge {
+  node: Organization!
+  cursor: Cursor!
+}
+
+input OrganizationSearchInput {
+  typeahead: OrganizationTypeAheadInput!
+}
+
+input OrganizationTypeAheadInput {
+  field: OrganizationTypeAheadField!
+  term: String!
+}
+
+enum OrganizationTypeAheadField {
+  name
+  email
+}
+
+input OrganizationSortInput {
+  field: OrganizationSortField! = name
+  order: Int! = -1
+}
+
+input OrganizationPayloadInput {
+  name: String
+}
+
+input CreateOrganizationInput {
+  payload: OrganizationPayloadInput!
+}
+
+input UpdateOrganizationInput {
+  id: String!
+  payload: OrganizationPayloadInput!
+}

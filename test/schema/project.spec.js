@@ -19,7 +19,7 @@ describe('schema/project', function() {
     return Project.remove();
   });
   it('should successfully save.', async function() {
-    const organization = generateOrganization().save();
+    const organization = await generateOrganization().save();
     const project = generateProject({
       organizationId: () => organization.id
     });
@@ -28,8 +28,8 @@ describe('schema/project', function() {
 
   describe('#name', function() {
     let project;
-    beforeEach(function() {
-      const organization = generateOrganization().save();
+    beforeEach(async function() {
+      const organization = await generateOrganization().save();
       project = generateProject({
         organizationId: () => organization.id,
       });

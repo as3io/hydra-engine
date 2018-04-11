@@ -136,10 +136,10 @@ describe('schema/organization', function() {
     let organization;
     let user;
     let project;
-    beforeEach(function() {
+    beforeEach(async function() {
       organization = generateOrganization();
-      user = fixtures(User, 1).one().save();
-      project = fixtures(Project, 1, { organizationId: () => organization.id }).one().save();
+      user = await fixtures(User, 1).one().save();
+      project = await fixtures(Project, 1, { organizationId: () => organization.id }).one().save();
     });
 
     it('should save when a valid project is specified', async function() {
