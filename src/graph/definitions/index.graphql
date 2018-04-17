@@ -12,9 +12,13 @@ type Query {
 
 type PageInfo {
   hasNextPage: Boolean!
+  hasPrevPage: Boolean!
   endCursor: Cursor
-  # hasPreviousPage: Boolean!
-  # startCursor: Cursor
+  startCursor: Cursor
+}
+
+input PaginationCriteriaInput {
+  organization: String!
 }
 
 input PaginationInput {
@@ -31,8 +35,13 @@ enum Roles {
   Administrator
   Member
 }
+enum ProjectRoles {
+  Administrator
+  Developer
+  Editor
+}
 
 type ProjectRole {
   project: Project!
-  role: Roles
+  role: ProjectRoles
 }

@@ -2,6 +2,7 @@ const bcrypt = require('bcrypt');
 const mongoose = require('mongoose');
 const validator = require('validator');
 const crypto = require('crypto');
+const uuid = require('uuid/v4');
 
 const { Schema } = mongoose;
 
@@ -33,7 +34,6 @@ const schema = new Schema({
   },
   password: {
     type: String,
-    required: true,
     minlength: 6,
   },
   logins: {
@@ -48,6 +48,11 @@ const schema = new Schema({
     type: Boolean,
     required: true,
     default: false,
+  },
+  token: {
+    type: String,
+    // @todo make this a JWT to ensure it can expire
+    default: () => uuid(),
   },
   photoURL: {
     type: String,

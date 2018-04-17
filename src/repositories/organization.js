@@ -113,4 +113,24 @@ module.exports = {
     return results;
   },
 
+  /**
+   *
+   * @param {String} id
+   * @param {String} uid
+   */
+  async acceptInvitation(id, uid) {
+    const organization = await this.findById(id);
+    if (!organization) throw new Error('Unable to retrieve organization by id.');
+
+    for (let i = 0; i < organization.members.length; i += 1) {
+      const member = organization.members[i];
+      if (member.user === uid) {
+        member.accepted = new Date();
+        return organization.save().then(org => org.members.id(member.id));
+      }
+    }
+
+    throw new Error('There is no pending invite for this user and organization.');
+  },
+
 };

@@ -1,8 +1,16 @@
 const UserRepo = require('../../repositories/user');
+const Organization = require('../../models/organization');
 const SessionRepo = require('../../repositories/session');
 const paginationResolvers = require('./pagination');
 
 module.exports = {
+  /**
+   *
+   */
+  User: {
+    hasPassword: user => !(!user.password),
+    organizations: user => Organization.find({ 'members.user': user.id }),
+  },
   /**
    *
    */
@@ -70,11 +78,45 @@ module.exports = {
     /**
      *
      */
+    loginFromToken: (root, { input }) => {
+      const { token } = input;
+      return UserRepo.loginFromToken(token);
+    },
+
+    /**
+     *
+     */
+    setPassword: (root, { input }, { auth }) => {
+      const { password } = input;
+      return UserRepo.setPassword(auth.session.uid, password);
+    },
+
+    /**
+     *
+     */
+    sendPasswordReset: (root, { input }) => {
+      const { email } = input;
+      return UserRepo.sendPasswordReset(email);
+    },
+
+    /**
+     *
+     */
     deleteSession: async (root, args, { auth }) => {
       if (auth.isValid()) {
         await SessionRepo.delete(auth.session);
       }
       return 'ok';
+    },
+
+    /**
+     *
+     */
+    organizationInvite: async (root, { input }, { auth }) => {
+      auth.check();
+      const { organization, payload } = input;
+      // role.check(Roles.Administrator || Roles.Owner);
+      return UserRepo.organizationInvite(organization, payload);
     },
   },
 };

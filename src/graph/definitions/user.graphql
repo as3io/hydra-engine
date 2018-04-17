@@ -7,8 +7,12 @@ type Query {
 
 type Mutation {
   createUser(input: CreateUserInput!): User
+  loginFromToken(input: AuthTokenInput!): Authentication
+  setPassword(input: SetPasswordInput!): User
+  sendPasswordReset(input: ResetPasswordInput!): User
   loginUser(input: LoginInput!): Authentication
   deleteSession: String
+  organizationInvite(input: OrganizationInviteInput!): OrganizationMembership
 }
 
 enum UserSortField {
@@ -37,6 +41,8 @@ type User {
   familyName: String
   logins: Int
   photoURL: String
+  hasPassword: Boolean
+  organizations: [Organization]
 }
 
 type UserConnection {
@@ -52,7 +58,7 @@ type UserEdge {
 
 input NewUserPayloadInput {
   email: String!
-  password: String!
+  password: String
   givenName: String!
   familyName: String!
 }
@@ -60,6 +66,36 @@ input NewUserPayloadInput {
 input CreateUserInput {
   # captcha: String
   payload: NewUserPayloadInput
+}
+
+input OrganizationInviteInput {
+  organization: String!
+  payload: OrganizationInvitePayload!
+}
+
+input OrganizationInvitePayload {
+  email: String!
+  givenName: String!
+  familyName: String!
+  role: Roles!
+  projectRoles: [ProjectRoleInput]
+}
+
+input ProjectRoleInput {
+  id: String!
+  role: ProjectRoles!
+}
+
+input AuthTokenInput {
+  token: String!
+}
+
+input SetPasswordInput {
+  password: String!
+}
+
+input ResetPasswordInput {
+  email: String!
 }
 
 input SessionTokenInput {
