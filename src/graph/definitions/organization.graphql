@@ -8,7 +8,7 @@ type Query {
 type Mutation {
   createOrganization(input: CreateOrganizationInput!): Organization!
   updateOrganization(input: UpdateOrganizationInput!): Organization!
-  organizationInviteAccept(input: AcceptOrganizationInviteInput!): OrganizationMembership!
+  organizationInviteAccept(input: AcceptOrganizationInviteInput!): OrganizationMembership
 }
 
 enum OrganizationSortField {

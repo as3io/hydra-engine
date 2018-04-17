@@ -122,12 +122,15 @@ module.exports = {
     const organization = await this.findById(id);
     if (!organization) throw new Error('Unable to retrieve organization by id.');
 
-    for (let i = 0; i < organization.members.length; i += 1) {
-      const member = organization.members[i];
-      if (member.user === uid) {
-        member.accepted = new Date();
-        return organization.save().then(org => org.members.id(member.id));
-      }
+    let found = false;
+    organization.members.forEach((member) => {
+      if (member.user == uid) found = member; // eslint-disable-line eqeqeq
+    });
+
+    if (found) {
+      found.accepted = new Date();
+      await organization.save();
+      return found;
     }
 
     throw new Error('There is no pending invite for this user and organization.');
