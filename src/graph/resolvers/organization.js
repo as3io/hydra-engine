@@ -9,6 +9,14 @@ module.exports = {
    */
   Organization: {
     projects: ({ id }) => Project.find({ organization: id }),
+    accepted: (org, _args, { auth }) => {
+      const { uid } = auth.session;
+      for (let i = 0; i < org.members.length; i += 1) {
+        const member = org.members[i];
+        if (member.user === uid && member.accepted) return true;
+      }
+      return false;
+    },
   },
   /**
    *
@@ -67,6 +75,7 @@ module.exports = {
       payload.members = [{
         user: auth.user._id,
         role: 'Owner',
+        accepted: new Date(),
       }];
       return Repo.create(payload);
     },
@@ -78,6 +87,15 @@ module.exports = {
       auth.check();
       const { id, payload } = input;
       return Repo.update(id, payload);
+    },
+
+    /**
+     *
+     */
+    organizationInviteAccept: (root, { input }, { auth }) => {
+      auth.check();
+      const { organization } = input;
+      Repo.acceptInvitation(organization, auth.session.uid);
     },
   },
 };

@@ -65,8 +65,9 @@ class Pagination {
       .comment(this.createComment('getEdges'));
   }
 
-  getTotalCount() {
-    return this.Model.find().comment(this.createComment('getTotalCount')).count();
+  async getTotalCount() {
+    const filter = deepAssign({}, this.criteria);
+    return this.Model.find(filter).comment(this.createComment('getTotalCount')).count();
   }
 
   async getEndCursor() {
@@ -83,6 +84,12 @@ class Pagination {
 
     const model = await Query;
     return model ? model.get('id') : null;
+  }
+
+  async hasPrevPage() {
+    const count = await this.getTotalCount();
+    if (count > 0 && count > this.limit) return this.after != null;
+    return false;
   }
 
   async hasNextPage() {

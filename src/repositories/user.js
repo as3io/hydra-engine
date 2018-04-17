@@ -2,13 +2,18 @@ const bcrypt = require('bcrypt');
 const Promise = require('bluebird');
 const sessionRepo = require('./session');
 const User = require('../models/user');
+const Organization = require('../models/organization');
 const fixtures = require('../fixtures');
 const Pagination = require('../classes/pagination');
+const mailer = require('../connections/sendgrid');
+const uuid = require('uuid/v4');
 
 module.exports = {
-  create(payload = {}) {
+  async create(payload = {}, send = true) {
     const user = new User(payload);
-    return user.save();
+    await user.save();
+    if (send) await mailer.sendWelcomeVerification(user);
+    return user;
   },
 
   generate(count = 1) {
@@ -24,6 +29,15 @@ module.exports = {
     const value = this.normalizeEmail(email);
     if (!value) return Promise.reject(new Error('Unable to find user: no email address was provided.'));
     return User.findOne({ email: value });
+  },
+
+  /**
+   *
+   * @param {string} token
+   * @return {Promise}
+   */
+  findByToken(token) {
+    return User.findOne({ token });
   },
 
   normalizeEmail(email) {
@@ -66,6 +80,8 @@ module.exports = {
     const user = await this.findByEmail(email);
     if (!user) throw new Error('No user was found for the provided email address.');
 
+    if (!user.get('password')) throw new Error('A password has not yet been set. An email has been sent providing further instructions.');
+
     // Verify password.
     await this.verifyPassword(password, user.get('password'));
 
@@ -75,6 +91,51 @@ module.exports = {
     // Update login info
     await this.updateLoginInfo(user);
     return { user, session };
+  },
+
+  /**
+   *
+   * @param {string} token
+   * @return {Promise}
+   */
+  async loginFromToken(token) {
+    const user = await this.findByToken(token);
+    if (!user) throw new Error('No user was found for the provided token.');
+    user.set('token', null);
+    user.set('emailVerified', true);
+
+    // Create session.
+    const session = await sessionRepo.set({ uid: user.id });
+
+    // Update login info
+    await this.updateLoginInfo(user);
+    return { user, session };
+  },
+
+  /**
+   *
+   * @param {string} _id
+   * @param {string} password
+   * @return {Promise}
+   */
+  async setPassword(id, password) {
+    const user = await this.findById(id);
+    if (!user) throw new Error('No user was found for the provided token.');
+    user.set('password', password);
+    return user.save();
+  },
+
+  /**
+   *
+   */
+  async sendPasswordReset(email) {
+    const user = await this.findByEmail(email);
+    if (!user) throw new Error('No user was found for the provided email address.');
+    // @todo JWT
+    user.set('token', uuid());
+    await user.save();
+    await mailer.sendPasswordReset(user);
+    return user;
   },
 
   async retrieveSession(token) {
@@ -124,5 +185,47 @@ module.exports = {
     const results = this.generate(count);
     await Promise.all(results.all().map(model => model.save()));
     return results;
+  },
+
+  /**
+   *
+   */
+  async organizationInvite(id, {
+    email,
+    givenName,
+    familyName,
+    role,
+    projectRoles,
+  }) {
+    const organization = await Organization.findById(id);
+    if (!organization) throw new Error(`Unable to invite user: Organization with id "${id}" was not found.`);
+
+    let user = await this.findByEmail(email);
+    if (!user) user = await this.create({ email, givenName, familyName }, false);
+    user.set('token', uuid());
+    await user.save();
+
+    const projects = [];
+    projectRoles.forEach((pRole) => {
+      if (pRole && pRole.id && pRole.role) {
+        projects.push(Object.assign({}, { id: pRole.id, role: pRole.role }));
+      }
+    });
+
+    let found = false;
+    const payload = { user: user.id, role, projects };
+
+    organization.members.forEach((membership) => {
+      if (membership.user === user.id) {
+        found = true;
+        let member = organization.members.id(membership.id); // eslint-disable-line no-unused-vars
+        member = payload;
+      }
+    });
+    if (!found) organization.members.addToSet(payload);
+    await organization.save();
+
+    // send welcome/invite email
+    await mailer.sendOrganizationInvitation(organization, user);
   },
 };

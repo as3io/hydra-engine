@@ -8,6 +8,7 @@ type Query {
 type Mutation {
   createOrganization(input: CreateOrganizationInput!): Organization!
   updateOrganization(input: UpdateOrganizationInput!): Organization!
+  organizationInviteAccept(input: AcceptOrganizationInviteInput!): OrganizationMembership!
 }
 
 enum OrganizationSortField {
@@ -21,15 +22,18 @@ type Organization {
   name: String
   createdAt: Date
   updatedAt: Date
-
+  photoURL: String
   members: [OrganizationMembership]
   projects: [Project]
+  accepted: Boolean
 }
 
 type OrganizationMembership {
   user: User!
   role: Roles
   projects: [ProjectRole]
+  invited: Date
+  accepted: Date
 }
 
 type OrganizationConnection {
@@ -41,6 +45,11 @@ type OrganizationConnection {
 type OrganizationEdge {
   node: Organization!
   cursor: Cursor!
+}
+
+
+input AcceptOrganizationInviteInput {
+  organization: String!
 }
 
 input OrganizationSearchInput {

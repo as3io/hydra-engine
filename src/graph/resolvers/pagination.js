@@ -4,6 +4,7 @@ module.exports = {
     edges: paginated => paginated.getEdges(),
     pageInfo: paginated => ({
       hasNextPage: () => paginated.hasNextPage(),
+      hasPrevPage: () => paginated.hasPrevPage(),
       endCursor: () => paginated.getEndCursor(),
     }),
   },

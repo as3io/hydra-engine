@@ -1,5 +1,5 @@
 type Query {
-  allProjects(pagination: PaginationInput = {}, sort: ProjectSortInput = {}): ProjectConnection!
+  allProjects(criteria: PaginationCriteriaInput = {}, pagination: PaginationInput = {}, sort: ProjectSortInput = {}): ProjectConnection!
   # searchProjects(pagination: PaginationInput = {}, search: ProjectSearchInput!): ProjectConnection!
   # userProjects(pagination: PaginationInput = {}, sort: ProjectSortInput = {}): ProjectConnection!
   project(input: ModelIdInput!): Project!

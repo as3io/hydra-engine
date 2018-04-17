@@ -37,9 +37,9 @@ module.exports = {
     /**
      *
      */
-    allProjects: (root, { pagination, sort }, { auth }) => {
+    allProjects: (root, { criteria, pagination, sort }, { auth }) => {
       auth.check();
-      return Repo.paginate({ pagination, sort });
+      return Repo.paginate({ criteria, pagination, sort });
     },
   },
 
