@@ -114,6 +114,20 @@ module.exports = {
 
   /**
    *
+   * @param {string} email
+   */
+  async magicLogin(email) {
+    const user = await this.findByEmail(email);
+    if (!user) throw new Error('No user was found for the provided email address.');
+    // @todo JWT
+    user.set('token', uuid());
+    await user.save();
+    await mailer.sendMagicLogin(user);
+    return user;
+  },
+
+  /**
+   *
    * @param {string} _id
    * @param {string} password
    * @return {Promise}
