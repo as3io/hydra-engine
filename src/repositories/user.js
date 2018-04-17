@@ -216,7 +216,7 @@ module.exports = {
     const payload = { user: user.id, role, projects };
 
     organization.members.forEach((membership) => {
-      if (membership.user === user.id) {
+      if (membership.user == user.id) { // eslint-disable-line eqeqeq
         found = true;
         let member = organization.members.id(membership.id); // eslint-disable-line no-unused-vars
         member = payload;

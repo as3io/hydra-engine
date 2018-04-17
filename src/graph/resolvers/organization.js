@@ -13,7 +13,7 @@ module.exports = {
       const { uid } = auth.session;
       for (let i = 0; i < org.members.length; i += 1) {
         const member = org.members[i];
-        if (member.user === uid && member.accepted) return true;
+        if (member.user == uid && member.accepted) return true; // eslint-disable-line eqeqeq
       }
       return false;
     },
