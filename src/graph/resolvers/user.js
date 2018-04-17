@@ -118,5 +118,13 @@ module.exports = {
       // role.check(Roles.Administrator || Roles.Owner);
       return UserRepo.organizationInvite(organization, payload);
     },
+
+    /**
+     *
+     */
+    magicLogin: (root, { input }) => {
+      const { email } = input;
+      return UserRepo.magicLogin(email);
+    },
   },
 };

@@ -2,6 +2,7 @@ const sgMail = require('@sendgrid/mail');
 const templateReset = require('./templates/reset.js');
 const templateWelcome = require('./templates/welcome.js');
 const templateInvitation = require('./templates/invitation.js');
+const templateMagicLogin = require('./templates/magic-login.js');
 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
@@ -30,11 +31,26 @@ module.exports = {
     givenName,
     token,
   }) {
-    // @todo hostname injected via process.env?
     const link = `${appUri}/token/${token}/settings`;
     const subject = 'Your HYDRA password reset';
     const to = `${givenName} ${familyName} <${email}>`;
     const html = templateReset
+      .replace('*|FIRST_NAME|*', givenName)
+      .replace('*|LAST_NAME|*', familyName)
+      .replace('*|VERIFY_LINK|*', link);
+    return send({ to, subject, html });
+  },
+
+  sendMagicLogin({
+    email,
+    familyName,
+    givenName,
+    token,
+  }) {
+    const link = `${appUri}/token/${token}/index`;
+    const subject = 'Your HYDRA magic login link';
+    const to = `${givenName} ${familyName} <${email}>`;
+    const html = templateMagicLogin
       .replace('*|FIRST_NAME|*', givenName)
       .replace('*|LAST_NAME|*', familyName)
       .replace('*|VERIFY_LINK|*', link);
