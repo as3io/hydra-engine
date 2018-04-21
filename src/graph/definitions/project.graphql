@@ -8,6 +8,7 @@ type Query {
 type Mutation {
   createProject(input: CreateProjectInput!): Project!
   updateProject(input: UpdateProjectInput!): Project!
+  configureProject(input: ProjectConfigInput!): Project!
 }
 
 enum ProjectSortField {
@@ -19,6 +20,7 @@ enum ProjectSortField {
 type Project {
   id: String!
   name: String
+  description: String
   createdAt: Date
   updatedAt: Date
   organization: Organization!
@@ -66,4 +68,10 @@ input CreateProjectInput {
 input UpdateProjectInput {
   id: String!
   payload: ProjectPayloadInput!
+}
+
+input ProjectConfigInput {
+  projectId: String!
+  name: String
+  description: String
 }
