@@ -13,6 +13,10 @@ const schema = new Schema({
     ref: 'organization',
     required: true,
   },
+  keys: [{
+    type: Schema.Types.ObjectId,
+    ref: 'key',
+  }],
 
 }, { timestamps: true });
 

@@ -1,3 +1,4 @@
+# import * from 'key.graphql'
 # import * from 'user.graphql'
 # import * from 'story.graphql'
 # import * from 'organization.graphql'

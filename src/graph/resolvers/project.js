@@ -1,6 +1,7 @@
 const Repo = require('../../repositories/project');
 const Model = require('../../models/project');
 const Organization = require('../../models/organization');
+const Key = require('../../models/key');
 const paginationResolvers = require('./pagination');
 
 module.exports = {
@@ -9,6 +10,7 @@ module.exports = {
    */
   Project: {
     organization: ({ organization }) => Organization.findById(organization),
+    keys: ({ id }) => Key.find({ project: id }),
   },
   /**
    *

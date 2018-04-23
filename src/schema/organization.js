@@ -41,6 +41,10 @@ const schema = new Schema({
     type: String,
     required: true,
   },
+  keys: [{
+    type: Schema.Types.ObjectId,
+    ref: 'key',
+  }],
   description: String,
   members: [orgMember],
   photoURL: {
