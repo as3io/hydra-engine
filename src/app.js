@@ -8,6 +8,7 @@ app.set('trust proxy', 'loopback, linklocal, uniquelocal');
 app.disable('x-powered-by');
 
 // Set the auth strategies
+passport.use(authStrategies.basic);
 passport.use(authStrategies.bearer);
 
 // Initialize passport auth.
