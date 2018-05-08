@@ -39,6 +39,11 @@ describe('classes/api-auth', function() {
       expect(auth.getError()).to.be.null;
       done();
     });
+    it('should return null when no arguments are passed', function(done) {
+      const auth = new Auth();
+      expect(auth.getError()).to.be.an.instanceof(Error);
+      done();
+    });
   });
   describe('#isValid', function() {
     it('should respond to the function', function() {

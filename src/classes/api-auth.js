@@ -26,14 +26,14 @@ class ApiAuth {
   canRead() {
     this.check();
     const canRead = this.hasProjectAccess() && this.key.purpose === 'Public';
-    if (!canRead) throw new Error('You do not have access this resource.');
+    if (!canRead) throw new Error('You do not have access to read from this resource.');
     return canRead;
   }
 
   canWrite() {
     this.check();
     const canWrite = this.hasProjectAccess() && this.key.purpose === 'Private';
-    if (!canWrite) throw new Error('You do not have access this resource.');
+    if (!canWrite) throw new Error('You do not have access to write to this resource.');
     return canWrite;
   }
 

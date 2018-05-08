@@ -59,11 +59,18 @@ describe('content/resolvers', function() {
         }
       `;
 
-      it('should throw an error when given a key without read access', async function() {
+      it('should throw an error when given an invalid api key', async function() {
         const variables = { input: { id: '5ade495e876c718a84ce5341' } };
         const promise = graphql({ query, variables, key: 'content', apiKey: null });
         await expect(promise).to.eventually.be.rejectedWith(Error, 'You must be logged-in to access this resource');
       });
+
+      it('should throw an error when given a key without read access', async function() {
+        const variables = { input: { id: '5ade495e876c718a84ce5341' } };
+        const promise = graphql({ query, variables, key: 'content', canRead: false });
+        await expect(promise).to.eventually.be.rejectedWith(Error, 'You must be logged-in to access this resource');
+      });
+
       it('should reject when given an invalid identifier', async function() {
         const variables = { input: { id: '5ade495e876c718a84ce5341' } };
         const promise = graphql({ query, variables, key: 'content', canRead: true });
@@ -199,7 +206,7 @@ describe('content/resolvers', function() {
         const payload = { title: 'Some new title' };
         const variables = { input: { payload } };
         const promise = graphql({ query, variables, key: 'createContent', apiKey: { value: 1234, project: otherProject.id } });
-        await expect(promise).to.eventually.be.rejectedWith(Error, 'You do not have access this resource.');
+        await expect(promise).to.eventually.be.rejectedWith(Error, 'You do not have access to write to this resource.');
       });
       it('should throw an error when given a key without read access', async function() {
         const payload = { title: 'Some new title' };
@@ -267,7 +274,7 @@ describe('content/resolvers', function() {
         const payload = { title: 'Some new title' };
         const variables = { input: { id, payload } };
         const promise = graphql({ query, variables, key: 'updateContent', apiKey: { value: 1234, project: otherProject.id } });
-        await expect(promise).to.eventually.be.rejectedWith(Error, 'You do not have access this resource.');
+        await expect(promise).to.eventually.be.rejectedWith(Error, 'You do not have access to write to this resource.');
       });
       it('should throw an error when given a key without write access', async function () {
         const { id } = content;
@@ -306,7 +313,7 @@ describe('content/resolvers', function() {
         const payload = { title: 'Some new title' };
         const variables = { input: { id, payload } };
         const promise = graphql({ query, variables, key: 'updateContent', apiKey: { value: 1234, project: otherProject.id } });
-        await expect(promise).to.eventually.be.rejectedWith(Error, 'You do not have access this resource.');
+        await expect(promise).to.eventually.be.rejectedWith(Error, 'You do not have access to write to this resource.');
       });
     });
   });
