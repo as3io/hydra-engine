@@ -4,9 +4,9 @@ const sessionRepo = require('./session');
 const User = require('../models/user');
 const Organization = require('../models/organization');
 const fixtures = require('../fixtures');
-const Pagination = require('../classes/pagination');
 const mailer = require('../connections/sendgrid');
 const uuid = require('uuid/v4');
+const { Pagination } = require('@limit0/mongoose-graphql-pagination');
 
 module.exports = {
   async create(payload = {}) {

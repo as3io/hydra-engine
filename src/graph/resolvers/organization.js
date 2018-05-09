@@ -1,9 +1,9 @@
+const { paginationResolvers } = require('@limit0/mongoose-graphql-pagination');
 const Repo = require('../../repositories/organization');
 const Model = require('../../models/organization');
 const Project = require('../../models/project');
 const User = require('../../models/user');
 const Key = require('../../models/key');
-const paginationResolvers = require('./pagination');
 
 module.exports = {
   /**

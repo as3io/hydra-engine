@@ -1,7 +1,7 @@
 require('../../connections');
 const { graphql, setup, teardown } = require('./utils');
 const StoryRepo = require('../../../src/repositories/story');
-const { CursorType } = require('../../../src/graph/custom-types');
+const { CursorType } = require('@limit0/graphql-custom-types');
 
 const createStory = async () => {
   const results = await StoryRepo.seed();
@@ -110,24 +110,6 @@ describe('graph/resolvers/story', function() {
         const last = data.edges.pop();
         expect(data.pageInfo.endCursor).to.equal(last.cursor);
       });
-      it('should should not have a next page when limited by more than the total.', async function() {
-        const pagination = { first: 50 };
-        const variables = { pagination };
-        const promise = graphql({ query, key: 'allStories', variables, loggedIn: true });
-        await expect(promise).to.eventually.be.an('object');
-        const data = await promise;
-        expect(data.totalCount).to.equal(10);
-        expect(data.edges.length).to.equal(10);
-        expect(data.pageInfo.hasNextPage).to.be.false;
-        expect(data.pageInfo.endCursor).to.be.null;
-      });
-      it('should return an error when an after cursor is requested that does not exist.', async function() {
-        const after = CursorType.serialize(StoryRepo.generate().one().id);
-        const pagination = { first: 5, after };
-        const variables = { pagination };
-        const promise = graphql({ query, key: 'allStories', variables, loggedIn: true });
-        await expect(promise).to.be.rejectedWith(Error, `No record found for cursor '${after}'.`);
-      });
     });
 
   });
@@ -198,7 +180,7 @@ describe('graph/resolvers/story', function() {
         const id = '507f1f77bcf86cd799439011'
         const input = { id, payload };
         const variables = { input };
-        await expect(graphql({ query, variables, key: 'updateStory', loggedIn: true })).to.be.rejectedWith(Error, `Unable to update story: no record was found for ID '${id}'`);
+        await expect(graphql({ query, variables, key: 'updateStory', loggedIn: true })).to.be.rejectedWith(Error, `Unable to update story: no story was found for ID "${id}"`);
       });
       it('should update the story.', async function() {
         const id = story.id;

@@ -1,9 +1,8 @@
 const Promise = require('bluebird');
 const Model = require('../models/project');
 const OrganizationRepo = require('./organization');
-const Pagination = require('../classes/pagination');
 const fixtures = require('../fixtures');
-const TypeAhead = require('../classes/type-ahead');
+const { Pagination, TypeAhead } = require('@limit0/mongoose-graphql-pagination');
 
 module.exports = {
   /**
@@ -97,9 +96,9 @@ module.exports = {
    * @return {Pagination}
    */
   search({ pagination, search } = {}) {
-    const { typeahead } = search;
-    const { criteria, sort } = TypeAhead.getCriteria(typeahead);
-    return new Pagination(Model, { criteria, pagination, sort });
+    const { field, term } = search.typeahead;
+    const typeahead = new TypeAhead(field, term);
+    return typeahead.paginate(Model, { pagination });
   },
 
   /**

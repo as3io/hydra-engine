@@ -1,4 +1,4 @@
-const { DateType } = require('../../graph/custom-types');
+const { DateType } = require('@limit0/graphql-custom-types');
 
 const Content = require('../../models/content');
 

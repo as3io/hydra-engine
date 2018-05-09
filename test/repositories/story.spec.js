@@ -40,17 +40,17 @@ describe('repositories/story', function() {
     before(async function() {
       story = await createStory();
     });
-    it('should return a rejected promise when no ID is provided.', async function() {
+    it('should return a rejected promise when no ID is provided', async function() {
       await expect(Repo.update()).to.be.rejectedWith(Error, 'Unable to update story: no ID was provided.');
     });
-    it('should return a rejected promise when the ID cannot be found.', async function() {
+    it('should return a rejected promise when the ID cannot be found', async function() {
       const id = '507f1f77bcf86cd799439011';
-      await expect(Repo.update(id, { title: 'foo' })).to.be.rejectedWith(Error, `Unable to update story: no record was found for ID '${id}'`);
+      await expect(Repo.update(id, { title: 'foo' })).to.be.rejectedWith(Error, `Unable to update story: no story was found for ID "${id}"`);
     });
-    it('should return a rejected promise when valiation fails.', async function() {
-      await expect(Repo.update(story.id)).to.be.rejectedWith(Error, /validation/i);
+    it('should save the story even if no fields are passed', async function() {
+      await expect(Repo.update(story.id)).to.be.fulfilled;
     });
-    it('should return the updated model object.', async function() {
+    it('should return the updated model object', async function() {
       const updated = await Repo.update(story.id, { title: 'Updated title.' });
       expect(updated).to.be.an('object');
       expect(updated).to.be.an.instanceof(Model).with.property('title').equal('Updated title.');

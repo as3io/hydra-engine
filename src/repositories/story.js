@@ -1,8 +1,7 @@
 const Promise = require('bluebird');
 const Story = require('../models/story');
-const Pagination = require('../classes/pagination');
 const fixtures = require('../fixtures');
-const TypeAhead = require('../classes/type-ahead');
+const { Pagination, TypeAhead } = require('@limit0/mongoose-graphql-pagination');
 
 module.exports = {
   /**
@@ -22,15 +21,14 @@ module.exports = {
    * @param {string} payload.name
    * @return {Promise}
    */
-  update(id, { title, slug, text } = {}) {
+  async update(id, { title, slug, text } = {}) {
     if (!id) return Promise.reject(new Error('Unable to update story: no ID was provided.'));
-    const criteria = { _id: id };
-    const update = { $set: { title, slug, text } };
-    const options = { new: true, runValidators: true };
-    return Story.findOneAndUpdate(criteria, update, options).then((document) => {
-      if (!document) throw new Error(`Unable to update story: no record was found for ID '${id}'`);
-      return document;
-    });
+    const story = await this.findById(id);
+    if (!story) return Promise.reject(new Error(`Unable to update story: no story was found for ID "${id}"`));
+    if (title) story.title = title;
+    if (slug) story.slug = slug;
+    if (text) story.text = text;
+    return story.save();
   },
 
   /**
@@ -93,9 +91,9 @@ module.exports = {
    * @return {Pagination}
    */
   search({ pagination, search } = {}) {
-    const { typeahead } = search;
-    const { criteria, sort } = TypeAhead.getCriteria(typeahead);
-    return new Pagination(Story, { criteria, pagination, sort });
+    const { field, term } = search.typeahead;
+    const typeahead = new TypeAhead(field, term);
+    return typeahead.paginate(Story, { pagination });
   },
 
   /**
