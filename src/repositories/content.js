@@ -1,7 +1,8 @@
-const Promise = require('bluebird');
-const Story = require('../models/story');
-const fixtures = require('../fixtures');
 const { Pagination, TypeAhead } = require('@limit0/mongoose-graphql-pagination');
+const Promise = require('bluebird');
+const Content = require('../models/content');
+const fixtures = require('../fixtures');
+const ProjectRepo = require('./project');
 
 module.exports = {
   /**
@@ -10,8 +11,8 @@ module.exports = {
    * @return {Promise}
    */
   create(payload = {}) {
-    const story = new Story(payload);
-    return story.save();
+    const content = new Content(payload);
+    return content.save();
   },
 
   /**
@@ -22,17 +23,17 @@ module.exports = {
    * @return {Promise}
    */
   async update(id, { title, slug, text } = {}) {
-    if (!id) return Promise.reject(new Error('Unable to update story: no ID was provided.'));
-    const story = await this.findById(id);
-    if (!story) return Promise.reject(new Error(`Unable to update story: no story was found for ID "${id}"`));
-    if (title) story.title = title;
-    if (slug) story.slug = slug;
-    if (text) story.text = text;
-    return story.save();
+    if (!id) return Promise.reject(new Error('Unable to update content: no ID was provided.'));
+    const content = await this.findById(id);
+    if (!content) return Promise.reject(new Error(`Unable to update content: no content was found for ID "${id}"`));
+    if (title) content.title = title;
+    if (slug) content.slug = slug;
+    if (text) content.text = text;
+    return content.save();
   },
 
   /**
-   * Find an Story record by ID.
+   * Find an Content record by ID.
    *
    * Will return a rejected promise if no ID was provided.
    * Will NOT reject the promise if the record cannnot be found.
@@ -41,8 +42,8 @@ module.exports = {
    * @return {Promise}
    */
   findById(id) {
-    if (!id) return Promise.reject(new Error('Unable to find story: no ID was provided.'));
-    return Story.findOne({ _id: id });
+    if (!id) return Promise.reject(new Error('Unable to find content: no ID was provided.'));
+    return Content.findOne({ _id: id });
   },
 
   /**
@@ -50,7 +51,7 @@ module.exports = {
    * @return {Promise}
    */
   find(criteria) {
-    return Story.find(criteria);
+    return Content.find(criteria);
   },
 
   /**
@@ -58,7 +59,7 @@ module.exports = {
    * @return {Promise}
    */
   removeById(id) {
-    if (!id) return Promise.reject(new Error('Unable to remove story: no ID was provided.'));
+    if (!id) return Promise.reject(new Error('Unable to remove content: no ID was provided.'));
     return this.remove({ _id: id });
   },
 
@@ -67,33 +68,33 @@ module.exports = {
    * @return {Promise}
    */
   remove(criteria) {
-    return Story.remove(criteria);
+    return Content.remove(criteria);
   },
 
   /**
-   * Paginates all Story models.
+   * Paginates all Content models.
    *
    * @param {object} params
    * @param {object.object} params.pagination The pagination parameters.
    * @param {object.object} params.sort The sort parameters.
    * @return {Pagination}
    */
-  paginate({ pagination, sort } = {}) {
-    return new Pagination(Story, { pagination, sort });
+  paginate({ criteria, pagination, sort } = {}) {
+    return new Pagination(Content, { criteria, pagination, sort });
   },
 
   /**
-   * Searches & Paginates all Story models.
+   * Searches & Paginates all Content models.
    *
    * @param {object} params
    * @param {object.object} params.pagination The pagination parameters.
    * @param {object.object} params.search The search parameters.
    * @return {Pagination}
    */
-  search({ pagination, search } = {}) {
+  search({ criteria, pagination, search } = {}) {
     const { field, term } = search.typeahead;
     const typeahead = new TypeAhead(field, term);
-    return typeahead.paginate(Story, { pagination });
+    return typeahead.paginate(Content, { criteria, pagination });
   },
 
   /**
@@ -101,12 +102,15 @@ module.exports = {
    * @param {number} [count=1]
    * @return {object}
    */
-  generate(count = 1) {
-    return fixtures(Story, count);
+  generate(count = 1, params) {
+    return fixtures(Content, count, params);
   },
 
-  async seed({ count = 1 } = {}) {
-    const results = this.generate(count);
+  async seed({ count = 1, projectCount = 1 } = {}) {
+    const projects = await ProjectRepo.seed({ count: projectCount });
+    const results = this.generate(count, {
+      projectId: () => projects.random().id,
+    });
     await Promise.all(results.all().map(model => model.save()));
     return results;
   },
