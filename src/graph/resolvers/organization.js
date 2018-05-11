@@ -1,7 +1,9 @@
+const { paginationResolvers } = require('@limit0/mongoose-graphql-pagination');
 const Repo = require('../../repositories/organization');
+const Model = require('../../models/organization');
 const Project = require('../../models/project');
 const User = require('../../models/user');
-const paginationResolvers = require('./pagination');
+const Key = require('../../models/key');
 
 module.exports = {
   /**
@@ -17,6 +19,15 @@ module.exports = {
       }
       return false;
     },
+    role: (org, _args, { auth }) => {
+      const { uid } = auth.session;
+      for (let i = 0; i < org.members.length; i += 1) {
+        const member = org.members[i];
+        if (member.user == uid) return member.role; // eslint-disable-line eqeqeq
+      }
+      return null;
+    },
+    keys: ({ id }) => Key.find({ organization: id }),
   },
   /**
    *
@@ -87,6 +98,19 @@ module.exports = {
       auth.check();
       const { id, payload } = input;
       return Repo.update(id, payload);
+    },
+
+    /**
+     *
+     */
+    configureOrganization: async (root, { input }, { auth }) => {
+      auth.check();
+      const model = await Model.findById(input.organizationId);
+      const { name, description, photoURL } = input;
+      model.set('name', name);
+      model.set('description', description);
+      model.set('photoURL', photoURL);
+      return model.save();
     },
 
     /**

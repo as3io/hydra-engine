@@ -1,7 +1,7 @@
 require('../../connections');
 const { graphql, setup, teardown } = require('./utils');
 const OrganizationRepo = require('../../../src/repositories/organization');
-const { CursorType } = require('../../../src/graph/custom-types');
+const { CursorType } = require('@limit0/graphql-custom-types');
 
 const createOrganization = async () => {
   const results = await OrganizationRepo.seed();
@@ -129,24 +129,6 @@ describe('graph/resolvers/organization', function() {
 
         const last = data.edges.pop();
         expect(data.pageInfo.endCursor).to.equal(last.cursor);
-      });
-      it('should should not have a next page when limited by more than the total.', async function() {
-        const pagination = { first: 50 };
-        const variables = { pagination };
-        const promise = graphql({ query, key: 'allOrganizations', variables, loggedIn: true });
-        await expect(promise).to.eventually.be.an('object');
-        const data = await promise;
-        expect(data.totalCount).to.equal(10);
-        expect(data.edges.length).to.equal(10);
-        expect(data.pageInfo.hasNextPage).to.be.false;
-        expect(data.pageInfo.endCursor).to.be.null;
-      });
-      it('should return an error when an after cursor is requested that does not exist.', async function() {
-        const after = CursorType.serialize(OrganizationRepo.generate().one().id);
-        const pagination = { first: 5, after };
-        const variables = { pagination };
-        const promise = graphql({ query, key: 'allOrganizations', variables, loggedIn: true });
-        await expect(promise).to.be.rejectedWith(Error, `No record found for cursor '${after}'.`);
       });
     });
 

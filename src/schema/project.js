@@ -7,11 +7,16 @@ const schema = new Schema({
     type: String,
     required: true,
   },
+  description: String,
   organization: {
     type: Schema.Types.ObjectId,
     ref: 'organization',
     required: true,
   },
+  keys: [{
+    type: Schema.Types.ObjectId,
+    ref: 'key',
+  }],
 
 }, { timestamps: true });
 

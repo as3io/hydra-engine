@@ -32,9 +32,7 @@ const orgMember = new Schema({
     type: Date,
     default: () => new Date(),
   },
-  accepted: {
-    type: Date,
-  },
+  accepted: Date,
   projects: [projectRole],
 });
 
@@ -43,6 +41,11 @@ const schema = new Schema({
     type: String,
     required: true,
   },
+  keys: [{
+    type: Schema.Types.ObjectId,
+    ref: 'key',
+  }],
+  description: String,
   members: [orgMember],
   photoURL: {
     type: String,

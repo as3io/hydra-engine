@@ -22,6 +22,10 @@ const schema = new Schema({
       },
     ],
   },
+  keys: [{
+    type: Schema.Types.ObjectId,
+    ref: 'key',
+  }],
   givenName: {
     type: String,
     required: true,

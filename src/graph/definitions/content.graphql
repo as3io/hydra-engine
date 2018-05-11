@@ -1,0 +1,73 @@
+type Query {
+  allContent(criteria: PaginationCriteriaInput = {}, pagination: PaginationInput = {}, sort: ContentSortInput = {}): ContentConnection!
+  # searchContent(pagination: PaginationInput = {}, search: ContentSearchInput!): ContentConnection!
+  content(input: ModelIdInput!): Content!
+}
+
+type Mutation {
+  createContent(input: CreateContentInput!): Content!
+  updateContent(input: UpdateContentInput!): Content!
+}
+
+enum ContentSortField {
+  title
+  createdAt
+  updatedAt
+}
+
+type Content {
+  id: String!
+  title: String
+  teaser: String
+  slug: String
+  text: String
+  createdAt: Date
+  updatedAt: Date
+}
+
+type ContentConnection {
+  totalCount: Int!
+  edges: [ContentEdge]!
+  pageInfo: PageInfo!
+}
+
+type ContentEdge {
+  node: Content!
+  cursor: Cursor!
+}
+
+input ContentSearchInput {
+  typeahead: ContentTypeAheadInput!
+}
+
+input ContentTypeAheadInput {
+  field: ContentTypeAheadField!
+  term: String!
+}
+
+enum ContentTypeAheadField {
+  name
+  email
+}
+
+input ContentSortInput {
+  field: ContentSortField! = createdAt
+  order: Int! = -1
+}
+
+input ContentPayloadInput {
+  title: String
+  teaser: String
+  slug: String
+  text: String
+}
+
+input CreateContentInput {
+  project: String!
+  payload: ContentPayloadInput!
+}
+
+input UpdateContentInput {
+  id: String!
+  payload: ContentPayloadInput!
+}

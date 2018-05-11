@@ -1,6 +1,8 @@
+const { paginationResolvers } = require('@limit0/mongoose-graphql-pagination');
 const Repo = require('../../repositories/project');
+const Model = require('../../models/project');
 const Organization = require('../../models/organization');
-const paginationResolvers = require('./pagination');
+const Key = require('../../models/key');
 
 module.exports = {
   /**
@@ -8,6 +10,7 @@ module.exports = {
    */
   Project: {
     organization: ({ organization }) => Organization.findById(organization),
+    keys: ({ id }) => Key.find({ project: id }),
   },
   /**
    *
@@ -63,6 +66,18 @@ module.exports = {
       auth.check();
       const { id, payload } = input;
       return Repo.update(id, payload);
+    },
+
+    /**
+     *
+     */
+    configureProject: async (root, { input }, { auth }) => {
+      auth.check();
+      const model = await Model.findById(input.projectId);
+      const { name, description } = input;
+      model.set('name', name);
+      model.set('description', description);
+      return model.save();
     },
   },
 };

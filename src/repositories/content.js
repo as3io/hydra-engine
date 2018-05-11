@@ -1,8 +1,8 @@
-const Promise = require('bluebird');
-const Model = require('../models/project');
-const OrganizationRepo = require('./organization');
-const fixtures = require('../fixtures');
 const { Pagination, TypeAhead } = require('@limit0/mongoose-graphql-pagination');
+const Promise = require('bluebird');
+const Content = require('../models/content');
+const fixtures = require('../fixtures');
+const ProjectRepo = require('./project');
 
 module.exports = {
   /**
@@ -11,8 +11,8 @@ module.exports = {
    * @return {Promise}
    */
   create(payload = {}) {
-    const project = new Model(payload);
-    return project.save();
+    const content = new Content(payload);
+    return content.save();
   },
 
   /**
@@ -22,22 +22,18 @@ module.exports = {
    * @param {string} payload.name
    * @return {Promise}
    */
-  update(id, { name, organization } = {}) {
-    if (!id) return Promise.reject(new Error('Unable to update project: no ID was provided.'));
-    const criteria = { _id: id };
-    const update = { $set: { name } };
-    if (organization) {
-      update.$set.organization = organization;
-    }
-    const options = { new: true, runValidators: true };
-    return Model.findOneAndUpdate(criteria, update, options).then((document) => {
-      if (!document) throw new Error(`Unable to update project: no record was found for ID '${id}'`);
-      return document;
-    });
+  async update(id, { title, slug, text } = {}) {
+    if (!id) return Promise.reject(new Error('Unable to update content: no ID was provided.'));
+    const content = await this.findById(id);
+    if (!content) return Promise.reject(new Error(`Unable to update content: no content was found for ID "${id}"`));
+    if (title) content.title = title;
+    if (slug) content.slug = slug;
+    if (text) content.text = text;
+    return content.save();
   },
 
   /**
-   * Find an Model record by ID.
+   * Find an Content record by ID.
    *
    * Will return a rejected promise if no ID was provided.
    * Will NOT reject the promise if the record cannnot be found.
@@ -46,8 +42,8 @@ module.exports = {
    * @return {Promise}
    */
   findById(id) {
-    if (!id) return Promise.reject(new Error('Unable to find project: no ID was provided.'));
-    return Model.findOne({ _id: id });
+    if (!id) return Promise.reject(new Error('Unable to find content: no ID was provided.'));
+    return Content.findOne({ _id: id });
   },
 
   /**
@@ -55,7 +51,7 @@ module.exports = {
    * @return {Promise}
    */
   find(criteria) {
-    return Model.find(criteria);
+    return Content.find(criteria);
   },
 
   /**
@@ -63,7 +59,7 @@ module.exports = {
    * @return {Promise}
    */
   removeById(id) {
-    if (!id) return Promise.reject(new Error('Unable to remove project: no ID was provided.'));
+    if (!id) return Promise.reject(new Error('Unable to remove content: no ID was provided.'));
     return this.remove({ _id: id });
   },
 
@@ -72,11 +68,11 @@ module.exports = {
    * @return {Promise}
    */
   remove(criteria) {
-    return Model.remove(criteria);
+    return Content.remove(criteria);
   },
 
   /**
-   * Paginates all Model models.
+   * Paginates all Content models.
    *
    * @param {object} params
    * @param {object.object} params.pagination The pagination parameters.
@@ -84,21 +80,21 @@ module.exports = {
    * @return {Pagination}
    */
   paginate({ criteria, pagination, sort } = {}) {
-    return new Pagination(Model, { criteria, pagination, sort });
+    return new Pagination(Content, { criteria, pagination, sort });
   },
 
   /**
-   * Searches & Paginates all Model models.
+   * Searches & Paginates all Content models.
    *
    * @param {object} params
    * @param {object.object} params.pagination The pagination parameters.
    * @param {object.object} params.search The search parameters.
    * @return {Pagination}
    */
-  search({ pagination, search } = {}) {
+  search({ criteria, pagination, search } = {}) {
     const { field, term } = search.typeahead;
     const typeahead = new TypeAhead(field, term);
-    return typeahead.paginate(Model, { pagination });
+    return typeahead.paginate(Content, { criteria, pagination });
   },
 
   /**
@@ -107,13 +103,13 @@ module.exports = {
    * @return {object}
    */
   generate(count = 1, params) {
-    return fixtures(Model, count, params);
+    return fixtures(Content, count, params);
   },
 
-  async seed({ count = 1, organizationCount = 1 } = {}) {
-    const organizations = await OrganizationRepo.seed({ count: organizationCount });
+  async seed({ count = 1, projectCount = 1 } = {}) {
+    const projects = await ProjectRepo.seed({ count: projectCount });
     const results = this.generate(count, {
-      organizationId: () => organizations.random().id,
+      projectId: () => projects.random().id,
     });
     await Promise.all(results.all().map(model => model.save()));
     return results;

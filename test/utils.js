@@ -1,6 +1,6 @@
 const bcrypt = require('bcrypt');
 const { expect } = require('chai');
-const Pagination = require('../src/classes/pagination');
+const { Pagination } = require('@limit0/mongoose-graphql-pagination');
 const Promise = require('bluebird');
 
 const runAuthExpect = (res) => {
@@ -104,7 +104,7 @@ module.exports = {
     const paginated = Repo.search({ pagination, search });
     expect(paginated).to.be.an.instanceOf(Pagination);
     expect(paginated.Model).to.be.a('function');
-    expect(Repo.search).to.throw(Error, /Cannot destructure property/);
+    expect(Repo.search).to.throw(Error, /Cannot read property/);
   },
 
   async testTrimmedField(Model, document, field, { value = ' Trim Me ', expected = 'Trim Me', property } = {}) {

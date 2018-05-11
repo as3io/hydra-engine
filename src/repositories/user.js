@@ -4,15 +4,15 @@ const sessionRepo = require('./session');
 const User = require('../models/user');
 const Organization = require('../models/organization');
 const fixtures = require('../fixtures');
-const Pagination = require('../classes/pagination');
 const mailer = require('../connections/sendgrid');
 const uuid = require('uuid/v4');
+const { Pagination } = require('@limit0/mongoose-graphql-pagination');
 
 module.exports = {
-  async create(payload = {}, send = true) {
+  async create(payload = {}) {
     const user = new User(payload);
     await user.save();
-    if (send) await mailer.sendWelcomeVerification(user);
+    await mailer.sendWelcomeVerification(user);
     return user;
   },
 
@@ -222,7 +222,7 @@ module.exports = {
     const projects = [];
     projectRoles.forEach((pRole) => {
       if (pRole && pRole.id && pRole.role) {
-        projects.push(Object.assign({}, { id: pRole.id, role: pRole.role }));
+        projects.push(Object.assign({}, { project: pRole.id, role: pRole.role }));
       }
     });
 

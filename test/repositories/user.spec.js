@@ -1,6 +1,8 @@
 require('../connections');
 const bcrypt = require('bcrypt');
 const Repo = require('../../src/repositories/user');
+const Organization = require('../../src/repositories/organization');
+const Project = require('../../src/repositories/project');
 const Model = require('../../src/models/user');
 const { stubHash } = require('../utils');
 const Utils = require('../utils');
@@ -41,6 +43,189 @@ describe('repositories/user', function() {
 
       expect(found).to.be.an.instanceof(Model);
       expect(found).to.have.property('id').equal(user.get('id'));
+    });
+  });
+
+  describe('#organizationInvite', function() {
+    let user;
+    let organization;
+    let role = 'Administrator';
+    let projectRoles = [];
+
+    beforeEach(async function() {
+      const payload = Repo.generate().one();
+      user = await Repo.create(payload);
+      const seed = await Organization.seed();
+      organization = seed.one();
+    });
+
+    afterEach(async function() {
+      await Organization.remove();
+    })
+
+    it('should reject when the org does not exist', async function() {
+      const { email, givenName, familyName } = await user;
+      const payload = {
+        email,
+        givenName,
+        familyName,
+        role,
+        projectRoles,
+      };
+      const promise = Repo.organizationInvite('5af0b41d11b3e6002183c51b', payload);
+      await expect(promise).to.eventually.be.rejectedWith(Error, 'Organization with id "5af0b41d11b3e6002183c51b" was not found');
+    });
+
+    it('should create a user if one does not exist', async function() {
+      const payload = {
+        email: 'foo@bar.baz.dill',
+        givenName: 'Joe',
+        familyName: 'Blow',
+        role,
+        projectRoles,
+      };
+      const promise = Repo.organizationInvite(organization.id, payload);
+      await expect(promise).to.eventually.be.fulfilled;
+
+      const created = Repo.findByEmail(payload.email);
+      await expect(created).to.eventually.be.fulfilled;
+      const data = await created;
+      expect(data).to.have.property('email', payload.email);
+      expect(data).to.have.property('givenName', payload.givenName);
+      expect(data).to.have.property('familyName', payload.familyName);
+    })
+
+    it('should set a new token for the user to accept the invitation', async function() {
+      const { email, givenName, familyName, token } = await user;
+      const payload = {
+        email,
+        givenName,
+        familyName,
+        role,
+        projectRoles,
+      };
+      const promise = Repo.organizationInvite(organization.id, payload);
+      await expect(promise).to.eventually.be.fulfilled;
+      const newPromise = Repo.findById(user.id);
+      await expect(newPromise).to.eventually.be.fulfilled;
+      const newUser = await newPromise;
+      expect(newUser.token).to.not.equal(user.token);
+    });
+
+    it('should store the requested project roles', async function() {
+      const { email, givenName, familyName } = await user;
+      const project = await Project.create({
+        name: 'Test',
+        organization: organization.id,
+      });
+      const payload = {
+        email,
+        givenName,
+        familyName,
+        role,
+        projectRoles: [
+          {
+            id: project.id,
+            role: 'Administrator'
+          }
+        ],
+      };
+      const promise = Repo.organizationInvite(organization.id, payload);
+      await expect(promise).to.eventually.be.fulfilled;
+
+      const response = await Organization.findById(organization.id);
+      expect(response.get('members.0.projects.0.role')).to.equal('Administrator');
+      expect(response.get('members.0.projects.0.project') + '').to.equal(project.id);
+    });
+
+    it('should not add duplicate invitations/memberships', async function() {
+      const { email, givenName, familyName, token } = await user;
+      const payload = {
+        email,
+        givenName,
+        familyName,
+        role,
+        projectRoles,
+      };
+      const promise = Repo.organizationInvite(organization.id, payload);
+      await expect(promise).to.eventually.be.fulfilled;
+      const promise2 = Repo.organizationInvite(organization.id, payload);
+      await expect(promise2).to.eventually.be.fulfilled;
+      const newPromise = Repo.findById(user.id);
+      await expect(newPromise).to.eventually.be.fulfilled;
+      const org = await Organization.findById(organization.id);
+      expect(org.get('members.length')).to.equal(1);
+    });
+
+    it('should return a fulfilled promise with the model', async function() {
+      const { email, givenName, familyName } = await user;
+      const payload = {
+        email,
+        givenName,
+        familyName,
+        role,
+        projectRoles,
+      };
+      const promise = Repo.organizationInvite(organization.id, payload, false);
+      await expect(promise).to.eventually.be.fulfilled;
+    });
+  });
+
+  describe('#sendPasswordReset', function() {
+    let user;
+    beforeEach(async function() {
+      const payload = Repo.generate().one();
+      user = await Repo.create(payload);
+    });
+    afterEach(async function() {
+      await user.remove();
+    })
+
+    it('should error when given no arguments', () => {
+      return expect(Repo.sendPasswordReset())
+        .to.eventually.be
+        .rejectedWith(Error, 'no email address was provided')
+      ;
+    });
+    it('should error when given an invalid email', () => {
+      return expect(Repo.sendPasswordReset('does@not.exist'))
+        .to.eventually.be
+        .rejectedWith(Error, 'No user was found')
+      ;
+    });
+    it('should set a new token for the user', async () => {
+      await expect(Repo.sendPasswordReset(user.email)).to.eventually.be.fulfilled;
+      const updated = await expect(Repo.findByEmail(user.email)).to.eventually.be.fulfilled;
+      expect(updated.token).to.not.equal(user.token);
+    });
+  });
+
+  describe('#magicLogin', function() {
+    let user;
+    beforeEach(async function() {
+      const payload = Repo.generate().one();
+      user = await Repo.create(payload);
+    });
+    afterEach(async function() {
+      await user.remove();
+    })
+
+    it('should error when given no arguments', () => {
+      return expect(Repo.magicLogin())
+        .to.eventually.be
+        .rejectedWith(Error, 'no email address was provided')
+      ;
+    });
+    it('should error when given an invalid email', () => {
+      return expect(Repo.magicLogin('does@not.exist'))
+        .to.eventually.be
+        .rejectedWith(Error, 'No user was found')
+      ;
+    });
+    it('should set a new token for the user', async () => {
+      await expect(Repo.magicLogin(user.email)).to.eventually.be.fulfilled;
+      const updated = await expect(Repo.findByEmail(user.email)).to.eventually.be.fulfilled;
+      expect(updated.token).to.not.equal(user.token);
     });
   });
 

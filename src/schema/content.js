@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const slug = require('slug');
+const Project = require('../models/project');
 
 const { Schema } = mongoose;
 
@@ -8,19 +9,26 @@ const schema = new Schema({
     type: String,
     required: true,
     trim: true,
-    unique: false,
   },
+  teaser: String,
   slug: {
     type: String,
-    required: false,
     trim: true,
-    unique: true,
     lowercase: true,
   },
-  text: {
-    type: String,
-    required: false,
-    trim: false,
+  text: String,
+  project: {
+    type: Schema.Types.ObjectId,
+    ref: 'project',
+    required: true,
+    validate: {
+      async validator(v) {
+        const doc = await Project.findOne({ _id: v }, { _id: 1 });
+        if (doc) return true;
+        return false;
+      },
+      message: 'No project found for ID {VALUE}',
+    },
   },
 
 }, { timestamps: true });
