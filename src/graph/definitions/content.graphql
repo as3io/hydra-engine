@@ -21,6 +21,7 @@ type Content {
   teaser: String
   slug: String
   text: String
+  published: Boolean
   createdAt: Date
   updatedAt: Date
 }

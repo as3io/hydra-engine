@@ -38,6 +38,7 @@ describe('graph/resolvers/content', function() {
             id
             title
             slug
+            published
             text
             createdAt
             updatedAt
@@ -63,7 +64,7 @@ describe('graph/resolvers/content', function() {
         const promise = graphql({ query, variables, key: 'content', loggedIn: true });
         await expect(promise).to.eventually.be.an('object').with.property('id', id);
         const data = await promise;
-        expect(data).to.have.all.keys('id', 'title', 'slug', 'text', 'updatedAt', 'createdAt');
+        expect(data).to.have.all.keys('id', 'title', 'slug', 'text', 'updatedAt', 'createdAt', 'published');
       });
     });
 
@@ -84,6 +85,9 @@ describe('graph/resolvers/content', function() {
               node {
                 id
                 title
+                published
+                createdAt
+                updatedAt
               }
               cursor
             }
@@ -130,6 +134,7 @@ describe('graph/resolvers/content', function() {
             id
             title
             slug
+            published
             text
             createdAt
             updatedAt
@@ -168,6 +173,7 @@ describe('graph/resolvers/content', function() {
             id
             title
             slug
+            published
             text
             createdAt
             updatedAt
