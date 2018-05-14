@@ -22,13 +22,21 @@ module.exports = {
    * @param {string} payload.name
    * @return {Promise}
    */
-  async update(id, { title, slug, text } = {}) {
+  async update(id, {
+    title,
+    teaser,
+    slug,
+    text,
+    published,
+  } = {}) {
     if (!id) return Promise.reject(new Error('Unable to update content: no ID was provided.'));
     const content = await this.findById(id);
     if (!content) return Promise.reject(new Error(`Unable to update content: no content was found for ID "${id}"`));
     if (title) content.title = title;
+    if (teaser) content.teaser = teaser;
     if (slug) content.slug = slug;
     if (text) content.text = text;
+    if (published) content.published = published;
     return content.save();
   },
 
