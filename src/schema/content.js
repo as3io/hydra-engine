@@ -17,6 +17,11 @@ const schema = new Schema({
     lowercase: true,
   },
   text: String,
+  published: {
+    type: Boolean,
+    required: true,
+    default: false,
+  },
   project: {
     type: Schema.Types.ObjectId,
     ref: 'project',
