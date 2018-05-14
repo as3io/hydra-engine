@@ -11,6 +11,7 @@ describe('fixtures/generators/content', function() {
     { key: 'slug', cb: v => expect(v).to.be.a('string') },
     { key: 'text', cb: v => expect(v).to.be.a('string') },
     { key: 'project', cb: v => expect(v).to.be.a('string') },
+    { key: 'published', cb: v => expect(v).to.be.a('boolean') },
   ];
   const obj = Generate({
     projectId: () => '1234',
@@ -20,13 +21,13 @@ describe('fixtures/generators/content', function() {
     expect(obj).to.be.an('object');
     done();
   });
-  it('should only contain valid field keys.', function(done) {
+  it('should only contain valid field keys', function(done) {
     const keys = fields.map(field => field.key);
     expect(obj).to.have.keys(keys);
     done();
   });
   fields.forEach((field) => {
-    it(`should only have the ${field.key} property of the appropriate type.`, function(done) {
+    it(`should only have the ${field.key} property of the appropriate type`, function(done) {
       expect(obj).to.have.property(field.key);
       field.cb(obj[field.key]);
       done();

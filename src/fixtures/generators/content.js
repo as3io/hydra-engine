@@ -9,5 +9,6 @@ module.exports = ({ projectId }) => {
     teaser: faker.lorem.paragraphs(1),
     text: faker.lorem.paragraphs(5),
     project: projectId(),
+    published: false,
   };
 };
