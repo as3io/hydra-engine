@@ -59,6 +59,14 @@ module.exports = {
     },
   },
   Mutation: {
+    generateUserApiKey: async (root, args, { auth }) => {
+      auth.check();
+      const { user } = auth;
+      user.api = {};
+      await user.save();
+      return user.api;
+    },
+
     /**
      *
      */
@@ -73,6 +81,11 @@ module.exports = {
     loginUser: (root, { input }) => {
       const { email, password } = input;
       return UserRepo.login(email, password);
+    },
+
+    loginWithApiKey: (root, { input }) => {
+      const { key, secret } = input;
+      return UserRepo.loginWithApiKey(key, secret);
     },
 
     /**

@@ -95,6 +95,22 @@ module.exports = {
 
   /**
    *
+   * @param {string} key
+   * @param {string} secret
+   * @return {Promise}
+   */
+  async loginWithApiKey(key, secret) {
+    const user = await User.findOne({ 'api.key': key });
+    if (!user) throw new Error('No user was found for the provided API key.');
+    if (secret && secret !== user.get('api.secret')) throw new Error('The provided API secret is invalid.');
+
+    // Create session.
+    const session = await sessionRepo.set({ uid: user.id });
+    return { user, session };
+  },
+
+  /**
+   *
    * @param {string} token
    * @return {Promise}
    */
