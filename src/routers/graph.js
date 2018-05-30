@@ -28,7 +28,13 @@ const schema = require('../graph/schema');
  */
 const authenticate = (req, res, next) => {
   passport.authenticate('bearer', { session: false }, (err, { user, session } = {}) => {
-    req.auth = new Auth({ user, session, err });
+    const { tenant } = req;
+    req.auth = new Auth({
+      user,
+      session,
+      tenant,
+      err,
+    });
     next();
   })(req, res, next);
 };
@@ -49,8 +55,8 @@ router.use(
   authenticate,
   bodyParser.json(),
   graphqlExpress((req) => {
-    const { auth, tenant } = req;
-    return { schema, context: { auth, tenant } };
+    const { auth } = req;
+    return { schema, context: { auth } };
   }),
 );
 

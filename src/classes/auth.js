@@ -1,8 +1,14 @@
 class Auth {
-  constructor({ user, session, err } = {}) {
+  constructor({
+    user,
+    session,
+    tenant,
+    err,
+  } = {}) {
     this.user = user;
     this.session = session;
     this.err = err;
+    this.tenant = tenant;
   }
 
   isValid() {
@@ -24,6 +30,14 @@ class Auth {
 
   isAdmin() {
     return this.hasRole('Admin');
+  }
+
+  async checkProjectRead() {
+    this.check();
+  }
+
+  async checkOrgRead() {
+    this.check();
   }
 
   check() {
