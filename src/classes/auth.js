@@ -5,6 +5,7 @@ class Auth {
     tenant,
     err,
   } = {}) {
+    this.adminRoles = ['Owner', 'Administrator'];
     this.user = user;
     this.session = session;
     this.err = err;
@@ -23,9 +24,10 @@ class Auth {
     return this.session.uid !== this.user.id ? new Error('Session-user mismatch encountered.') : null;
   }
 
-  hasRole(name) {
+  async hasRole(name) {
     if (!this.isValid()) return false;
-    return this.user.role === name;
+    const { role } = await this.getOrgMembership();
+    return role === name;
   }
 
   isAdmin() {
@@ -34,10 +36,45 @@ class Auth {
 
   async checkProjectRead() {
     this.check();
+    const { role, projects } = await this.getOrgMembership();
+    if (this.adminRoles.includes(role)) return true;
+    // eslint-disable-next-line eqeqeq
+    const valid = projects.filter(project => project.id == this.tenant.projectId);
+    if (!valid.length) throw new Error('You are not permitted to read from this project.');
+    return true;
+  }
+
+  async checkProjectWrite() {
+    this.check();
+    const { role, projects } = await this.getOrgMembership();
+    if (this.adminRoles.includes(role)) return true;
+    const valid = projects.filter(project =>
+      // eslint-disable-next-line eqeqeq
+      project.id == this.tenant.projectId && this.adminRoles.includes(project.role));
+    if (!valid.length) throw new Error('You are not permitted to write to this project.');
+    return true;
   }
 
   async checkOrgRead() {
     this.check();
+    const { role } = await this.getOrgMembership();
+    if (!role) throw new Error('You are not permitted to read from this organization.');
+    return true;
+  }
+
+  async checkOrgWrite() {
+    this.check();
+    const { role } = await this.getOrgMembership();
+
+    if (!this.adminRoles.includes(role)) throw new Error('You are not permitted to write to this organization.');
+    return true;
+  }
+
+  async getOrgMembership() {
+    const org = await this.tenant.getOrganization();
+    // eslint-disable-next-line eqeqeq
+    const filtered = org.get('members').filter(member => member.user == this.user.id);
+    return filtered.shift() || {};
   }
 
   check() {
