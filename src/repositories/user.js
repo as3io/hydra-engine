@@ -105,7 +105,7 @@ module.exports = {
     if (secret && secret !== user.get('api.secret')) throw new Error('The provided API secret is invalid.');
 
     // Create session.
-    const session = await sessionRepo.set({ uid: user.id });
+    const session = await sessionRepo.set({ uid: user.id, api: { key, secret } });
     return { user, session };
   },
 

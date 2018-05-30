@@ -66,6 +66,7 @@ module.exports = {
       uid: session.uid,
       cre: verified.iat,
       exp: verified.exp,
+      api: session.api,
       token,
     };
   },
@@ -74,9 +75,10 @@ module.exports = {
    *
    * @param {object} params
    * @param {string} params.uid
+   * @param {string} params.api Optional API key/secret (if using the API)
    * @return {Promise}
    */
-  async set({ uid }) {
+  async set({ uid, api }) {
     if (!uid) throw new Error('The user ID is required.');
 
     const now = new Date();
@@ -95,6 +97,7 @@ module.exports = {
       ts,
       uid,
       s: userSecret,
+      api,
     }));
 
     const memberKey = `${SETTINGS.userPrefix}:${uid}`;
@@ -109,6 +112,7 @@ module.exports = {
       cre: iat,
       exp,
       token,
+      api,
     };
   },
 };

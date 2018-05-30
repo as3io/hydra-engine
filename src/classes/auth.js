@@ -29,6 +29,11 @@ class Auth {
   check() {
     if (!this.isValid()) throw new Error('You must be logged-in to access this resource.');
   }
+
+  fromApi() {
+    if (!this.isValid()) return false;
+    return this.session.api && this.session.api.key;
+  }
 }
 
 module.exports = Auth;
