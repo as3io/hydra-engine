@@ -2,7 +2,7 @@ require('../connections');
 const Content = require('../../src/models/content');
 const ProjectRepo = require('../../src/repositories/project');
 const fixtures = require('../../src/fixtures');
-const { testTrimmedField, testUnTrimmedField, stubHash } = require('../utils');
+const { testTrimmedField, testRequiredField, testUnTrimmedField, stubHash } = require('../utils');
 
 const generateContent = async () => {
   const project = await ProjectRepo.seed();
@@ -22,7 +22,7 @@ describe('schema/content', function() {
     stub.restore();
     return Content.remove();
   });
-  it('should successfully save.', async () => {
+  it('should successfully save', async () => {
     const content = await generateContent();
     await expect(content.save()).to.be.fulfilled;
   });
@@ -32,7 +32,7 @@ describe('schema/content', function() {
     beforeEach(async () => {
       content = await generateContent();
     });
-    it('should be trimmed.', function() {
+    it('should be trimmed', function() {
       return testTrimmedField(Content, content, 'title', { value: ' Some Awesome Title  ', expected: 'Some Awesome Title' });
     });
   });
@@ -42,7 +42,7 @@ describe('schema/content', function() {
     beforeEach(async () => {
       content = await generateContent();
     });
-    it('should be slugged.', function() {
+    it('should be slugged', function() {
       return testTrimmedField(Content, content, 'slug', { value: ' This is a title ', expected: 'this-is-a-title' });
     })
   });
@@ -52,8 +52,31 @@ describe('schema/content', function() {
     beforeEach(async () => {
       content = await generateContent();
     });
-    it('should not be trimmed.', function() {
+    it('should not be trimmed', function() {
       return testUnTrimmedField(Content, content, 'text');
+    });
+  });
+
+  describe('#teaser', async () => {
+    let content;
+    beforeEach(async () => {
+      content = await generateContent();
+    });
+    it('should not be trimmed', function() {
+      return testUnTrimmedField(Content, content, 'teaser');
+    });
+  });
+
+  describe('#published', async () => {
+    let content;
+    beforeEach(async () => {
+      content = await generateContent();
+    });
+    it('should be required', function() {
+      return testRequiredField(Content, content, 'published');
+    });
+    it('should default to `false`', function() {
+      expect(content.get('published')).to.equal(false);
     });
   });
 

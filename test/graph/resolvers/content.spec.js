@@ -38,6 +38,7 @@ describe('graph/resolvers/content', function() {
             id
             title
             slug
+            published
             text
             createdAt
             updatedAt
@@ -63,7 +64,7 @@ describe('graph/resolvers/content', function() {
         const promise = graphql({ query, variables, key: 'content', loggedIn: true });
         await expect(promise).to.eventually.be.an('object').with.property('id', id);
         const data = await promise;
-        expect(data).to.have.all.keys('id', 'title', 'slug', 'text', 'updatedAt', 'createdAt');
+        expect(data).to.have.all.keys('id', 'title', 'slug', 'text', 'updatedAt', 'createdAt', 'published');
       });
     });
 
@@ -84,6 +85,9 @@ describe('graph/resolvers/content', function() {
               node {
                 id
                 title
+                published
+                createdAt
+                updatedAt
               }
               cursor
             }
@@ -130,6 +134,7 @@ describe('graph/resolvers/content', function() {
             id
             title
             slug
+            published
             text
             createdAt
             updatedAt
@@ -154,6 +159,21 @@ describe('graph/resolvers/content', function() {
         const data = await promise;
         await expect(ContentRepo.findById(data.id)).to.eventually.be.an('object');
       });
+
+      it('should not be published by default', async function() {
+        const input = { project: project.id, payload };
+        const variables = { input };
+        const promise = graphql({ query, variables, key: 'createContent', loggedIn: true });
+        await expect(promise).to.eventually.be.an('object').with.property('published', false);
+      })
+
+      it('should allow publishing on create', async function() {
+        const newPayload = { published: true, title: payload.title };
+        const input = { project: project.id, payload: newPayload };
+        const variables = { input };
+        const promise = graphql({ query, variables, key: 'createContent', loggedIn: true });
+        await expect(promise).to.eventually.be.an('object').with.property('published', true);
+      })
     });
 
     describe('updateContent', function() {
@@ -168,6 +188,7 @@ describe('graph/resolvers/content', function() {
             id
             title
             slug
+            published
             text
             createdAt
             updatedAt
@@ -200,6 +221,16 @@ describe('graph/resolvers/content', function() {
         expect(data.name).to.equal(payload.name);
         await expect(ContentRepo.findById(data.id)).to.eventually.be.an('object').with.property('title', payload.title);
       });
+
+      it('should allow modifying published status', async function() {
+        const id = content.id;
+        const published = true;
+        const input = { id, payload: { published } };
+        const variables = { input };
+        const promise = graphql({ query, variables, key: 'updateContent', loggedIn: true });
+        await expect(promise).to.eventually.be.an('object').with.property('published', true);
+      })
+
     });
 
   });
