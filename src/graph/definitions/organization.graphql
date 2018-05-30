@@ -29,7 +29,6 @@ type Organization {
   projects: [Project]
   accepted: Boolean
   role: String
-  keys: [Key]
 }
 
 type OrganizationMembership {

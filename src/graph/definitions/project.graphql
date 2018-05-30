@@ -24,7 +24,6 @@ type Project {
   createdAt: Date
   updatedAt: Date
   organization: Organization!
-  keys: [Key]
 }
 
 type ProjectConnection {
