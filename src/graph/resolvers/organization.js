@@ -51,7 +51,7 @@ module.exports = {
      *
      */
     organization: async (root, { input }, { auth }) => {
-      auth.check();
+      await auth.checkOrgRead();
       const { id } = input;
       const record = await Repo.findById(id);
       if (!record) throw new Error(`No organization record found for ID ${id}.`);
