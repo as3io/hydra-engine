@@ -1,10 +1,22 @@
+const { Schema } = require('mongoose');
 const bcrypt = require('bcrypt');
-const mongoose = require('mongoose');
 const validator = require('validator');
 const crypto = require('crypto');
 const uuid = require('uuid/v4');
+const pushId = require('unique-push-id');
 
-const { Schema } = mongoose;
+const apiSchema = new Schema({
+  key: {
+    type: String,
+    required: true,
+    default: () => uuid(),
+  },
+  secret: {
+    type: String,
+    required: true,
+    default: () => pushId(),
+  },
+});
 
 const schema = new Schema({
   email: {
@@ -22,10 +34,9 @@ const schema = new Schema({
       },
     ],
   },
-  keys: [{
-    type: Schema.Types.ObjectId,
-    ref: 'key',
-  }],
+  api: {
+    type: apiSchema,
+  },
   givenName: {
     type: String,
     required: true,
