@@ -14,7 +14,7 @@ const connection = mongoose.createConnection(MONGO_DSN, {
 connection.once('open', () => {
   /* istanbul ignore if */
   if (process.env.NODE_ENV !== 'test') {
-    process.stdout.write(`Successful MongoDB connection to '${MONGO_DSN}']n`);
+    process.stdout.write(`Successful MongoDB connection to '${MONGO_DSN}'\n`);
   }
 });
 
