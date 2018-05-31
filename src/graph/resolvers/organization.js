@@ -1,6 +1,5 @@
 const { paginationResolvers } = require('@limit0/mongoose-graphql-pagination');
 const Repo = require('../../repositories/organization');
-const Model = require('../../models/organization');
 const OrganizationMember = require('../../models/organization-member');
 const Project = require('../../models/project');
 const User = require('../../models/user');
@@ -61,23 +60,14 @@ module.exports = {
      */
     createOrganization: async (root, { input }, { auth }) => {
       auth.check();
-      const { payload } = input;
-      const organization = await Repo.create(payload);
+      const { name } = input;
+      const organization = await Repo.create({ name });
       await OrganizationMember.create({
         userId: auth.user.id,
         role: 'Owner',
         acceptedAt: new Date(),
-      }).save();
+      });
       return organization;
-    },
-
-    /**
-     *
-     */
-    updateOrganization: (root, { input }, { auth }) => {
-      auth.check();
-      const { id, payload } = input;
-      return Repo.update(id, payload);
     },
 
     /**
@@ -93,14 +83,12 @@ module.exports = {
     /**
      *
      */
-    configureOrganization: async (root, { input }, { auth }) => {
-      auth.check();
-      const model = await Model.findById(input.organizationId);
+    updateOrganization: async (root, { input }, { auth }) => {
+      await auth.checkOrgWrite();
+      const organization = await auth.tenant.getOrganization();
       const { name, description, photoURL } = input;
-      model.set('name', name);
-      model.set('description', description);
-      model.set('photoURL', photoURL);
-      return model.save();
+      organization.set({ name, description, photoURL });
+      return organization.save();
     },
 
     /**
