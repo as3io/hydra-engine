@@ -1,3 +1,5 @@
+const OrganizationMember = require('../models/organization-member');
+
 class Auth {
   constructor({
     user,
@@ -35,48 +37,49 @@ class Auth {
   }
 
   async checkProjectRead() {
-    this.check();
-    const { role, projects } = await this.getOrgMembership();
+    const { role, projectRoles } = await this.getOrgMembership();
     if (this.adminRoles.includes(role)) return true;
-    const valid = projects.filter(project => `${project.id}` === `${this.tenant.projectId}`);
+    const valid = projectRoles.filter(pRole => `${pRole.projectId}` === `${this.tenant.projectId}`);
     if (!valid.length) throw new Error('You are not permitted to read from this project.');
     return true;
   }
 
   async checkProjectWrite() {
-    this.check();
-    const { role, projects } = await this.getOrgMembership();
+    const { role, projectRoles } = await this.getOrgMembership();
     if (this.adminRoles.includes(role)) return true;
-    const valid = projects.filter(project =>
-      `${project.id}` === `${this.tenant.projectId}` && this.adminRoles.includes(project.role));
+    const valid = projectRoles.filter(pRole => `${pRole.projectId}` === `${this.tenant.projectId}` && this.adminRoles.includes(pRole.role));
     if (!valid.length) throw new Error('You are not permitted to write to this project.');
+    this.checkApiWrite();
     return true;
   }
 
   async checkOrgRead() {
-    this.check();
     const { role } = await this.getOrgMembership();
     if (!role) throw new Error('You are not permitted to read from this organization.');
     return true;
   }
 
   async checkOrgWrite() {
-    this.check();
     const { role } = await this.getOrgMembership();
     if (!this.adminRoles.includes(role)) throw new Error('You are not permitted to write to this organization.');
+    this.checkApiWrite();
     return true;
   }
 
   async getOrgMembership() {
-    const org = await this.tenant.getOrganization();
-    if (!org) throw new Error('No organization was found for the provided ID.');
-    const filtered = org.get('members').filter(member => `${member.user}` === `${this.user.id}`);
-    if (!filtered.length) throw new Error('You are not a member of this organization.');
-    return filtered.shift();
+    this.check();
+    const { organizationId } = this.tenant;
+    const orgMember = await OrganizationMember.findOne({ organizationId, userId: this.user.id });
+    if (!orgMember) throw new Error('You are not a member of this organization.');
+    return orgMember;
   }
 
   check() {
     if (!this.isValid()) throw new Error('You must be logged-in to access this resource.');
+  }
+
+  checkApiWrite() {
+    if (this.fromApi() && !this.session.api.secret) throw new Error('You must provide a secret to write via the API.');
   }
 
   fromApi() {
