@@ -63,7 +63,6 @@ class Auth {
   async checkOrgWrite() {
     this.check();
     const { role } = await this.getOrgMembership();
-
     if (!this.adminRoles.includes(role)) throw new Error('You are not permitted to write to this organization.');
     return true;
   }
