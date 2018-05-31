@@ -1,6 +1,7 @@
 const Promise = require('bluebird');
 const Model = require('../models/organization');
 const OrganizationMember = require('../models/organization-member');
+const TokenRepo = require('./token');
 const fixtures = require('../fixtures');
 const UserRepo = require('./user');
 const mailer = require('../connections/sendgrid');
@@ -139,8 +140,14 @@ module.exports = {
     });
     await orgMember.save();
 
+    const token = await TokenRepo.create({
+      act: 'inviteUserToOrg',
+      uid: user.id,
+      oid: organization.id,
+    }, 60 * 60 * 24 * 30);
+
     // send welcome/invite email
-    await mailer.sendOrganizationInvitation(organization, user);
+    await mailer.sendOrganizationInvitation(organization, user, token);
 
     return orgMember;
   },
