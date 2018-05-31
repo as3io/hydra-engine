@@ -38,9 +38,14 @@ module.exports = {
     /**
      *
      */
-    allProjects: (root, { criteria, pagination, sort }, { auth }) => {
-      auth.check();
-      return Repo.paginate({ criteria, pagination, sort });
+    allProjects: async (root, { pagination, sort }, { auth }) => {
+      await auth.checkOrgRead();
+      const userId = auth.user.id;
+      const organizationId = auth.tenant.organizationId;
+      const member = await OrganizationMember.findOne({ userId, organizationId }, { projectRoles: 1 });
+      const projectIds = member.get('projectRoles').map(member => member.projectId.toString());
+      const criteria = { _id: { $in: projectIds } };
+      return Repo.paginate({ pagination, sort, criteria });
     },
   },
 
@@ -54,28 +59,18 @@ module.exports = {
     createProject: async (root, { input }, { auth }) => {
       await auth.checkOrgWrite();
       const { payload } = input;
-      payload.organization = auth.tenant.organizationId;
+      payload.organizationId = auth.tenant.organizationId;
       return Repo.create(payload);
     },
 
     /**
      *
      */
-    updateProject: (root, { input }, { auth }) => {
-      auth.check();
-      const { id, payload } = input;
-      return Repo.update(id, payload);
-    },
-
-    /**
-     *
-     */
-    configureProject: async (root, { input }, { auth }) => {
-      auth.check();
+    updateProject: async (root, { input }, { auth }) => {
+      await auth.checkProjectWrite();
       const model = await Model.findById(input.projectId);
       const { name, description } = input;
-      model.set('name', name);
-      model.set('description', description);
+      model.set({ name, description });
       return model.save();
     },
   },

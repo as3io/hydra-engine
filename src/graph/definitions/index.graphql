@@ -17,11 +17,6 @@ type PageInfo {
   startCursor: Cursor
 }
 
-input PaginationCriteriaInput {
-  organization: String
-  project: String
-}
-
 input PaginationInput {
   first: Int! = 25
   after: Cursor

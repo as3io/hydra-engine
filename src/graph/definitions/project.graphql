@@ -1,14 +1,11 @@
 type Query {
-  allProjects(criteria: PaginationCriteriaInput = {}, pagination: PaginationInput = {}, sort: ProjectSortInput = {}): ProjectConnection!
-  # searchProjects(pagination: PaginationInput = {}, search: ProjectSearchInput!): ProjectConnection!
-  # userProjects(pagination: PaginationInput = {}, sort: ProjectSortInput = {}): ProjectConnection!
+  allProjects(pagination: PaginationInput = {}, sort: ProjectSortInput = {}): ProjectConnection!
   project(input: ModelIdInput!): Project!
 }
 
 type Mutation {
   createProject(input: CreateProjectInput!): Project!
   updateProject(input: UpdateProjectInput!): Project!
-  configureProject(input: ProjectConfigInput!): Project!
 }
 
 enum ProjectSortField {
@@ -56,22 +53,12 @@ input ProjectSortInput {
   order: Int! = -1
 }
 
-input ProjectPayloadInput {
-  name: String
-  organization: String
-}
-
 input CreateProjectInput {
-  payload: ProjectPayloadInput!
-}
-
-input UpdateProjectInput {
-  id: String!
-  payload: ProjectPayloadInput!
+  name: String!
+  description: String
 }
 
 input ProjectConfigInput {
-  projectId: String!
-  name: String
+  name: String!
   description: String
 }
