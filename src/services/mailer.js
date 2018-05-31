@@ -4,7 +4,8 @@ const emailTemplates = require('../email-templates');
 const {
   SENDGRID_API_KEY,
   SENDGRID_FROM,
-  SERVER_BASE_URI,
+  APP_BASE_URI,
+  APP_NAME,
 } = process.env;
 
 module.exports = {
@@ -24,16 +25,25 @@ module.exports = {
   },
 
   async sendOrganizationInvitation(organization, user, token) {
+    const to = user.toAddress;
+    const subject = `You have been invited to the ${organization.name} organization.`;
     const html = await emailTemplates.render('organization-invite', {
       organization,
       user,
-      verifyHref: `${SERVER_BASE_URI}/actions/organization-invite/${token}`,
+      subject,
+      href: `${APP_BASE_URI}/actions/organization-invite/${token}`,
     });
-    const { givenName, familyName, email } = user;
-    const { name } = organization;
+    return this.send({ to, subject, html });
+  },
 
-    const to = `${givenName} ${familyName} <${email}>`;
-    const subject = `You have been invited to the ${name} organization.`;
+  async sendMagicLogin(user, token) {
+    const to = user.toAddress;
+    const subject = `Your ${APP_NAME} magic login link`;
+    const html = await emailTemplates.render('magic-login', {
+      user,
+      subject,
+      href: `${APP_BASE_URI}/actions/magic-login/${token}`,
+    });
     return this.send({ to, subject, html });
   },
 };

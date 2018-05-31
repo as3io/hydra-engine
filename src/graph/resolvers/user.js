@@ -132,9 +132,6 @@ module.exports = {
     /**
      *
      */
-    magicLogin: (root, { input }) => {
-      const { email } = input;
-      return UserRepo.magicLogin(email);
-    },
+    createMagicLoginToken: (root, { email }) => UserRepo.createMagicLoginToken(email),
   },
 };

@@ -87,6 +87,10 @@ const schema = new Schema({
  */
 schema.index({ email: 1, isEmailVerified: 1 });
 
+schema.virtual('toAddress').get(function toAddress() {
+  return `${this.givenName} ${this.familyName} <${this.email}>`;
+});
+
 /**
  * Hooks.
  */

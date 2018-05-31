@@ -3,7 +3,8 @@ const Promise = require('bluebird');
 const sessionRepo = require('./session');
 const User = require('../models/user');
 const fixtures = require('../fixtures');
-const mailer = require('../connections/sendgrid');
+const TokenRepo = require('./token');
+const mailer = require('../services/mailer');
 const uuid = require('uuid/v4');
 const { Pagination } = require('@limit0/mongoose-graphql-pagination');
 
@@ -133,14 +134,17 @@ module.exports = {
    *
    * @param {string} email
    */
-  async magicLogin(email) {
+  async createMagicLoginToken(email) {
     const user = await this.findByEmail(email);
     if (!user) throw new Error('No user was found for the provided email address.');
-    // @todo JWT
-    user.set('token', uuid());
-    await user.save();
-    await mailer.sendMagicLogin(user);
-    return user;
+
+    const token = await TokenRepo.create({
+      act: 'createMagicLoginToken',
+      uid: user.id,
+    }, 60 * 60);
+
+    await mailer.sendMagicLogin(user, token);
+    return token;
   },
 
   /**
