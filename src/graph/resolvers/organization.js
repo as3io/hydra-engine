@@ -10,6 +10,7 @@ module.exports = {
    */
   Organization: {
     projects: ({ id }) => Project.find({ organizationId: id }),
+    members: ({ id }) => OrganizationMember.find({ organizationId: id }),
   },
   /**
    *
@@ -64,6 +65,7 @@ module.exports = {
       const organization = await Repo.create({ name });
       await OrganizationMember.create({
         userId: auth.user.id,
+        organizationId: organization.id,
         role: 'Owner',
         acceptedAt: new Date(),
       });

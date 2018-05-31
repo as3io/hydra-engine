@@ -23,10 +23,12 @@ const schema = new Schema({
   userId: {
     type: Schema.Types.ObjectId,
     ref: 'user',
+    required: true,
   },
   organizationId: {
     type: Schema.Types.ObjectId,
     ref: 'organization',
+    required: true,
   },
   role,
   invitedAt: {
