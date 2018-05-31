@@ -161,6 +161,7 @@ module.exports = {
     const userId = token.payload.uid;
     const organizationId = token.payload.oid;
     const orgMember = await OrganizationMember.findOne({ userId, organizationId });
+    if (!orgMember) throw new Error('No organization membership was found for the provided token.');
     orgMember.acceptedAt = new Date();
     await orgMember.save();
     await TokenRepo.invalidate(token.id);
