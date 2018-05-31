@@ -24,6 +24,17 @@ module.exports = {
     return sgMail.send(payload);
   },
 
+  async sendWelcomeVerification(user, token) {
+    const to = user.toAddress;
+    const subject = `Welcome to ${APP_NAME}`;
+    const html = await emailTemplates.render('welcome', {
+      user,
+      subject,
+      href: `${APP_BASE_URI}/actions/magic-login/${token}`,
+    });
+    return this.send({ to, subject, html });
+  },
+
   async sendOrganizationInvitation(organization, user, token) {
     const to = user.toAddress;
     const subject = `You have been invited to the ${organization.name} organization.`;

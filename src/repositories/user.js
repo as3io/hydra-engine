@@ -13,8 +13,9 @@ module.exports = {
     return user.save();
   },
 
-  sendWelcomeVerification(user) {
-    return mailer.sendWelcomeVerification(user);
+  async sendWelcomeVerification(user) {
+    const token = await this.createMagicLoginToken(user);
+    return mailer.sendWelcomeVerification(user, token);
   },
 
   generate(count = 1) {
@@ -131,6 +132,13 @@ module.exports = {
     return { user, session };
   },
 
+  createMagicLoginToken(user) {
+    return TokenRepo.create({
+      act: 'createMagicLoginToken',
+      uid: user.id,
+    }, 60 * 60);
+  },
+
   /**
    *
    * @param {string} email
@@ -139,11 +147,7 @@ module.exports = {
     const user = await this.findByEmail(email);
     if (!user) return true;
 
-    const token = await TokenRepo.create({
-      act: 'createMagicLoginToken',
-      uid: user.id,
-    }, 60 * 60);
-
+    const token = await this.createMagicLoginToken(user);
     await mailer.sendMagicLogin(user, token);
     return true;
   },
