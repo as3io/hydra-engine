@@ -113,19 +113,21 @@ module.exports = {
 
   /**
    *
-   * @param {string} token
+   * @param {string} jwt
    * @return {Promise}
    */
-  async loginFromToken(token) {
-    const user = await this.findByToken(token);
+  async loginWithMagicToken(jwt) {
+    const token = await TokenRepo.verify(jwt);
+    const userId = token.payload.uid;
+    const user = await this.findById(userId);
     if (!user) throw new Error('No user was found for the provided token.');
-    user.set('token', null);
-    user.set('emailVerified', true);
 
     // Create session.
     const session = await sessionRepo.set({ uid: user.id });
+    await TokenRepo.invalidate(token.id);
 
     // Update login info
+    user.emailVerified = true;
     await this.updateLoginInfo(user);
     return { user, session };
   },

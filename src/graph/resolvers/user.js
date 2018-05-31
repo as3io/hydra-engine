@@ -98,10 +98,7 @@ module.exports = {
     /**
      *
      */
-    loginFromToken: (root, { input }) => {
-      const { token } = input;
-      return UserRepo.loginFromToken(token);
-    },
+    loginWithMagicToken: (root, { token }) => UserRepo.loginWithMagicToken(token),
 
     /**
      *

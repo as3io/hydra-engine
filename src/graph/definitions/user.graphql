@@ -7,7 +7,7 @@ type Query {
 
 type Mutation {
   createUser(input: CreateUserInput!): User
-  loginFromToken(input: AuthTokenInput!): Authentication
+  loginWithMagicToken(token: String!): Authentication!
   setPassword(input: SetPasswordInput!): User
   sendPasswordReset(input: ResetPasswordInput!): User
   loginUser(input: LoginInput!): Authentication
@@ -78,10 +78,6 @@ input NewUserPayloadInput {
 input CreateUserInput {
   # captcha: String
   payload: NewUserPayloadInput
-}
-
-input AuthTokenInput {
-  token: String!
 }
 
 input SetPasswordInput {
