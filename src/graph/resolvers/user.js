@@ -98,9 +98,10 @@ module.exports = {
     /**
      *
      */
-    setPassword: (root, { input }, { auth }) => {
-      const { password } = input;
-      return UserRepo.setPassword(auth.session.uid, password);
+    resetPassword: async (root, { input }) => {
+      const { token, password } = input;
+      await UserRepo.resetPassword(token, password);
+      return true;
     },
 
     /**

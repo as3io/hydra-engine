@@ -150,15 +150,20 @@ module.exports = {
 
   /**
    *
-   * @param {string} _id
+   * @param {string} jwt
    * @param {string} password
    * @return {Promise}
    */
-  async setPassword(id, password) {
-    const user = await this.findById(id);
+  async resetPassword(jwt, password) {
+    const token = await TokenRepo.verify(jwt);
+    const userId = token.payload.uid;
+
+    const user = await this.findById(userId);
     if (!user) throw new Error('No user was found for the provided token.');
     user.set('password', password);
-    return user.save();
+    await user.save();
+    await TokenRepo.invalidate(token.id);
+    return user;
   },
 
   /**

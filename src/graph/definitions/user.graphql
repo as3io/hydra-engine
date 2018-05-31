@@ -8,7 +8,7 @@ type Query {
 type Mutation {
   createUser(input: CreateUserInput!): User
   loginWithMagicToken(token: String!): Authentication!
-  setPassword(input: SetPasswordInput!): User
+  resetPassword(input: ResetPasswordInput!): Boolean!
   sendPasswordResetEmail(email: String!): Boolean!
   loginUser(input: LoginInput!): Authentication
   deleteSession: String
@@ -80,7 +80,8 @@ input CreateUserInput {
   payload: NewUserPayloadInput
 }
 
-input SetPasswordInput {
+input ResetPasswordInput {
+  token: String!
   password: String!
 }
 
