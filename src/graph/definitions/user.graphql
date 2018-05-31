@@ -12,7 +12,7 @@ type Mutation {
   sendPasswordReset(input: ResetPasswordInput!): User
   loginUser(input: LoginInput!): Authentication
   deleteSession: String
-  createMagicLoginToken(email: String!): String!
+  sendMagicLoginEmail(email: String!): Boolean!
   loginWithApiKey(input: ApiLoginInput!): Authentication!
   generateUserApiKey: UserApiKey!
 }

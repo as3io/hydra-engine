@@ -136,9 +136,9 @@ module.exports = {
    *
    * @param {string} email
    */
-  async createMagicLoginToken(email) {
+  async sendMagicLoginEmail(email) {
     const user = await this.findByEmail(email);
-    if (!user) throw new Error('No user was found for the provided email address.');
+    if (!user) return true;
 
     const token = await TokenRepo.create({
       act: 'createMagicLoginToken',
@@ -146,7 +146,7 @@ module.exports = {
     }, 60 * 60);
 
     await mailer.sendMagicLogin(user, token);
-    return token;
+    return true;
   },
 
   /**

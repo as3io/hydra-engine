@@ -129,6 +129,6 @@ module.exports = {
     /**
      *
      */
-    createMagicLoginToken: (root, { email }) => UserRepo.createMagicLoginToken(email),
+    sendMagicLoginEmail: (root, { email }) => UserRepo.sendMagicLoginEmail(email),
   },
 };
