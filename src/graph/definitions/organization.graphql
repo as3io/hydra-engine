@@ -1,14 +1,13 @@
 type Query {
   allOrganizations(pagination: PaginationInput = {}, sort: OrganizationSortInput = {}): OrganizationConnection!
-  # searchOrganizations(pagination: PaginationInput = {}, search: OrganizationSearchInput!): OrganizationConnection!
-  # userOrganizations(pagination: PaginationInput = {}, sort: OrganizationSortInput = {}): OrganizationConnection!
   organization(input: ModelIdInput!): Organization!
 }
 
 type Mutation {
   createOrganization(input: CreateOrganizationInput!): Organization!
   updateOrganization(input: UpdateOrganizationInput!): Organization!
-  organizationInviteAccept(input: AcceptOrganizationInviteInput!): OrganizationMembership
+  inviteUserToOrg(input: OrganizationInviteInput!): OrganizationMember!
+  organizationInviteAccept(input: AcceptOrganizationInviteInput!): OrganizationMember!
   configureOrganization(input: OrganizationConfigInput!): Organization!
 }
 
@@ -25,18 +24,21 @@ type Organization {
   createdAt: Date
   updatedAt: Date
   photoURL: String
-  members: [OrganizationMembership]
+  members: [OrganizationMember]
   projects: [Project]
-  accepted: Boolean
-  role: String
 }
 
-type OrganizationMembership {
+type OrganizationMember {
   user: User!
-  role: Roles
-  projects: [ProjectRole]
+  role: RolesForOrganization
+  projectRoles: [ProjectRole]
   invited: Date
   accepted: Date
+}
+
+type ProjectRole {
+  project: Project!
+  role: RolesForProject
 }
 
 type OrganizationConnection {
@@ -50,6 +52,22 @@ type OrganizationEdge {
   cursor: Cursor!
 }
 
+input OrganizationInviteInput {
+  payload: OrganizationInvitePayload!
+}
+
+input OrganizationInvitePayload {
+  email: String!
+  givenName: String!
+  familyName: String!
+  role: RolesForOrganization!
+  projectRoles: [ProjectInviteRoleInput]
+}
+
+input ProjectInviteRoleInput {
+  projectId: String!
+  role: RolesForProject!
+}
 
 input AcceptOrganizationInviteInput {
   organization: String!

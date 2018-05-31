@@ -1,6 +1,7 @@
 const { paginationResolvers } = require('@limit0/mongoose-graphql-pagination');
 const UserRepo = require('../../repositories/user');
 const Organization = require('../../models/organization');
+const OrganizationMember = require('../../models/organization-member');
 const SessionRepo = require('../../repositories/session');
 
 module.exports = {
@@ -9,7 +10,11 @@ module.exports = {
    */
   User: {
     hasPassword: user => !(!user.password),
-    organizations: user => Organization.find({ 'members.user': user.id }),
+    organizations: async (user) => {
+      const members = await OrganizationMember.find({ userId: user.id }, { organizationId: 1 });
+      const organizationIds = members.map(member => member.organizationId);
+      return Organization.find({ _id: { $in: organizationIds } });
+    },
   },
   /**
    *
@@ -70,9 +75,11 @@ module.exports = {
     /**
      *
      */
-    createUser: (root, { input }) => {
+    createUser: async (root, { input }) => {
       const { payload } = input;
-      return UserRepo.create(payload);
+      const user = await UserRepo.create(payload);
+      await UserRepo.sendWelcomeVerification(user);
+      return user;
     },
 
     /**
@@ -120,16 +127,6 @@ module.exports = {
         await SessionRepo.delete(auth.session);
       }
       return 'ok';
-    },
-
-    /**
-     *
-     */
-    organizationInvite: async (root, { input }, { auth }) => {
-      auth.check();
-      const { organization, payload } = input;
-      // role.check(Roles.Administrator || Roles.Owner);
-      return UserRepo.organizationInvite(organization, payload);
     },
 
     /**

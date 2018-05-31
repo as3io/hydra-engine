@@ -9,29 +9,13 @@ module.exports = {
    *
    */
   Organization: {
-    projects: ({ id }) => Project.find({ organization: id }),
-    accepted: (org, _args, { auth }) => {
-      const { uid } = auth.session;
-      for (let i = 0; i < org.members.length; i += 1) {
-        const member = org.members[i];
-        if (member.user == uid && member.accepted) return true; // eslint-disable-line eqeqeq
-      }
-      return false;
-    },
-    role: (org, _args, { auth }) => {
-      const { uid } = auth.session;
-      for (let i = 0; i < org.members.length; i += 1) {
-        const member = org.members[i];
-        if (member.user == uid) return member.role; // eslint-disable-line eqeqeq
-      }
-      return null;
-    },
+    projects: ({ id }) => Project.find({ organizationId: id }),
   },
   /**
    *
    */
-  OrganizationMembership: {
-    user: orgMember => User.findById(orgMember.user),
+  OrganizationMember: {
+    user: orgMember => User.findById(orgMember.userId),
   },
   /**
    *
@@ -64,10 +48,6 @@ module.exports = {
     allOrganizations: (root, { pagination, sort }, { auth }) => {
       auth.check();
       return Repo.paginate({ pagination, sort });
-      // const criteria = {
-      //   "members.user": auth.uid,
-      // };
-      // return Repo.paginate({ criteria, pagination, sort });
     },
   },
 
@@ -96,6 +76,16 @@ module.exports = {
       auth.check();
       const { id, payload } = input;
       return Repo.update(id, payload);
+    },
+
+    /**
+     *
+     */
+    inviteUserToOrg: async (root, { input }, { auth }) => {
+      await auth.checkOrgWrite();
+      const { payload } = input;
+      const organization = await auth.tenant.getOrganization();
+      return Repo.inviteUserToOrg(organization, payload);
     },
 
     /**

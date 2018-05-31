@@ -12,7 +12,6 @@ type Mutation {
   sendPasswordReset(input: ResetPasswordInput!): User
   loginUser(input: LoginInput!): Authentication
   deleteSession: String
-  organizationInvite(input: OrganizationInviteInput!): OrganizationMembership
   magicLogin(input: MagicLoginInput!): User
   loginWithApiKey(input: ApiLoginInput!): Authentication!
   generateUserApiKey: UserApiKey!
@@ -81,26 +80,8 @@ input CreateUserInput {
   payload: NewUserPayloadInput
 }
 
-input OrganizationInviteInput {
-  organization: String!
-  payload: OrganizationInvitePayload!
-}
-
 input MagicLoginInput {
   email: String!
-}
-
-input OrganizationInvitePayload {
-  email: String!
-  givenName: String!
-  familyName: String!
-  role: Roles!
-  projectRoles: [ProjectRoleInput]
-}
-
-input ProjectRoleInput {
-  id: String!
-  role: ProjectRoles!
 }
 
 input AuthTokenInput {

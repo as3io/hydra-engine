@@ -8,7 +8,7 @@ module.exports = {
    *
    */
   Project: {
-    organization: ({ organization }) => Organization.findById(organization),
+    organization: ({ organizationId }) => Organization.findById(organizationId),
   },
   /**
    *

@@ -1,6 +1,4 @@
-const mongoose = require('mongoose');
-
-const { Schema } = mongoose;
+const { Schema } = require('mongoose');
 
 const schema = new Schema({
   name: {
@@ -8,16 +6,13 @@ const schema = new Schema({
     required: true,
   },
   description: String,
-  organization: {
+  organizationId: {
     type: Schema.Types.ObjectId,
     ref: 'organization',
     required: true,
   },
-  keys: [{
-    type: Schema.Types.ObjectId,
-    ref: 'key',
-  }],
-
 }, { timestamps: true });
+
+schema.index({ organizationId: 1 });
 
 module.exports = schema;

@@ -34,7 +34,7 @@ const schema = new Schema({
     default: () => new Date(),
   },
   accepted: Date,
-  projects: [projectRole],
+  projectRoles: [projectRole],
 }, { timestamps: true });
 
 schema.index({ organizationId: 1, userId: 1 }, { unique: true });

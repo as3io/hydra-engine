@@ -1,6 +1,9 @@
 const Promise = require('bluebird');
 const Model = require('../models/organization');
+const OrganizationMember = require('../models/organization-member');
 const fixtures = require('../fixtures');
+const UserRepo = require('./user');
+const mailer = require('../connections/sendgrid');
 const { Pagination, TypeAhead } = require('@limit0/mongoose-graphql-pagination');
 
 module.exports = {
@@ -110,6 +113,36 @@ module.exports = {
     const results = this.generate(count);
     await Promise.all(results.all().map(model => model.save()));
     return results;
+  },
+
+  /**
+   *
+   */
+  async inviteUserToOrg(organization, {
+    email,
+    givenName,
+    familyName,
+    role,
+    projectRoles,
+  } = {}) {
+    let user = await UserRepo.findByEmail(email);
+    if (!user) {
+      user = await UserRepo.create({ email, givenName, familyName });
+      await user.save();
+    }
+
+    const orgMember = new OrganizationMember({
+      organizationId: organization.id,
+      userId: user.id,
+      projectRoles: projectRoles || [],
+      role,
+    });
+    await orgMember.save();
+
+    // send welcome/invite email
+    await mailer.sendOrganizationInvitation(organization, user);
+
+    return orgMember;
   },
 
   /**

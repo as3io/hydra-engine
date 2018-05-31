@@ -31,18 +31,14 @@ input ModelIdInput {
   id: String!
 }
 
-enum Roles {
+enum RolesForOrganization {
   Owner
   Administrator
   Member
 }
-enum ProjectRoles {
-  Administrator
-  Developer
-  Editor
-}
 
-type ProjectRole {
-  project: Project!
-  role: ProjectRoles
+enum RolesForProject {
+  Owner
+  Administrator
+  Member
 }

@@ -2,18 +2,19 @@ const bcrypt = require('bcrypt');
 const Promise = require('bluebird');
 const sessionRepo = require('./session');
 const User = require('../models/user');
-const Organization = require('../models/organization');
 const fixtures = require('../fixtures');
 const mailer = require('../connections/sendgrid');
 const uuid = require('uuid/v4');
 const { Pagination } = require('@limit0/mongoose-graphql-pagination');
 
 module.exports = {
-  async create(payload = {}) {
+  create(payload = {}) {
     const user = new User(payload);
-    await user.save();
-    await mailer.sendWelcomeVerification(user);
-    return user;
+    return user.save();
+  },
+
+  sendWelcomeVerification(user) {
+    return mailer.sendWelcomeVerification(user);
   },
 
   generate(count = 1) {
@@ -226,47 +227,5 @@ module.exports = {
     const results = this.generate(count);
     await Promise.all(results.all().map(model => model.save()));
     return results;
-  },
-
-  /**
-   *
-   */
-  async organizationInvite(id, {
-    email,
-    givenName,
-    familyName,
-    role,
-    projectRoles,
-  }) {
-    const organization = await Organization.findById(id);
-    if (!organization) throw new Error(`Unable to invite user: Organization with id "${id}" was not found.`);
-
-    let user = await this.findByEmail(email);
-    if (!user) user = await this.create({ email, givenName, familyName }, false);
-    user.set('token', uuid());
-    await user.save();
-
-    const projects = [];
-    projectRoles.forEach((pRole) => {
-      if (pRole && pRole.id && pRole.role) {
-        projects.push(Object.assign({}, { project: pRole.id, role: pRole.role }));
-      }
-    });
-
-    let found = false;
-    const payload = { user: user.id, role, projects };
-
-    organization.members.forEach((membership) => {
-      if (membership.user == user.id) { // eslint-disable-line eqeqeq
-        found = true;
-        let member = organization.members.id(membership.id); // eslint-disable-line no-unused-vars
-        member = payload;
-      }
-    });
-    if (!found) organization.members.addToSet(payload);
-    await organization.save();
-
-    // send welcome/invite email
-    await mailer.sendOrganizationInvitation(organization, user);
   },
 };
