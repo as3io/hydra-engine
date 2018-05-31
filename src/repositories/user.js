@@ -117,7 +117,7 @@ module.exports = {
    * @return {Promise}
    */
   async loginWithMagicToken(jwt) {
-    const token = await TokenRepo.verify(jwt);
+    const token = await TokenRepo.verify('magic-login', jwt);
     const userId = token.payload.uid;
     const user = await this.findById(userId);
     if (!user) throw new Error('No user was found for the provided token.');
@@ -133,8 +133,7 @@ module.exports = {
   },
 
   createMagicLoginToken(user) {
-    return TokenRepo.create({
-      act: 'createMagicLoginToken',
+    return TokenRepo.create('magic-login', {
       uid: user.id,
     }, 60 * 60);
   },
@@ -159,7 +158,7 @@ module.exports = {
    * @return {Promise}
    */
   async resetPassword(jwt, password) {
-    const token = await TokenRepo.verify(jwt);
+    const token = await TokenRepo.verify('password-reset', jwt);
     const userId = token.payload.uid;
 
     const user = await this.findById(userId);
@@ -177,8 +176,7 @@ module.exports = {
     const user = await this.findByEmail(email);
     if (!user) return true;
 
-    const token = await TokenRepo.create({
-      act: 'sendPasswordResetEmail',
+    const token = await TokenRepo.create('password-reset', {
       uid: user.id,
     }, 60 * 60);
 

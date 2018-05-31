@@ -144,8 +144,7 @@ module.exports = {
       role,
     });
 
-    const token = await TokenRepo.create({
-      act: 'inviteUserToOrg',
+    const token = await TokenRepo.create('user-org-invitation', {
       uid: userId,
       oid: organizationId,
     }, 60 * 60 * 24 * 30);
@@ -157,7 +156,7 @@ module.exports = {
   },
 
   async acknowledgeUserInvite(jwt) {
-    const token = await TokenRepo.verify(jwt);
+    const token = await TokenRepo.verify('user-org-invitation', jwt);
     const userId = token.payload.uid;
     const organizationId = token.payload.oid;
     const orgMember = await OrganizationMember.findOne({ userId, organizationId });

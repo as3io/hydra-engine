@@ -12,10 +12,11 @@ module.exports = {
    * If an `exp` values is provided in the payload, it will override the `ttl` argument.
    *
    * @async
+   * @param {string} action The action the token is for.
    * @param {object} payload The JWT payload object.
    * @param {number} ttl The token TTL, in seconds
    */
-  async create(payload = {}, ttl) {
+  async create(action, payload = {}, ttl) {
     const now = new Date();
     const iat = Math.floor(now.valueOf() / 1000);
 
@@ -28,7 +29,7 @@ module.exports = {
       ...payload,
     };
     const token = jwt.sign(toSign, JWT_SECRET);
-    await Token.create({ payload: toSign });
+    await Token.create({ action, payload: toSign });
     return token;
   },
 
@@ -36,14 +37,16 @@ module.exports = {
    * Verifies the provided token.
    *
    * @async
+   * @param {string} action The corresponding action for the token.
    * @param {string} encoded The encoded JWT value.
    */
-  async verify(encoded) {
+  async verify(action, encoded) {
+    if (!action) throw new Error('Unable to verify token: no action was provided.');
     if (!encoded) throw new Error('Unable to verify token: no value was provided.');
     const verified = jwt.verify(encoded, JWT_SECRET, { algorithms: ['HS256'] });
 
-    const token = await Token.findOne({ 'payload.jti': verified.jti });
-    if (!token) throw new Error('The provided token is no longer valid. Was it already used?');
+    const token = await Token.findOne({ 'payload.jti': verified.jti, action });
+    if (!token) throw new Error('The provided token was either not found or is no longer valid.');
     return token;
   },
 
