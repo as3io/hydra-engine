@@ -1,6 +1,7 @@
 const { paginationResolvers } = require('@limit0/mongoose-graphql-pagination');
 const Repo = require('../../repositories/organization');
 const OrganizationMember = require('../../models/organization-member');
+const Organization = require('../../models/organization');
 const Project = require('../../models/project');
 const User = require('../../models/user');
 
@@ -17,6 +18,7 @@ module.exports = {
    */
   OrganizationMember: {
     user: orgMember => User.findById(orgMember.userId),
+    organization: orgMember => Organization.findById(orgMember.organizationId),
   },
   /**
    *

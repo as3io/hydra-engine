@@ -1,6 +1,5 @@
 const { paginationResolvers } = require('@limit0/mongoose-graphql-pagination');
 const UserRepo = require('../../repositories/user');
-const Organization = require('../../models/organization');
 const OrganizationMember = require('../../models/organization-member');
 const SessionRepo = require('../../repositories/session');
 
@@ -10,11 +9,7 @@ module.exports = {
    */
   User: {
     hasPassword: user => !(!user.password),
-    organizations: async (user) => {
-      const members = await OrganizationMember.find({ userId: user.id }, { organizationId: 1 });
-      const organizationIds = members.map(member => member.organizationId);
-      return Organization.find({ _id: { $in: organizationIds } });
-    },
+    memberships: user => OrganizationMember.find({ userId: user.id }),
   },
   /**
    *
