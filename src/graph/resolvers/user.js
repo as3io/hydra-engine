@@ -106,10 +106,7 @@ module.exports = {
     /**
      *
      */
-    sendPasswordReset: (root, { input }) => {
-      const { email } = input;
-      return UserRepo.sendPasswordReset(email);
-    },
+    sendPasswordResetEmail: (root, { email }) => UserRepo.sendPasswordResetEmail(email),
 
     /**
      *

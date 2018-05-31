@@ -46,4 +46,15 @@ module.exports = {
     });
     return this.send({ to, subject, html });
   },
+
+  async sendPasswordReset(user, token) {
+    const to = user.toAddress;
+    const subject = `Your ${APP_NAME} password reset request`;
+    const html = await emailTemplates.render('reset-password', {
+      user,
+      subject,
+      href: `${APP_BASE_URI}/actions/reset-password/${token}`,
+    });
+    return this.send({ to, subject, html });
+  },
 };

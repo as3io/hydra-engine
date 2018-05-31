@@ -9,7 +9,7 @@ type Mutation {
   createUser(input: CreateUserInput!): User
   loginWithMagicToken(token: String!): Authentication!
   setPassword(input: SetPasswordInput!): User
-  sendPasswordReset(input: ResetPasswordInput!): User
+  sendPasswordResetEmail(email: String!): Boolean!
   loginUser(input: LoginInput!): Authentication
   deleteSession: String
   sendMagicLoginEmail(email: String!): Boolean!
@@ -82,10 +82,6 @@ input CreateUserInput {
 
 input SetPasswordInput {
   password: String!
-}
-
-input ResetPasswordInput {
-  email: String!
 }
 
 input SessionTokenInput {

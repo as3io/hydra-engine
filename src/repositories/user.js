@@ -5,7 +5,6 @@ const User = require('../models/user');
 const fixtures = require('../fixtures');
 const TokenRepo = require('./token');
 const mailer = require('../services/mailer');
-const uuid = require('uuid/v4');
 const { Pagination } = require('@limit0/mongoose-graphql-pagination');
 
 module.exports = {
@@ -165,14 +164,17 @@ module.exports = {
   /**
    *
    */
-  async sendPasswordReset(email) {
+  async sendPasswordResetEmail(email) {
     const user = await this.findByEmail(email);
-    if (!user) throw new Error('No user was found for the provided email address.');
-    // @todo JWT
-    user.set('token', uuid());
-    await user.save();
-    await mailer.sendPasswordReset(user);
-    return user;
+    if (!user) return true;
+
+    const token = await TokenRepo.create({
+      act: 'sendPasswordResetEmail',
+      uid: user.id,
+    }, 60 * 60);
+
+    await mailer.sendPasswordReset(user, token);
+    return true;
   },
 
   async retrieveSession(token) {
