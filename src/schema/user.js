@@ -64,11 +64,6 @@ const schema = new Schema({
     required: true,
     default: false,
   },
-  token: {
-    type: String,
-    // @todo make this a JWT to ensure it can expire
-    default: () => uuid(),
-  },
   photoURL: {
     type: String,
     trim: true,
