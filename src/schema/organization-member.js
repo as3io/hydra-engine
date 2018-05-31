@@ -29,11 +29,11 @@ const schema = new Schema({
     ref: 'organization',
   },
   role,
-  invited: {
+  invitedAt: {
     type: Date,
     default: () => new Date(),
   },
-  accepted: Date,
+  acceptedAt: Date,
   projectRoles: [projectRole],
 }, { timestamps: true });
 

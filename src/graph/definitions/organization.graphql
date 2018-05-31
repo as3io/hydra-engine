@@ -32,8 +32,8 @@ type OrganizationMember {
   user: User!
   role: RolesForOrganization
   projectRoles: [ProjectRole]
-  invited: Date
-  accepted: Date
+  invitedAt: Date
+  acceptedAt: Date
 }
 
 type ProjectRole {

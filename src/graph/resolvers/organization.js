@@ -1,6 +1,7 @@
 const { paginationResolvers } = require('@limit0/mongoose-graphql-pagination');
 const Repo = require('../../repositories/organization');
 const Model = require('../../models/organization');
+const OrganizationMember = require('../../models/organization-member');
 const Project = require('../../models/project');
 const User = require('../../models/user');
 
@@ -58,15 +59,16 @@ module.exports = {
     /**
      *
      */
-    createOrganization: (root, { input }, { auth }) => {
+    createOrganization: async (root, { input }, { auth }) => {
       auth.check();
       const { payload } = input;
-      payload.members = [{
-        user: auth.user._id,
+      const organization = await Repo.create(payload);
+      await OrganizationMember.create({
+        userId: auth.user.id,
         role: 'Owner',
-        accepted: new Date(),
-      }];
-      return Repo.create(payload);
+        acceptedAt: new Date(),
+      }).save();
+      return organization;
     },
 
     /**
