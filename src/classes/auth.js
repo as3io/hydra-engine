@@ -38,8 +38,7 @@ class Auth {
     this.check();
     const { role, projects } = await this.getOrgMembership();
     if (this.adminRoles.includes(role)) return true;
-    // eslint-disable-next-line eqeqeq
-    const valid = projects.filter(project => project.id == this.tenant.projectId);
+    const valid = projects.filter(project => `${project.id}` === `${this.tenant.projectId}`);
     if (!valid.length) throw new Error('You are not permitted to read from this project.');
     return true;
   }
@@ -49,8 +48,7 @@ class Auth {
     const { role, projects } = await this.getOrgMembership();
     if (this.adminRoles.includes(role)) return true;
     const valid = projects.filter(project =>
-      // eslint-disable-next-line eqeqeq
-      project.id == this.tenant.projectId && this.adminRoles.includes(project.role));
+      `${project.id}` === `${this.tenant.projectId}` && this.adminRoles.includes(project.role));
     if (!valid.length) throw new Error('You are not permitted to write to this project.');
     return true;
   }
@@ -72,8 +70,7 @@ class Auth {
 
   async getOrgMembership() {
     const org = await this.tenant.getOrganization();
-    // eslint-disable-next-line eqeqeq
-    const filtered = org.get('members').filter(member => member.user == this.user.id);
+    const filtered = org.get('members').filter(member => `${member.user}` === `${this.user.id}`);
     return filtered.shift() || {};
   }
 
