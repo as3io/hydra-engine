@@ -7,7 +7,7 @@ const { JWT_SECRET } = process.env;
 module.exports = {
   /**
    * Creates an encoded JWT for the provided payload.
-   * If the `jti` and `iat` values are not present, they will automatically be added.
+   * If the `jti` and `iat` values are not present in the payload, they will automatically be added.
    *
    * If an `exp` values is provided in the payload, it will override the `ttl` argument.
    *
