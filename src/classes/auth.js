@@ -70,8 +70,10 @@ class Auth {
 
   async getOrgMembership() {
     const org = await this.tenant.getOrganization();
+    if (!org) throw new Error('No organization was found for the provided ID.');
     const filtered = org.get('members').filter(member => `${member.user}` === `${this.user.id}`);
-    return filtered.shift() || {};
+    if (!filtered.length) throw new Error('You are not a member of this organization.');
+    return filtered.shift();
   }
 
   check() {
