@@ -3,50 +3,12 @@ const validator = require('validator');
 
 const { Schema } = mongoose;
 
-const role = {
-  type: String,
-  required: true,
-  default: 'Member',
-  enum: [
-    'Owner',
-    'Administrator',
-    'Member',
-  ],
-};
-
-const projectRole = new Schema({
-  project: {
-    type: Schema.Types.ObjectId,
-    ref: 'project',
-  },
-  role,
-});
-
-const orgMember = new Schema({
-  user: {
-    type: Schema.Types.ObjectId,
-    ref: 'user',
-  },
-  role,
-  invited: {
-    type: Date,
-    default: () => new Date(),
-  },
-  accepted: Date,
-  projects: [projectRole],
-});
-
 const schema = new Schema({
   name: {
     type: String,
     required: true,
   },
-  keys: [{
-    type: Schema.Types.ObjectId,
-    ref: 'key',
-  }],
   description: String,
-  members: [orgMember],
   photoURL: {
     type: String,
     trim: true,
