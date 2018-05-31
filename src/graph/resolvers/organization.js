@@ -90,14 +90,5 @@ module.exports = {
       organization.set({ name, description, photoURL });
       return organization.save();
     },
-
-    /**
-     *
-     */
-    organizationInviteAccept: (root, { input }, { auth }) => {
-      auth.check();
-      const { organization } = input;
-      Repo.acceptInvitation(organization, auth.session.uid);
-    },
   },
 };

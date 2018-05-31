@@ -7,7 +7,6 @@ type Mutation {
   createOrganization(input: CreateOrganizationInput!): Organization!
   updateOrganization(input: UpdateOrganizationInput!): Organization!
   inviteUserToOrg(input: OrganizationInviteInput!): OrganizationMember!
-  organizationInviteAccept(input: AcceptOrganizationInviteInput!): OrganizationMember!
 }
 
 enum OrganizationSortField {
@@ -68,10 +67,6 @@ input ProjectInviteRoleInput {
   role: RolesForProject!
 }
 
-input AcceptOrganizationInviteInput {
-  organization: String!
-}
-
 input OrganizationSearchInput {
   typeahead: OrganizationTypeAheadInput!
 }
@@ -91,16 +86,12 @@ input OrganizationSortInput {
   order: Int! = -1
 }
 
-input OrganizationPayloadInput {
-  name: String
-}
-
 input CreateOrganizationInput {
-  payload: OrganizationPayloadInput!
+  name: String!
 }
 
 input UpdateOrganizationInput {
-  name: String
+  name: String!
   description: String
   photoURL: String
 }
