@@ -69,6 +69,7 @@ class Auth {
   async getOrgMembership() {
     this.check();
     const { organizationId } = this.tenant;
+    if (!organizationId) throw new Error('No `X-Organization` header was found in the request.');
     const orgMember = await OrganizationMember.findOne({ organizationId, userId: this.user.id });
     if (!orgMember) throw new Error('You are not a member of this organization.');
     return orgMember;

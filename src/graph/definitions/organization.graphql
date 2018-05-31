@@ -51,10 +51,6 @@ type OrganizationEdge {
 }
 
 input OrganizationInviteInput {
-  payload: OrganizationInvitePayload!
-}
-
-input OrganizationInvitePayload {
   email: String!
   givenName: String!
   familyName: String!

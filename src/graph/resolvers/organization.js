@@ -36,8 +36,15 @@ module.exports = {
      *
      */
     organization: async (root, { input }, { auth }) => {
-      await auth.checkOrgRead();
+      await auth.check();
       const { id } = input;
+      const userId = auth.user.id;
+      const member = await OrganizationMember.findOne({
+        userId,
+        organizationId: id,
+      }, { organizationId: 1 });
+      if (!member) throw new Error('You do not have permission to read this organization');
+
       const record = await Repo.findById(id);
       if (!record) throw new Error(`No organization record found for ID ${id}.`);
       return record;
@@ -81,9 +88,8 @@ module.exports = {
      */
     inviteUserToOrg: async (root, { input }, { auth }) => {
       await auth.checkOrgWrite();
-      const { payload } = input;
       const organization = await auth.tenant.getOrganization();
-      return Repo.inviteUserToOrg(organization, payload);
+      return Repo.inviteUserToOrg(organization, input);
     },
 
     /**

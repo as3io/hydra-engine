@@ -4,7 +4,7 @@ const OrganizationMember = require('../models/organization-member');
 const TokenRepo = require('./token');
 const fixtures = require('../fixtures');
 const UserRepo = require('./user');
-const mailer = require('../connections/sendgrid');
+const mailer = require('../services/mailer');
 const { Pagination, TypeAhead } = require('@limit0/mongoose-graphql-pagination');
 
 module.exports = {
@@ -132,18 +132,22 @@ module.exports = {
       await user.save();
     }
 
-    const orgMember = new OrganizationMember({
-      organizationId: organization.id,
-      userId: user.id,
+    const userId = user.id;
+    const organizationId = organization.id;
+
+    await OrganizationMember.remove({ userId, organizationId });
+
+    const orgMember = await OrganizationMember.create({
+      organizationId,
+      userId,
       projectRoles: projectRoles || [],
       role,
     });
-    await orgMember.save();
 
     const token = await TokenRepo.create({
       act: 'inviteUserToOrg',
-      uid: user.id,
-      oid: organization.id,
+      uid: userId,
+      oid: organizationId,
     }, 60 * 60 * 24 * 30);
 
     // send welcome/invite email

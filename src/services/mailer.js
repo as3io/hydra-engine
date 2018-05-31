@@ -27,7 +27,7 @@ module.exports = {
     const html = await emailTemplates.render('organization-invite', {
       organization,
       user,
-      verifyUrl: `${SERVER_BASE_URI}/actions/organization-invite/${token}`,
+      verifyHref: `${SERVER_BASE_URI}/actions/organization-invite/${token}`,
     });
     const { givenName, familyName, email } = user;
     const { name } = organization;
