@@ -92,6 +92,8 @@ module.exports = {
       return Repo.inviteUserToOrg(organization, input);
     },
 
+    acknowledgeUserInvite: (root, { token }) => Repo.acknowledgeUserInvite(token),
+
     /**
      *
      */

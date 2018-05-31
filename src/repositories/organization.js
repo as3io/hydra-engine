@@ -155,4 +155,15 @@ module.exports = {
 
     return orgMember;
   },
+
+  async acknowledgeUserInvite(jwt) {
+    const token = await TokenRepo.verify(jwt);
+    const userId = token.payload.uid;
+    const organizationId = token.payload.oid;
+    const orgMember = await OrganizationMember.findOne({ userId, organizationId });
+    orgMember.acceptedAt = new Date();
+    await orgMember.save();
+    await TokenRepo.invalidate(token.id);
+    return orgMember;
+  },
 };
