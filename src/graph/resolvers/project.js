@@ -51,9 +51,10 @@ module.exports = {
     /**
      *
      */
-    createProject: (root, { input }, { auth }) => {
-      auth.check();
+    createProject: async (root, { input }, { auth }) => {
+      await auth.checkOrgWrite();
       const { payload } = input;
+      payload.organization = auth.tenant.organizationId;
       return Repo.create(payload);
     },
 

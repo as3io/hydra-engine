@@ -173,7 +173,18 @@ module.exports = {
     // Ensure user still exists/refresh the user data.
     const user = await this.findById(session.uid);
     if (!user) throw new Error('Unable to retrieve session: the provided user could not be found.');
+    if (session.api) this.checkApiCredentials(session.api, user);
     return { user, session };
+  },
+
+  /**
+   *
+   */
+  checkApiCredentials(credentials, user) {
+    if (credentials.key !== user.get('api.key')) throw new Error('The provided API key is no longer valid.');
+    if (credentials.secret && credentials.secret !== user.get('api.secret')) {
+      throw new Error('The provided API secret is no longer valid.');
+    }
   },
 
   /**
