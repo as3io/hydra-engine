@@ -44,11 +44,15 @@ module.exports = {
     },
 
     /**
-     * @todo Implement filtering by what the user has access to
+     *
      */
-    allOrganizations: (root, { pagination, sort }, { auth }) => {
+    allOrganizations: async (root, { pagination, sort }, { auth }) => {
       auth.check();
-      return Repo.paginate({ pagination, sort });
+      const userId = auth.user.id;
+      const members = await OrganizationMember.find({ userId }, { organizationId: 1 });
+      const organizationIds = members.map(member => member.organizationId.toString());
+      const criteria = { _id: { $in: organizationIds } };
+      return Repo.paginate({ pagination, sort, criteria });
     },
   },
 
