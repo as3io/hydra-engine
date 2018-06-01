@@ -26,6 +26,10 @@ module.exports = {
     return ['Owner', 'Administrator'];
   },
 
+  isAdminRole(role) {
+    return this.getAdminRoles().includes(role);
+  },
+
   /**
    * Determines if the provided user is a member of the organization.
    *
@@ -33,12 +37,30 @@ module.exports = {
    * @param {string} organizationId
    */
   async isOrgMember(userId, organizationId) {
-    const member = await OrganizationMember.findOne({
-      userId,
-      organizationId,
-    }, { _id: 1 });
+    const member = await this.getMembership(userId, organizationId);
     if (member) return true;
     return false;
+  },
+
+  /**
+   * Gets the role for the provided project.
+   * If no role is found, this method will NOT reject, and instead
+   * will resolve as `null`.
+   *
+   * @param {string} userId
+   * @param {string} organizationId
+   * @param {string} projectId
+   */
+  async getProjectRole(userId, organizationId, projectId) {
+    if (!projectId) throw new Error('Unable to retrieve project role: no project ID was provided.');
+    const member = await this.getMembership(userId, organizationId);
+    if (!member) return null;
+    const { role, projectRoles } = member;
+    // Use the organization role if an admin.
+    if (this.isAdminRole(role)) return role;
+    const found = projectRoles.find(r => `${r.projectId}` === `${projectId}`);
+    if (found) return found.role || null;
+    return null;
   },
 
   /**
@@ -46,14 +68,11 @@ module.exports = {
    *
    * @param {string} userId
    * @param {string} organizationId
+   * @param {string} projectId
    */
   async isProjectMember(userId, organizationId, projectId) {
-    const member = await OrganizationMember.findOne({
-      userId,
-      organizationId,
-      'projectRoles.projectId': projectId,
-    }, { _id: 1 });
-    if (member) return true;
+    const role = await this.getProjectRole(userId, organizationId, projectId);
+    if (role) return true;
     return false;
   },
 

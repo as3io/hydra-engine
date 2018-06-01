@@ -37,10 +37,9 @@ class Auth {
   }
 
   async checkProjectRead() {
-    const { role, projectRoles } = await this.getOrgMembership();
-    if (this.adminRoles.includes(role)) return true;
-    const valid = projectRoles.filter(pRole => `${pRole.projectId}` === `${this.tenant.projectId}`);
-    if (!valid.length) throw new Error('You are not permitted to read from this project.');
+    const { organizationId, projectId } = this.tenant;
+    const isMember = await OrgMemberRepo.isProjectMember(this.user.id, organizationId, projectId);
+    if (!isMember) throw new Error('You are not permitted to read from this project.');
     return true;
   }
 
