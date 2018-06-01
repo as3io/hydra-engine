@@ -31,14 +31,40 @@ module.exports = {
   },
 
   /**
+   * Gets the role for the provided organization.
+   * If no role is found, this method will NOT reject, and instead
+   * will resolve as `null`.
+   *
+   * @param {string} userId
+   * @param {string} organizationId
+   */
+  async getOrgRole(userId, organizationId) {
+    const member = await this.getMembership(userId, organizationId);
+    if (!member) return null;
+    return member.role || null;
+  },
+
+  /**
    * Determines if the provided user is a member of the organization.
    *
    * @param {string} userId
    * @param {string} organizationId
    */
   async isOrgMember(userId, organizationId) {
-    const member = await this.getMembership(userId, organizationId);
-    if (member) return true;
+    const role = await this.getOrgRole(userId, organizationId);
+    if (role) return true;
+    return false;
+  },
+
+  /**
+   * Determines if the provided user can write to the provided organization.
+   *
+   * @param {string} userId
+   * @param {string} organizationId
+   */
+  async canWriteToOrg(userId, organizationId) {
+    const role = await this.getOrgRole(userId, organizationId);
+    if (this.isAdminRole(role)) return true;
     return false;
   },
 
@@ -59,8 +85,8 @@ module.exports = {
     // Use the organization role if an admin.
     if (this.isAdminRole(role)) return role;
     const found = projectRoles.find(r => `${r.projectId}` === `${projectId}`);
-    if (found) return found.role || null;
-    return null;
+    if (!found) return null;
+    return found.role || null;
   },
 
   /**

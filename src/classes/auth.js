@@ -41,14 +41,16 @@ class Auth {
   }
 
   async checkOrgRead() {
-    const { role } = await this.getOrgMembership();
-    if (!role) throw new Error('You are not permitted to read from this organization.');
+    const { organizationId } = this.tenant;
+    const isMember = await OrgMemberRepo.isOrgMember(this.user.id, organizationId);
+    if (!isMember) throw new Error('You are not permitted to read from this organization.');
     return true;
   }
 
   async checkOrgWrite() {
-    const { role } = await this.getOrgMembership();
-    if (!this.adminRoles.includes(role)) throw new Error('You are not permitted to write to this organization.');
+    const { organizationId } = this.tenant;
+    const canWrite = await OrgMemberRepo.canWriteToOrg(this.user.id, organizationId);
+    if (!canWrite) throw new Error('You are not permitted to write to this organization.');
     this.checkApiWrite();
     return true;
   }
