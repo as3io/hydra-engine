@@ -44,6 +44,9 @@ const schema = new Schema({
 
 }, { timestamps: true });
 
+schema.index({ projectId: 1 });
+schema.index({ published: 1 });
+
 schema.pre('validate', function setSlug(next) {
   this.slug = slug(this.slug || this.title || '');
   next();
