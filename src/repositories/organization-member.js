@@ -77,6 +77,19 @@ module.exports = {
   },
 
   /**
+   * Determines if the provided user can write to the provided organization project.
+   *
+   * @param {string} userId
+   * @param {string} organizationId
+   * @param {string} projectId
+   */
+  async canWriteToProject(userId, organizationId, projectId) {
+    const role = await this.getProjectRole(userId, organizationId, projectId);
+    if (this.isAdminRole(role)) return true;
+    return false;
+  },
+
+  /**
    * Gets all organization ids that the provided user is a member of.
    * Will cast all org ids to string.
    *

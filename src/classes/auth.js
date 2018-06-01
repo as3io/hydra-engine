@@ -44,10 +44,9 @@ class Auth {
   }
 
   async checkProjectWrite() {
-    const { role, projectRoles } = await this.getOrgMembership();
-    if (this.adminRoles.includes(role)) return true;
-    const valid = projectRoles.filter(pRole => `${pRole.projectId}` === `${this.tenant.projectId}` && this.adminRoles.includes(pRole.role));
-    if (!valid.length) throw new Error('You are not permitted to write to this project.');
+    const { organizationId, projectId } = this.tenant;
+    const canWrite = await OrgMemberRepo.canWriteToProject(this.user.id, organizationId, projectId);
+    if (!canWrite) throw new Error('You are not permitted to write to this project.');
     this.checkApiWrite();
     return true;
   }
