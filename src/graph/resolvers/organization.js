@@ -71,12 +71,7 @@ module.exports = {
       auth.check();
       const { name } = input;
       const organization = await Repo.create({ name });
-      await OrganizationMember.create({
-        userId: auth.user.id,
-        organizationId: organization.id,
-        role: 'Owner',
-        acceptedAt: new Date(),
-      });
+      await OrgMemberRepo.createOrgOwner(auth.user.id, organization.id);
       return organization;
     },
 

@@ -26,4 +26,20 @@ module.exports = {
     const orgMembers = await OrganizationMember.find({ userId }, { organizationId: 1 });
     return orgMembers.map(member => member.organizationId.toString());
   },
+
+  /**
+   * Creates a new org owner membership record.
+   * Assumes that the `userId` and `organizationId` exist and are valid.
+   *
+   * @param {string} userId
+   * @param {string} organizationId
+   */
+  async createOrgOwner(userId, organizationId) {
+    return OrganizationMember.create({
+      userId,
+      organizationId,
+      role: 'Owner',
+      acceptedAt: new Date(),
+    });
+  },
 };
