@@ -127,6 +127,19 @@ module.exports = {
   },
 
   /**
+   * Gets all organization project ids that the provided user is a member of.
+   * Will cast all project ids to string.
+   *
+   * @param {string} userId
+   */
+  async getUserProjectIds(userId, organizationId) {
+    const member = await this.getMembership(userId, organizationId);
+    if (!member) return [];
+    const { projectRoles } = member;
+    return projectRoles.map(r => r.projectId.toString());
+  },
+
+  /**
    * Creates a new org owner membership record.
    * Assumes that the `userId` and `organizationId` exist and are valid.
    *

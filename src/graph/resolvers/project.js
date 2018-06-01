@@ -1,5 +1,6 @@
 const { paginationResolvers } = require('@limit0/mongoose-graphql-pagination');
 const Repo = require('../../repositories/project');
+const OrgMemberRepo = require('../../repositories/organization-member');
 const Model = require('../../models/project');
 const Organization = require('../../models/organization');
 const OrganizationMember = require('../../models/organization-member');
@@ -31,6 +32,10 @@ module.exports = {
     project: async (root, { input }, { auth }) => {
       auth.check();
       const { id } = input;
+      const { organizationId } = auth.tenant;
+      const member = await OrgMemberRepo.isProjectMember(auth.user.id, organizationId, id);
+      if (!member) throw new Error('You do not have permission to read this project.');
+
       const record = await Repo.findById(id);
       if (!record) throw new Error(`No project record found for ID ${id}.`);
       return record;
@@ -40,14 +45,9 @@ module.exports = {
      *
      */
     allProjects: async (root, { pagination, sort }, { auth }) => {
-      await auth.checkOrgRead();
-      const userId = auth.user.id;
+      auth.check();
       const { organizationId } = auth.tenant;
-      const orgMember = await OrganizationMember.findOne({
-        userId,
-        organizationId,
-      }, { projectRoles: 1 });
-      const projectIds = orgMember.get('projectRoles').map(member => member.projectId.toString());
+      const projectIds = await OrgMemberRepo.getUserProjectIds(auth.user.id, organizationId);
       const criteria = { _id: { $in: projectIds } };
       return Repo.paginate({ pagination, sort, criteria });
     },
