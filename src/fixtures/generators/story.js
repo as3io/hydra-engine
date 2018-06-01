@@ -7,8 +7,8 @@ module.exports = ({ projectId }) => {
     title: faker.commerce.productName(),
     slug: slug(title),
     teaser: faker.lorem.paragraphs(1),
-    text: faker.lorem.paragraphs(5),
-    project: projectId(),
+    body: faker.lorem.paragraphs(5),
+    projectId: projectId(),
     published: false,
   };
 };

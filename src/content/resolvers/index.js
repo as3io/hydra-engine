@@ -1,6 +1,6 @@
 const { DateType } = require('@limit0/graphql-custom-types');
 
-const Content = require('../../models/content');
+const Content = require('../../models/story');
 
 module.exports = {
   /**

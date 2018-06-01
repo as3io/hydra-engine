@@ -28,7 +28,7 @@ const schema = new Schema({
     required: true,
     default: false,
   },
-  project: {
+  projectId: {
     type: Schema.Types.ObjectId,
     ref: 'project',
     required: true,

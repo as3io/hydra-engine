@@ -1,6 +1,6 @@
-const { Pagination, TypeAhead } = require('@limit0/mongoose-graphql-pagination');
+const { Pagination } = require('@limit0/mongoose-graphql-pagination');
 const Promise = require('bluebird');
-const Content = require('../models/content');
+const Content = require('../models/story');
 const fixtures = require('../fixtures');
 const ProjectRepo = require('./project');
 
@@ -89,20 +89,6 @@ module.exports = {
    */
   paginate({ criteria, pagination, sort } = {}) {
     return new Pagination(Content, { criteria, pagination, sort });
-  },
-
-  /**
-   * Searches & Paginates all Content models.
-   *
-   * @param {object} params
-   * @param {object.object} params.pagination The pagination parameters.
-   * @param {object.object} params.search The search parameters.
-   * @return {Pagination}
-   */
-  search({ criteria, pagination, search } = {}) {
-    const { field, term } = search.typeahead;
-    const typeahead = new TypeAhead(field, term);
-    return typeahead.paginate(Content, { criteria, pagination });
   },
 
   /**
