@@ -18,14 +18,27 @@ module.exports = {
   /**
    *
    * @param {string} id
+   * @param {string} projectId
    * @param {object} payload
    * @return {Promise}
    */
-  async update(id, payload) {
+  async update(id, projectId, {
+    title,
+    teaser,
+    slug,
+    body,
+    published,
+  } = {}) {
     if (!id) throw new Error('Unable to update story: no ID was provided.');
-    const story = await this.findById(id);
-    if (!story) throw new Error(`Unable to update story: no story was found for ID "${id}"`);
-    story.set(payload);
+    const story = await this.findOne({ _id: id, projectId });
+    if (!story) throw new Error(`Unable to update story: no story was found in project for ID "${id}"`);
+    story.set({
+      title,
+      teaser,
+      slug,
+      body,
+      published,
+    });
     return story.save();
   },
 
@@ -49,6 +62,14 @@ module.exports = {
    */
   find(criteria) {
     return Story.find(criteria);
+  },
+
+  /**
+   * @param {object} criteria
+   * @return {Promise}
+   */
+  findOne(criteria) {
+    return Story.findOne(criteria);
   },
 
   /**

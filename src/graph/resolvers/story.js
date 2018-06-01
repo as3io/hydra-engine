@@ -12,7 +12,7 @@ module.exports = {
       await auth.checkProjectRead();
       const { id } = input;
       const { projectId } = auth.tenant;
-      const story = await StoryRepo.find({ _id: id, projectId });
+      const story = await StoryRepo.findOne({ _id: id, projectId });
       if (!story) throw new Error(`No story record found for ID ${id}.`);
       return story;
     },
@@ -50,6 +50,16 @@ module.exports = {
       const { projectId } = auth.tenant;
       const { payload } = input;
       return StoryRepo.create({ ...payload, projectId });
+    },
+
+    /**
+     *
+     */
+    updateStory: (root, { input }, { auth }) => {
+      auth.checkProjectWrite();
+      const { projectId } = auth.tenant;
+      const { id, payload } = input;
+      return StoryRepo.update(id, projectId, payload);
     },
   },
 };
