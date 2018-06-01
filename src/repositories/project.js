@@ -20,33 +20,28 @@ module.exports = {
    * @param {string} id
    * @param {object} payload
    * @param {string} payload.name
+   * @param {string} payload.description
    * @return {Promise}
    */
-  update(id, { name, organization } = {}) {
-    if (!id) return Promise.reject(new Error('Unable to update project: no ID was provided.'));
-    const criteria = { _id: id };
-    const update = { $set: { name } };
-    if (organization) {
-      update.$set.organization = organization;
-    }
-    const options = { new: true, runValidators: true };
-    return Model.findOneAndUpdate(criteria, update, options).then((document) => {
-      if (!document) throw new Error(`Unable to update project: no record was found for ID '${id}'`);
-      return document;
-    });
+  async update(id, { name, description } = {}) {
+    if (!id) throw new Error('Unable to update project: no ID was provided.');
+    const project = await this.findById(id);
+    if (!project) throw new Error(`Unable to update project: no record was found for ID '${id}'`);
+    project.set({ name, description });
+    return project.save();
   },
 
   /**
    * Find an Model record by ID.
    *
    * Will return a rejected promise if no ID was provided.
-   * Will NOT reject the promise if the record cannnot be found.
+   * Will NOT reject the promise if the record cannot be found.
    *
    * @param {string} id
    * @return {Promise}
    */
-  findById(id) {
-    if (!id) return Promise.reject(new Error('Unable to find project: no ID was provided.'));
+  async findById(id) {
+    if (!id) throw new Error('Unable to find project: no ID was provided.');
     return Model.findOne({ _id: id });
   },
 
