@@ -90,11 +90,11 @@ module.exports = {
      *
      */
     updateOrganization: async (root, { input }, { auth }) => {
-      await auth.checkOrgWrite();
-      const organization = await auth.tenant.getOrganization();
-      const { name, description, photoURL } = input;
-      organization.set({ name, description, photoURL });
-      return organization.save();
+      auth.check();
+      const { id, payload } = input;
+      const canWrite = await OrgMemberRepo.canWriteToOrg(auth.user.id, id);
+      if (!canWrite) throw new Error('You do not have permission to write to this organization.');
+      return Repo.update(id, payload);
     },
   },
 };

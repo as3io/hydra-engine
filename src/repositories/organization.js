@@ -25,15 +25,12 @@ module.exports = {
    * @param {string} payload.name
    * @return {Promise}
    */
-  update(id, { name } = {}) {
-    if (!id) return Promise.reject(new Error('Unable to update organization: no ID was provided.'));
-    const criteria = { _id: id };
-    const update = { $set: { name } };
-    const options = { new: true, runValidators: true };
-    return Model.findOneAndUpdate(criteria, update, options).then((document) => {
-      if (!document) throw new Error(`Unable to update organization: no record was found for ID '${id}'`);
-      return document;
-    });
+  async update(id, { name, description, photoURL } = {}) {
+    if (!id) throw new Error('Unable to update organization: no ID was provided.');
+    const org = await this.findById(id);
+    if (!org) throw new Error(`Unable to update organization: no record was found for ID '${id}'`);
+    org.set({ name, description, photoURL });
+    return org.save();
   },
 
   /**
@@ -45,8 +42,8 @@ module.exports = {
    * @param {string} id
    * @return {Promise}
    */
-  findById(id) {
-    if (!id) return Promise.reject(new Error('Unable to find organization: no ID was provided.'));
+  async findById(id) {
+    if (!id) throw new Error('Unable to find organization: no ID was provided.');
     return Model.findOne({ _id: id });
   },
 

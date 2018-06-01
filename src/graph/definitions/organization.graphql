@@ -76,6 +76,11 @@ input CreateOrganizationInput {
 }
 
 input UpdateOrganizationInput {
+  id: String!
+  payload: UpdateOrganizationPayload!
+}
+
+input UpdateOrganizationPayload {
   name: String!
   description: String
   photoURL: String
