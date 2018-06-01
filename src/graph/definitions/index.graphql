@@ -1,5 +1,4 @@
 # import * from 'user.graphql'
-# import * from 'content.graphql'
 # import * from 'organization.graphql'
 # import * from 'project.graphql'
 
