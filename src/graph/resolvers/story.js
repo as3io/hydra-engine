@@ -37,4 +37,19 @@ module.exports = {
       return StoryRepo.paginate({ criteria, pagination, sort });
     },
   },
+
+  /**
+   *
+   */
+  Mutation: {
+    /**
+     *
+     */
+    createStory: (root, { input }, { auth }) => {
+      auth.checkProjectWrite();
+      const { projectId } = auth.tenant;
+      const { payload } = input;
+      return StoryRepo.create({ ...payload, projectId });
+    },
+  },
 };
