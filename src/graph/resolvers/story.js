@@ -16,5 +16,15 @@ module.exports = {
       if (!story) throw new Error(`No story record found for ID ${id}.`);
       return story;
     },
+
+    /**
+     *
+     */
+    allStories: async (root, { pagination, sort }, { auth }) => {
+      await auth.checkProjectRead();
+      const { projectId } = auth.tenant;
+      const criteria = { projectId };
+      return StoryRepo.paginate({ criteria, pagination, sort });
+    },
   },
 };
