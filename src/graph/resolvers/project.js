@@ -3,7 +3,6 @@ const Repo = require('../../repositories/project');
 const OrgMemberRepo = require('../../repositories/organization-member');
 const Model = require('../../models/project');
 const Organization = require('../../models/organization');
-const OrganizationMember = require('../../models/organization-member');
 
 module.exports = {
   /**
