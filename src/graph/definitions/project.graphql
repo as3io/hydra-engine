@@ -45,6 +45,11 @@ input CreateProjectInput {
 }
 
 input UpdateProjectInput {
+  id: String!
+  payload: UpdateProjectPayload!
+}
+
+input UpdateProjectPayload {
   name: String!
   description: String
 }

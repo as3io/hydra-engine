@@ -69,10 +69,12 @@ module.exports = {
      *
      */
     updateProject: async (root, { input }, { auth }) => {
-      await auth.checkProjectWrite();
-      const { name, description } = input;
-      const { projectId } = auth.tenant;
-      return Repo.update(projectId, { name, description });
+      auth.check();
+      const { organizationId } = auth.tenant;
+      const { id, payload } = input;
+      const canWrite = await OrgMemberRepo.canWriteToProject(auth.user.id, organizationId, id);
+      if (!canWrite) throw new Error('You do not have permission to write to this project.');
+      return Repo.update(id, payload);
     },
   },
 };
