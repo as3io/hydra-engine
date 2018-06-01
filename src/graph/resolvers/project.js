@@ -2,6 +2,7 @@ const { paginationResolvers } = require('@limit0/mongoose-graphql-pagination');
 const Repo = require('../../repositories/project');
 const Model = require('../../models/project');
 const Organization = require('../../models/organization');
+const OrganizationMember = require('../../models/organization-member');
 
 module.exports = {
   /**
@@ -41,9 +42,12 @@ module.exports = {
     allProjects: async (root, { pagination, sort }, { auth }) => {
       await auth.checkOrgRead();
       const userId = auth.user.id;
-      const organizationId = auth.tenant.organizationId;
-      const member = await OrganizationMember.findOne({ userId, organizationId }, { projectRoles: 1 });
-      const projectIds = member.get('projectRoles').map(member => member.projectId.toString());
+      const { organizationId } = auth.tenant;
+      const orgMember = await OrganizationMember.findOne({
+        userId,
+        organizationId,
+      }, { projectRoles: 1 });
+      const projectIds = orgMember.get('projectRoles').map(member => member.projectId.toString());
       const criteria = { _id: { $in: projectIds } };
       return Repo.paginate({ pagination, sort, criteria });
     },
