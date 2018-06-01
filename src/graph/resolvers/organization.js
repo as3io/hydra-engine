@@ -39,10 +39,10 @@ module.exports = {
      *
      */
     organization: async (root, { input }, { auth }) => {
-      await auth.check();
+      auth.check();
       const { id } = input;
       const member = await OrgMemberRepo.isOrgMember(auth.user.id, id);
-      if (!member) throw new Error('You do not have permission to read this organization');
+      if (!member) throw new Error('You do not have permission to read this organization.');
 
       const record = await Repo.findById(id);
       if (!record) throw new Error(`No organization record found for ID ${id}.`);
