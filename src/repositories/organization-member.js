@@ -15,4 +15,15 @@ module.exports = {
     if (member) return true;
     return false;
   },
+
+  /**
+   * Gets all organization ids that the provided user is a member of.
+   * Will cast all org ids to string.
+   *
+   * @param {string} userId
+   */
+  async getUserOrgIds(userId) {
+    const orgMembers = await OrganizationMember.find({ userId }, { organizationId: 1 });
+    return orgMembers.map(member => member.organizationId.toString());
+  },
 };
