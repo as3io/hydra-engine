@@ -146,6 +146,7 @@ module.exports = {
    * @param {string} userId
    */
   async getUserOrgIds(userId) {
+    if (!userId) throw new Error('Unable to retrieve user organizations. No user ID was provided.');
     const orgMembers = await OrganizationMember.find({ userId }, { organizationId: 1 });
     return orgMembers.map(member => member.organizationId.toString());
   },
