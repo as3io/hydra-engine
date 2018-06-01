@@ -1,4 +1,5 @@
 const OrganizationMember = require('../models/organization-member');
+const Project = require('../models/project');
 
 module.exports = {
   /**
@@ -133,8 +134,15 @@ module.exports = {
    * @param {string} userId
    */
   async getUserProjectIds(userId, organizationId) {
+    const role = await this.getOrgRole(userId, organizationId);
+    if (!role) return [];
+    if (this.isAdminRole(role)) {
+      // For org admins, return all org project IDs directly.
+      const projects = await Project.find({ organizationId }, { _id: 1 });
+      return projects.map(p => p.id.toString());
+    }
+    // For non org admins, only return specifically assigned project IDs.
     const member = await this.getMembership(userId, organizationId);
-    if (!member) return [];
     const { projectRoles } = member;
     return projectRoles.map(r => r.projectId.toString());
   },
