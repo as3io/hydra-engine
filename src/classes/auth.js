@@ -1,4 +1,4 @@
-const OrganizationMember = require('../models/organization-member');
+const OrgMemberRepo = require('../repositories/organization-member');
 
 class Auth {
   constructor({
@@ -68,11 +68,9 @@ class Auth {
 
   async getOrgMembership() {
     this.check();
-    const { organizationId } = this.tenant;
-    if (!organizationId) throw new Error('No `X-Organization` header was found in the request.');
-    const orgMember = await OrganizationMember.findOne({ organizationId, userId: this.user.id });
-    if (!orgMember) throw new Error('You are not a member of this organization.');
-    return orgMember;
+    const member = await OrgMemberRepo.getMembership(this.user.id, this.tenant.organizationId);
+    if (!member) throw new Error('You are not a member of this organization.');
+    return member;
   }
 
   check() {

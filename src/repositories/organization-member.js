@@ -2,6 +2,31 @@ const OrganizationMember = require('../models/organization-member');
 
 module.exports = {
   /**
+   * Retrieves the membership for the provided user and org IDs.
+   * Will NOT error if the membership is not found, and instead will
+   * resolve to `null`.
+   *
+   * @param {string} userId
+   * @param {string} organizationId
+   */
+  async getMembership(userId, organizationId) {
+    const errorPrefix = 'Unable to retrieve organization membership';
+    if (!userId) throw new Error(`${errorPrefix}: No user ID was provided.`);
+    if (!organizationId) throw new Error(`${errorPrefix}: No organization ID was provided.`);
+
+    return OrganizationMember.findOne({ organizationId, userId });
+  },
+
+  /**
+   * Returns the admin roles.
+   *
+   * @return {string[]}
+   */
+  getAdminRoles() {
+    return ['Owner', 'Administrator'];
+  },
+
+  /**
    * Determines if the provided user is a member of the organization.
    *
    * @param {string} userId
@@ -11,7 +36,23 @@ module.exports = {
     const member = await OrganizationMember.findOne({
       userId,
       organizationId,
-    }, { organizationId: 1 });
+    }, { _id: 1 });
+    if (member) return true;
+    return false;
+  },
+
+  /**
+   * Determines if the provided user is a member of the organization project.
+   *
+   * @param {string} userId
+   * @param {string} organizationId
+   */
+  async isProjectMember(userId, organizationId, projectId) {
+    const member = await OrganizationMember.findOne({
+      userId,
+      organizationId,
+      'projectRoles.projectId': projectId,
+    }, { _id: 1 });
     if (member) return true;
     return false;
   },
