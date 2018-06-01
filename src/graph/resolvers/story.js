@@ -26,5 +26,15 @@ module.exports = {
       const criteria = { projectId };
       return StoryRepo.paginate({ criteria, pagination, sort });
     },
+
+    /**
+     *
+     */
+    allPublishedStories: async (root, { pagination, sort }, { auth }) => {
+      await auth.checkProjectRead();
+      const { projectId } = auth.tenant;
+      const criteria = { published: true, projectId };
+      return StoryRepo.paginate({ criteria, pagination, sort });
+    },
   },
 };
