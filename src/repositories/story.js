@@ -1,6 +1,6 @@
 const { Pagination } = require('@limit0/mongoose-graphql-pagination');
 const Promise = require('bluebird');
-const Content = require('../models/story');
+const Story = require('../models/story');
 const fixtures = require('../fixtures');
 const ProjectRepo = require('./project');
 
@@ -11,37 +11,26 @@ module.exports = {
    * @return {Promise}
    */
   create(payload = {}) {
-    const content = new Content(payload);
-    return content.save();
+    const story = new Story(payload);
+    return story.save();
   },
 
   /**
    *
    * @param {string} id
    * @param {object} payload
-   * @param {string} payload.name
    * @return {Promise}
    */
-  async update(id, {
-    title,
-    teaser,
-    slug,
-    text,
-    published,
-  } = {}) {
-    if (!id) return Promise.reject(new Error('Unable to update content: no ID was provided.'));
-    const content = await this.findById(id);
-    if (!content) return Promise.reject(new Error(`Unable to update content: no content was found for ID "${id}"`));
-    if (title) content.title = title;
-    if (teaser) content.teaser = teaser;
-    if (slug) content.slug = slug;
-    if (text) content.text = text;
-    if (published) content.published = published;
-    return content.save();
+  async update(id, payload) {
+    if (!id) throw new Error('Unable to update story: no ID was provided.');
+    const story = await this.findById(id);
+    if (!story) throw new Error(`Unable to update story: no story was found for ID "${id}"`);
+    story.set(payload);
+    return story.save();
   },
 
   /**
-   * Find an Content record by ID.
+   * Find an Story record by ID.
    *
    * Will return a rejected promise if no ID was provided.
    * Will NOT reject the promise if the record cannnot be found.
@@ -49,9 +38,9 @@ module.exports = {
    * @param {string} id
    * @return {Promise}
    */
-  findById(id) {
-    if (!id) return Promise.reject(new Error('Unable to find content: no ID was provided.'));
-    return Content.findOne({ _id: id });
+  async findById(id) {
+    if (!id) throw new Error('Unable to find story: no ID was provided.');
+    return Story.findOne({ _id: id });
   },
 
   /**
@@ -59,15 +48,15 @@ module.exports = {
    * @return {Promise}
    */
   find(criteria) {
-    return Content.find(criteria);
+    return Story.find(criteria);
   },
 
   /**
    * @param {string} id
    * @return {Promise}
    */
-  removeById(id) {
-    if (!id) return Promise.reject(new Error('Unable to remove content: no ID was provided.'));
+  async removeById(id) {
+    if (!id) throw new Error('Unable to remove story: no ID was provided.');
     return this.remove({ _id: id });
   },
 
@@ -76,11 +65,11 @@ module.exports = {
    * @return {Promise}
    */
   remove(criteria) {
-    return Content.remove(criteria);
+    return Story.remove(criteria);
   },
 
   /**
-   * Paginates all Content models.
+   * Paginates all Story models.
    *
    * @param {object} params
    * @param {object.object} params.pagination The pagination parameters.
@@ -88,7 +77,7 @@ module.exports = {
    * @return {Pagination}
    */
   paginate({ criteria, pagination, sort } = {}) {
-    return new Pagination(Content, { criteria, pagination, sort });
+    return new Pagination(Story, { criteria, pagination, sort });
   },
 
   /**
@@ -97,7 +86,7 @@ module.exports = {
    * @return {object}
    */
   generate(count = 1, params) {
-    return fixtures(Content, count, params);
+    return fixtures(Story, count, params);
   },
 
   async seed({ count = 1, projectCount = 1 } = {}) {
@@ -108,5 +97,4 @@ module.exports = {
     await Promise.all(results.all().map(model => model.save()));
     return results;
   },
-
 };
