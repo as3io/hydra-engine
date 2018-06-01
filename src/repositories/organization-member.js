@@ -19,16 +19,39 @@ module.exports = {
   },
 
   /**
-   * Returns the admin roles.
+   * Returns the organization admin roles.
    *
    * @return {string[]}
    */
-  getAdminRoles() {
+  getOrgAdminRoles() {
     return ['Owner', 'Administrator'];
   },
 
-  isAdminRole(role) {
-    return this.getAdminRoles().includes(role);
+  /**
+   * Returns the organization admin roles.
+   *
+   * @return {string[]}
+   */
+  getProjectAdminRoles() {
+    return ['Owner', 'Administrator'];
+  },
+
+  /**
+   * Determines if the provided role name is considered an org admin.
+   *
+   * @param {string} role
+   */
+  isOrgAdmin(role) {
+    return this.getOrgAdminRoles().includes(role);
+  },
+
+  /**
+   * Determines if the provided role name is considered a project admin.
+   *
+   * @param {string} role
+   */
+  isProjectAdmin(role) {
+    return this.getProjectAdminRoles().includes(role);
   },
 
   /**
@@ -65,7 +88,7 @@ module.exports = {
    */
   async canWriteToOrg(userId, organizationId) {
     const role = await this.getOrgRole(userId, organizationId);
-    if (this.isAdminRole(role)) return true;
+    if (this.isOrgAdmin(role)) return true;
     return false;
   },
 
@@ -83,8 +106,8 @@ module.exports = {
     const member = await this.getMembership(userId, organizationId);
     if (!member) return null;
     const { role, projectRoles } = member;
-    // Use the organization role if an admin.
-    if (this.isAdminRole(role)) return role;
+    // Use the organization role if an org admin.
+    if (this.isOrgAdmin(role)) return role;
     const found = projectRoles.find(r => `${r.projectId}` === `${projectId}`);
     if (!found) return null;
     return found.role || null;
@@ -112,7 +135,7 @@ module.exports = {
    */
   async canWriteToProject(userId, organizationId, projectId) {
     const role = await this.getProjectRole(userId, organizationId, projectId);
-    if (this.isAdminRole(role)) return true;
+    if (this.isOrgAdmin(role) || this.isProjectAdmin(role)) return true;
     return false;
   },
 
@@ -136,7 +159,7 @@ module.exports = {
   async getUserProjectIds(userId, organizationId) {
     const role = await this.getOrgRole(userId, organizationId);
     if (!role) return [];
-    if (this.isAdminRole(role)) {
+    if (this.isOrgAdmin(role)) {
       // For org admins, return all org project IDs directly.
       const projects = await Project.find({ organizationId }, { _id: 1 });
       return projects.map(p => p.id.toString());
