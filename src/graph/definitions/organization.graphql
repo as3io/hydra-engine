@@ -65,20 +65,6 @@ input ProjectInviteRoleInput {
   role: RolesForProject!
 }
 
-input OrganizationSearchInput {
-  typeahead: OrganizationTypeAheadInput!
-}
-
-input OrganizationTypeAheadInput {
-  field: OrganizationTypeAheadField!
-  term: String!
-}
-
-enum OrganizationTypeAheadField {
-  name
-  email
-}
-
 input OrganizationSortInput {
   field: OrganizationSortField! = name
   order: Int! = -1

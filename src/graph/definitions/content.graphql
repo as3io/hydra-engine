@@ -1,5 +1,5 @@
 type Query {
-  allContent(criteria: PaginationCriteriaInput = {}, pagination: PaginationInput = {}, sort: ContentSortInput = {}): ContentConnection!
+  allContent(pagination: PaginationInput = {}, sort: ContentSortInput = {}): ContentConnection!
   # searchContent(pagination: PaginationInput = {}, search: ContentSearchInput!): ContentConnection!
   content(input: ModelIdInput!): Content!
 }
@@ -35,20 +35,6 @@ type ContentConnection {
 type ContentEdge {
   node: Content!
   cursor: Cursor!
-}
-
-input ContentSearchInput {
-  typeahead: ContentTypeAheadInput!
-}
-
-input ContentTypeAheadInput {
-  field: ContentTypeAheadField!
-  term: String!
-}
-
-enum ContentTypeAheadField {
-  name
-  email
 }
 
 input ContentSortInput {

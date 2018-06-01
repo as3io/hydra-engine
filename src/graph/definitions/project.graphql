@@ -34,20 +34,6 @@ type ProjectEdge {
   cursor: Cursor!
 }
 
-input ProjectSearchInput {
-  typeahead: ProjectTypeAheadInput!
-}
-
-input ProjectTypeAheadInput {
-  field: ProjectTypeAheadField!
-  term: String!
-}
-
-enum ProjectTypeAheadField {
-  name
-  email
-}
-
 input ProjectSortInput {
   field: ProjectSortField! = name
   order: Int! = -1
@@ -58,7 +44,7 @@ input CreateProjectInput {
   description: String
 }
 
-input ProjectConfigInput {
+input UpdateProjectInput {
   name: String!
   description: String
 }
