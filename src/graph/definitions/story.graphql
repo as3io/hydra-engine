@@ -1,0 +1,53 @@
+type Query {
+  allStories(pagination: PaginationInput = {}, sort: StorySortInput = {}): StoryConnection!
+  story(input: ModelIdInput!): Story!
+}
+
+type Mutation {
+  createStory(input: StoryPayloadInput!): Story!
+  updateStory(input: UpdateStoryInput!): Story!
+}
+
+type Story {
+  id: String!
+  title: String!
+  teaser: String
+  slug: String!
+  body: String
+  createdAt: Date
+  updatedAt: Date
+}
+
+type StoryConnection {
+  totalCount: Int!
+  edges: [StoryEdge]!
+  pageInfo: PageInfo!
+}
+
+type StoryEdge {
+  node: Story!
+  cursor: Cursor!
+}
+
+enum StorySortField {
+  title
+  createdAt
+  updatedAt
+}
+
+input StorySortInput {
+  field: StorySortField! = title
+  order: Int! = -1
+}
+
+input UpdateStoryInput {
+  id: String!
+  payload: StoryPayloadInput!
+}
+
+input StoryPayloadInput {
+  title: String!
+  teaser: String
+  slug: String
+  body: String
+}
