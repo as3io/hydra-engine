@@ -33,15 +33,6 @@ module.exports = {
     return User.findOne({ email: value });
   },
 
-  /**
-   *
-   * @param {string} token
-   * @return {Promise}
-   */
-  findByToken(token) {
-    return User.findOne({ token });
-  },
-
   normalizeEmail(email) {
     if (!email) return '';
     return String(email).trim().toLowerCase();
