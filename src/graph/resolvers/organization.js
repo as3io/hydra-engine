@@ -51,7 +51,7 @@ module.exports = {
       auth.check();
       const organizationIds = await OrgMemberRepo.getUserOrgIds(auth.user.id);
       const criteria = { _id: { $in: organizationIds } };
-      return Repo.paginate({ pagination, sort, criteria });
+      return Organization.paginate({ pagination, sort, criteria });
     },
   },
 

@@ -1,4 +1,3 @@
-const { Pagination } = require('@limit0/mongoose-graphql-pagination');
 const Promise = require('bluebird');
 const Story = require('../models/story');
 const fixtures = require('../fixtures');
@@ -88,18 +87,6 @@ module.exports = {
    */
   remove(criteria) {
     return Story.remove(criteria);
-  },
-
-  /**
-   * Paginates all Story models.
-   *
-   * @param {object} params
-   * @param {object.object} params.pagination The pagination parameters.
-   * @param {object.object} params.sort The sort parameters.
-   * @return {Pagination}
-   */
-  paginate({ criteria, pagination, sort } = {}) {
-    return new Pagination(Story, { criteria, pagination, sort });
   },
 
   /**

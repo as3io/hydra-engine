@@ -1,6 +1,7 @@
 const { Schema } = require('mongoose');
-const connection = require('../connections/mongoose');
 const slug = require('slug');
+const connection = require('../connections/mongoose');
+const paginablePlugin = require('../plugins/paginable');
 
 const schema = new Schema({
   title: {
@@ -42,6 +43,8 @@ const schema = new Schema({
   },
 
 }, { timestamps: true });
+
+schema.plugin(paginablePlugin);
 
 schema.index({ projectId: 1 });
 schema.index({ published: 1 });

@@ -4,6 +4,7 @@ const validator = require('validator');
 const crypto = require('crypto');
 const uuid = require('uuid/v4');
 const pushId = require('unique-push-id');
+const paginablePlugin = require('../plugins/paginable');
 
 const apiSchema = new Schema({
   key: {
@@ -81,6 +82,8 @@ const schema = new Schema({
 }, {
   timestamps: true,
 });
+
+schema.plugin(paginablePlugin);
 
 /**
  * Indexes

@@ -1,4 +1,5 @@
 const { paginationResolvers } = require('@limit0/mongoose-graphql-pagination');
+const Story = require('../../models/story');
 const StoryRepo = require('../../repositories/story');
 
 module.exports = {
@@ -30,7 +31,7 @@ module.exports = {
       await auth.checkProjectRead();
       const { projectId } = auth.tenant;
       const criteria = { projectId };
-      return StoryRepo.paginate({ criteria, pagination, sort });
+      return Story.paginate({ criteria, pagination, sort });
     },
 
     /**

@@ -1,6 +1,5 @@
 const bcrypt = require('bcrypt');
 const Promise = require('bluebird');
-const { Pagination } = require('@limit0/mongoose-graphql-pagination');
 const sessionRepo = require('./session');
 const User = require('../models/user');
 const fixtures = require('../fixtures');
@@ -228,18 +227,6 @@ module.exports = {
     user.set('logins', user.get('logins') + 1);
     user.set('lastLoggedInAt', new Date());
     return user.save();
-  },
-
-  /**
-   * Paginates all User models.
-   *
-   * @param {object} params
-   * @param {object.object} params.pagination The pagination parameters.
-   * @param {object.object} params.sort The sort parameters.
-   * @return {Pagination}
-   */
-  paginate({ pagination, sort } = {}) {
-    return new Pagination(User, { pagination, sort });
   },
 
   async seed({ count = 1 } = {}) {

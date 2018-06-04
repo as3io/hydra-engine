@@ -5,7 +5,6 @@ const TokenRepo = require('./token');
 const fixtures = require('../fixtures');
 const UserRepo = require('./user');
 const mailer = require('../services/mailer');
-const { Pagination } = require('@limit0/mongoose-graphql-pagination');
 
 module.exports = {
   /**
@@ -70,18 +69,6 @@ module.exports = {
    */
   remove(criteria) {
     return Model.remove(criteria);
-  },
-
-  /**
-   * Paginates all Model models.
-   *
-   * @param {object} params
-   * @param {object.object} params.pagination The pagination parameters.
-   * @param {object.object} params.sort The sort parameters.
-   * @return {Pagination}
-   */
-  paginate({ criteria, pagination, sort } = {}) {
-    return new Pagination(Model, { criteria, pagination, sort });
   },
 
   /**
