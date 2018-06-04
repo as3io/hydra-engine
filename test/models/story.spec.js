@@ -1,30 +1,27 @@
 require('../connections');
 const Story = require('../../src/models/story');
-const ProjectRepo = require('../../src/repositories/project');
-const fixtures = require('../../src/fixtures');
+const Project = require('../../src/models/project');
+const Organization = require('../../src/models/organization');
+const Seed = require('../../src/fixtures/seed');
 const { testTrimmedField, testRequiredField, testRefOne } = require('./utils');
-
-const generateStory = async () => {
-  const project = await ProjectRepo.seed();
-  const params = {
-    projectId: () => project.one().id,
-  };
-  return fixtures(Story, 1, params).one();
-};
 
 describe('models/story', function() {
   before(async function() {
     await Story.remove();
-    await ProjectRepo.remove();
+    await Project.remove();
+    await Organization.remove();
+  });
+  after(async function() {
+    await Project.remove();
+    await Organization.remove();
   });
 
   let story;
   beforeEach(async function() {
-    story = await generateStory();
+    story = await Seed.stories(1);
   });
   afterEach(async function() {
     await Story.remove();
-    await ProjectRepo.remove();
   });
 
   it('should successfully save.', async () => {

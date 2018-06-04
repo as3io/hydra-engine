@@ -1,8 +1,9 @@
 require('../connections');
 const bcrypt = require('bcrypt');
 const User = require('../../src/models/user');
-const fixtures = require('../../src/fixtures');
+const Seed = require('../../src/fixtures/seed');
 const { testTrimmedField, testUniqueField, testRequiredField } = require('./utils');
+
 const sandbox = sinon.createSandbox();
 
 const bcryptRegex = /^\$2[ayb]\$[0-9]{2}\$[A-Za-z0-9\.\/]{53}$/;
@@ -14,9 +15,9 @@ describe('models/user', function() {
   });
 
   let user;
-  beforeEach(function() {
+  beforeEach(async function() {
     sandbox.stub(bcrypt, 'hash').resolves('$2a$04$jdkrJXkU92FIF4NcprNKWOcMKoOG28ELDrW2HBpDZFSmY/vxOj4VW');
-    user = generateUser();
+    user = await Seed.users(1);
   });
   afterEach(async function() {
     await User.remove();
@@ -36,8 +37,8 @@ describe('models/user', function() {
         return testRequiredField(user, 'email', value);
       });
     });
-    it('should be unique.', function() {
-      const another = generateUser();
+    it('should be unique.', async function() {
+      const another = await Seed.users(1);
       return testUniqueField(user, another, 'email', 'some@email.com');
     });
     it('should be lowercased', async function() {

@@ -1,9 +1,7 @@
 require('../connections');
 const Organization = require('../../src/models/organization');
-const fixtures = require('../../src/fixtures');
+const Seed = require('../../src/fixtures/seed');
 const { testTrimmedField, testUniqueField, testRequiredField } = require('./utils');
-
-const generateOrganization = () => fixtures(Organization, 1).one();
 
 describe('models/organization', function() {
   before(async function() {
@@ -11,16 +9,11 @@ describe('models/organization', function() {
   });
 
   let organization;
-  beforeEach(function() {
-    organization = generateOrganization();
+  beforeEach(async function() {
+    organization = await Seed.organizations(1);
   });
   afterEach(async function() {
     await Organization.remove();
-  });
-
-
-  it('should successfully save.', async function() {
-    await expect(organization.save()).to.be.fulfilled;
   });
 
   describe('.name', async () => {
