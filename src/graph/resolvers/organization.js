@@ -54,7 +54,7 @@ module.exports = {
      */
     allOrganizations: async (root, { pagination, sort }, { auth }) => {
       auth.check();
-      const organizationIds = OrgMemberRepo.getUserOrgIds(auth.user.id);
+      const organizationIds = await OrgMemberRepo.getUserOrgIds(auth.user.id);
       const criteria = { _id: { $in: organizationIds } };
       return Repo.paginate({ pagination, sort, criteria });
     },
