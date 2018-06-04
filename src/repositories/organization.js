@@ -8,16 +8,6 @@ const mailer = require('../services/mailer');
 module.exports = {
   /**
    *
-   * @param {object} payload
-   * @return {Promise}
-   */
-  create(payload = {}) {
-    const organization = new Model(payload);
-    return organization.save();
-  },
-
-  /**
-   *
    * @param {string} id
    * @param {object} payload
    * @param {string} payload.name

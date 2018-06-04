@@ -58,7 +58,7 @@ module.exports = {
       await auth.checkOrgWrite();
       const { name, description } = input;
       const { organizationId } = auth.tenant;
-      return Repo.create({ name, description, organizationId });
+      return Project.create({ name, description, organizationId });
     },
 
     /**

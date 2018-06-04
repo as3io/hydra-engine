@@ -3,16 +3,6 @@ const Story = require('../models/story');
 module.exports = {
   /**
    *
-   * @param {object} payload
-   * @return {Promise}
-   */
-  create(payload = {}) {
-    const story = new Story(payload);
-    return story.save();
-  },
-
-  /**
-   *
    * @param {string} id
    * @param {string} projectId
    * @param {object} payload

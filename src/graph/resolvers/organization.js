@@ -66,7 +66,7 @@ module.exports = {
       auth.check();
       auth.checkApiWrite();
       const { name } = input;
-      const organization = await Repo.create({ name });
+      const organization = await Organization.create({ name });
       await MemberService.createOrgOwner(auth.user.id, organization.id);
       return organization;
     },

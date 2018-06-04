@@ -6,11 +6,6 @@ const tokenGenerator = require('../services/token-generator');
 const mailer = require('../services/mailer');
 
 module.exports = {
-  create(payload = {}) {
-    const user = new User(payload);
-    return user.save();
-  },
-
   async sendWelcomeVerification(user) {
     const token = await this.createMagicLoginToken(user);
     return mailer.sendWelcomeVerification(user, token);

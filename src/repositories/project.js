@@ -4,16 +4,6 @@ const Model = require('../models/project');
 module.exports = {
   /**
    *
-   * @param {object} payload
-   * @return {Promise}
-   */
-  create(payload = {}) {
-    const project = new Model(payload);
-    return project.save();
-  },
-
-  /**
-   *
    * @param {string} id
    * @param {object} payload
    * @param {string} payload.name

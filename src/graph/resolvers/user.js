@@ -67,7 +67,7 @@ module.exports = {
      */
     createUser: async (root, { input }) => {
       const { payload } = input;
-      const user = await UserRepo.create(payload);
+      const user = await User.create(payload);
       await UserRepo.sendWelcomeVerification(user);
       return user;
     },
