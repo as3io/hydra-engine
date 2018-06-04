@@ -65,6 +65,7 @@ module.exports = {
      */
     updateProject: async (root, { input }, { auth }) => {
       auth.check();
+      auth.checkApiWrite();
       const { organizationId } = auth.tenant;
       const { id, payload } = input;
       const canWrite = await OrgMemberRepo.canWriteToProject(auth.user.id, organizationId, id);
