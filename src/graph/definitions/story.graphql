@@ -37,7 +37,7 @@ enum StorySortField {
 }
 
 input StorySortInput {
-  field: StorySortField! = title
+  field: StorySortField! = createdAt
   order: Int! = -1
 }
 
