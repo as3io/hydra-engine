@@ -1,7 +1,7 @@
 const { paginationResolvers } = require('@limit0/mongoose-graphql-pagination');
 const Repo = require('../../repositories/organization');
 const OrganizationMember = require('../../models/organization-member');
-const OrgMemberRepo = require('../../repositories/organization-member');
+const MemberService = require('../../services/organization-member');
 const Organization = require('../../models/organization');
 const Project = require('../../models/project');
 const User = require('../../models/user');
@@ -36,7 +36,7 @@ module.exports = {
     organization: async (root, { input }, { auth }) => {
       auth.check();
       const { id } = input;
-      const member = await OrgMemberRepo.isOrgMember(auth.user.id, id);
+      const member = await MemberService.isOrgMember(auth.user.id, id);
       if (!member) throw new Error('You do not have permission to read this organization.');
 
       const record = await Repo.findById(id);
@@ -49,7 +49,7 @@ module.exports = {
      */
     allOrganizations: async (root, { pagination, sort }, { auth }) => {
       auth.check();
-      const organizationIds = await OrgMemberRepo.getUserOrgIds(auth.user.id);
+      const organizationIds = await MemberService.getUserOrgIds(auth.user.id);
       const criteria = { _id: { $in: organizationIds } };
       return Organization.paginate({ pagination, sort, criteria });
     },
@@ -67,7 +67,7 @@ module.exports = {
       auth.checkApiWrite();
       const { name } = input;
       const organization = await Repo.create({ name });
-      await OrgMemberRepo.createOrgOwner(auth.user.id, organization.id);
+      await MemberService.createOrgOwner(auth.user.id, organization.id);
       return organization;
     },
 
@@ -89,7 +89,7 @@ module.exports = {
       auth.check();
       auth.checkApiWrite();
       const { id, payload } = input;
-      const canWrite = await OrgMemberRepo.canWriteToOrg(auth.user.id, id);
+      const canWrite = await MemberService.canWriteToOrg(auth.user.id, id);
       if (!canWrite) throw new Error('You do not have permission to write to this organization.');
       return Repo.update(id, payload);
     },

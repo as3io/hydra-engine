@@ -1,7 +1,7 @@
 const { paginationResolvers } = require('@limit0/mongoose-graphql-pagination');
 const Project = require('../../models/project');
 const Repo = require('../../repositories/project');
-const OrgMemberRepo = require('../../repositories/organization-member');
+const MemberService = require('../../services/organization-member');
 const Organization = require('../../models/organization');
 
 module.exports = {
@@ -27,7 +27,7 @@ module.exports = {
       auth.check();
       const { id } = input;
       const { organizationId } = auth.tenant;
-      const member = await OrgMemberRepo.isProjectMember(auth.user.id, organizationId, id);
+      const member = await MemberService.isProjectMember(auth.user.id, organizationId, id);
       if (!member) throw new Error('You do not have permission to read this project.');
 
       const record = await Repo.findById(id);
@@ -41,7 +41,7 @@ module.exports = {
     allProjects: async (root, { pagination, sort }, { auth }) => {
       auth.check();
       const { organizationId } = auth.tenant;
-      const projectIds = await OrgMemberRepo.getUserProjectIds(auth.user.id, organizationId);
+      const projectIds = await MemberService.getUserProjectIds(auth.user.id, organizationId);
       const criteria = { _id: { $in: projectIds } };
       return Project.paginate({ pagination, sort, criteria });
     },
@@ -69,7 +69,7 @@ module.exports = {
       auth.checkApiWrite();
       const { organizationId } = auth.tenant;
       const { id, payload } = input;
-      const canWrite = await OrgMemberRepo.canWriteToProject(auth.user.id, organizationId, id);
+      const canWrite = await MemberService.canWriteToProject(auth.user.id, organizationId, id);
       if (!canWrite) throw new Error('You do not have permission to write to this project.');
       return Repo.update(id, payload);
     },

@@ -1,4 +1,4 @@
-const OrgMemberRepo = require('../repositories/organization-member');
+const MemberService = require('../services/organization-member');
 
 class Auth {
   constructor({
@@ -28,7 +28,7 @@ class Auth {
   async checkProjectRead() {
     this.check();
     const { organizationId, projectId } = this.tenant;
-    const isMember = await OrgMemberRepo.isProjectMember(this.user.id, organizationId, projectId);
+    const isMember = await MemberService.isProjectMember(this.user.id, organizationId, projectId);
     if (!isMember) throw new Error('You are not permitted to read from this project.');
     return true;
   }
@@ -36,7 +36,7 @@ class Auth {
   async checkProjectWrite() {
     this.check();
     const { organizationId, projectId } = this.tenant;
-    const canWrite = await OrgMemberRepo.canWriteToProject(this.user.id, organizationId, projectId);
+    const canWrite = await MemberService.canWriteToProject(this.user.id, organizationId, projectId);
     if (!canWrite) throw new Error('You are not permitted to write to this project.');
     this.checkApiWrite();
     return true;
@@ -45,7 +45,7 @@ class Auth {
   async checkOrgRead() {
     this.check();
     const { organizationId } = this.tenant;
-    const isMember = await OrgMemberRepo.isOrgMember(this.user.id, organizationId);
+    const isMember = await MemberService.isOrgMember(this.user.id, organizationId);
     if (!isMember) throw new Error('You are not permitted to read from this organization.');
     return true;
   }
@@ -53,7 +53,7 @@ class Auth {
   async checkOrgWrite() {
     this.check();
     const { organizationId } = this.tenant;
-    const canWrite = await OrgMemberRepo.canWriteToOrg(this.user.id, organizationId);
+    const canWrite = await MemberService.canWriteToOrg(this.user.id, organizationId);
     if (!canWrite) throw new Error('You are not permitted to write to this organization.');
     this.checkApiWrite();
     return true;
@@ -61,7 +61,7 @@ class Auth {
 
   async getOrgMembership() {
     this.check();
-    const member = await OrgMemberRepo.getMembership(this.user.id, this.tenant.organizationId);
+    const member = await MemberService.getMembership(this.user.id, this.tenant.organizationId);
     if (!member) throw new Error('You are not a member of this organization.');
     return member;
   }
