@@ -7,7 +7,7 @@ describe('fixtures/generators/project', function() {
   });
   const fields = [
     { key: 'name', cb: v => expect(v).to.be.a('string') },
-    { key: 'organization', cb: v => expect(v).to.be.a('string') },
+    { key: 'organizationId', cb: v => expect(v).to.be.a('string') },
   ];
   const obj = Generate({
     organizationId: () => '1234',

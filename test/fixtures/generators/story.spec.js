@@ -1,6 +1,6 @@
-const Generate = require('../../../src/fixtures/generators/content');
+const Generate = require('../../../src/fixtures/generators/story');
 
-describe('fixtures/generators/content', function() {
+describe('fixtures/generators/story', function() {
   it('should return a factory function', function(done) {
     expect(Generate).to.be.a('function');
     done();
@@ -9,8 +9,8 @@ describe('fixtures/generators/content', function() {
     { key: 'title', cb: v => expect(v).to.be.a('string') },
     { key: 'teaser', cb: v => expect(v).to.be.a('string') },
     { key: 'slug', cb: v => expect(v).to.be.a('string') },
-    { key: 'text', cb: v => expect(v).to.be.a('string') },
-    { key: 'project', cb: v => expect(v).to.be.a('string') },
+    { key: 'body', cb: v => expect(v).to.be.a('string') },
+    { key: 'projectId', cb: v => expect(v).to.be.a('string') },
     { key: 'published', cb: v => expect(v).to.be.a('boolean') },
   ];
   const obj = Generate({
