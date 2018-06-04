@@ -51,8 +51,8 @@ module.exports = {
     /**
      *
      */
-    createStory: (root, { input }, { auth }) => {
-      auth.checkProjectWrite();
+    createStory: async (root, { input }, { auth }) => {
+      await auth.checkProjectWrite();
       const { projectId } = auth.tenant;
       const { payload } = input;
       return StoryRepo.create({ ...payload, projectId });
@@ -61,8 +61,8 @@ module.exports = {
     /**
      *
      */
-    updateStory: (root, { input }, { auth }) => {
-      auth.checkProjectWrite();
+    updateStory: async (root, { input }, { auth }) => {
+      await auth.checkProjectWrite();
       const { projectId } = auth.tenant;
       const { id, payload } = input;
       return StoryRepo.update(id, projectId, payload);
