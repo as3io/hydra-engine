@@ -2,7 +2,6 @@ const bcrypt = require('bcrypt');
 const Promise = require('bluebird');
 const sessionRepo = require('./session');
 const User = require('../models/user');
-const fixtures = require('../fixtures');
 const TokenRepo = require('./token');
 const mailer = require('../services/mailer');
 
@@ -15,10 +14,6 @@ module.exports = {
   async sendWelcomeVerification(user) {
     const token = await this.createMagicLoginToken(user);
     return mailer.sendWelcomeVerification(user, token);
-  },
-
-  generate(count = 1) {
-    return fixtures(User, count);
   },
 
   /**
@@ -227,11 +222,5 @@ module.exports = {
     user.set('logins', user.get('logins') + 1);
     user.set('lastLoggedInAt', new Date());
     return user.save();
-  },
-
-  async seed({ count = 1 } = {}) {
-    const results = this.generate(count);
-    await Promise.all(results.all().map(model => model.save()));
-    return results;
   },
 };

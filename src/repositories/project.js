@@ -1,7 +1,5 @@
 const Promise = require('bluebird');
 const Model = require('../models/project');
-const OrganizationRepo = require('./organization');
-const fixtures = require('../fixtures');
 
 module.exports = {
   /**
@@ -68,23 +66,4 @@ module.exports = {
   remove(criteria) {
     return Model.remove(criteria);
   },
-
-  /**
-   *
-   * @param {number} [count=1]
-   * @return {object}
-   */
-  generate(count = 1, params) {
-    return fixtures(Model, count, params);
-  },
-
-  async seed({ count = 1, organizationCount = 1 } = {}) {
-    const organizations = await OrganizationRepo.seed({ count: organizationCount });
-    const results = this.generate(count, {
-      organizationId: () => organizations.random().id,
-    });
-    await Promise.all(results.all().map(model => model.save()));
-    return results;
-  },
-
 };

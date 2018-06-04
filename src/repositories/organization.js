@@ -2,7 +2,6 @@ const Promise = require('bluebird');
 const Model = require('../models/organization');
 const OrganizationMember = require('../models/organization-member');
 const TokenRepo = require('./token');
-const fixtures = require('../fixtures');
 const UserRepo = require('./user');
 const mailer = require('../services/mailer');
 
@@ -69,21 +68,6 @@ module.exports = {
    */
   remove(criteria) {
     return Model.remove(criteria);
-  },
-
-  /**
-   *
-   * @param {number} [count=1]
-   * @return {object}
-   */
-  generate(count = 1) {
-    return fixtures(Model, count);
-  },
-
-  async seed({ count = 1 } = {}) {
-    const results = this.generate(count);
-    await Promise.all(results.all().map(model => model.save()));
-    return results;
   },
 
   /**
