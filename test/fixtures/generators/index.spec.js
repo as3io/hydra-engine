@@ -9,7 +9,7 @@ describe('fixtures/generators', function() {
     'user',
     'project',
     'organization',
-    'organizationMember',
+    'organization-member',
     'story',
   ];
   it(`should only contain the ${cases.join(', ')} properties`, function(done) {

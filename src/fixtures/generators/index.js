@@ -8,6 +8,6 @@ module.exports = {
   user,
   project,
   organization,
-  organizationMember,
+  'organization-member': organizationMember,
   story,
 };
