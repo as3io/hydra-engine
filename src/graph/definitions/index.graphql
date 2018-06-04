@@ -12,9 +12,7 @@ type Query {
 
 type PageInfo {
   hasNextPage: Boolean!
-  hasPrevPage: Boolean!
   endCursor: Cursor
-  startCursor: Cursor
 }
 
 input PaginationInput {
