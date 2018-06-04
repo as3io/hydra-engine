@@ -13,7 +13,7 @@ describe('fixtures/generators/user', function() {
     { key: 'logins', cb: v => expect(v).be.a('number') },
     { key: 'lastLoggedInAt', cb: v => expect(v).be.a('date') },
     { key: 'isEmailVerified', cb: v => expect(v).be.a('boolean') },
-    { key: 'role', cb: v => expect(v).be.a('string') },
+    { key: 'api', cb: v => expect(v).be.an('object') },
     { key: 'photoURL', cb: v => expect(v).be.a('string') },
     { key: 'createdAt', cb: v => expect(v).be.a('date') },
     { key: 'updatedAt', cb: v => expect(v).be.a('date') },
