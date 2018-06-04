@@ -113,9 +113,9 @@ module.exports = {
      *
      */
     deleteSession: async (root, args, { auth }) => {
-      if (auth.isValid()) {
-        await SessionRepo.delete(auth.session);
-      }
+      auth.check();
+      const { id, uid } = auth.session;
+      await SessionRepo.delete(id, uid);
       return 'ok';
     },
 

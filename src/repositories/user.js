@@ -1,11 +1,11 @@
 const bcrypt = require('bcrypt');
 const Promise = require('bluebird');
+const { Pagination } = require('@limit0/mongoose-graphql-pagination');
 const sessionRepo = require('./session');
 const User = require('../models/user');
 const fixtures = require('../fixtures');
 const TokenRepo = require('./token');
 const mailer = require('../services/mailer');
-const { Pagination } = require('@limit0/mongoose-graphql-pagination');
 
 module.exports = {
   create(payload = {}) {
@@ -79,7 +79,7 @@ module.exports = {
     await this.verifyPassword(password, user.get('password'));
 
     // Create session.
-    const session = await sessionRepo.set({ uid: user.id });
+    const session = await sessionRepo.set(user.id);
 
     // Update login info
     await this.updateLoginInfo(user);
@@ -98,7 +98,7 @@ module.exports = {
     if (secret && secret !== user.get('api.secret')) throw new Error('The provided API secret is invalid.');
 
     // Create session.
-    const session = await sessionRepo.set({ uid: user.id, api: { key, secret } });
+    const session = await sessionRepo.set(user.id, { key, secret });
     return { user, session };
   },
 
@@ -114,7 +114,7 @@ module.exports = {
     if (!user) throw new Error('No user was found for the provided token.');
 
     // Create session.
-    const session = await sessionRepo.set({ uid: user.id });
+    const session = await sessionRepo.set(user.id);
     await TokenRepo.invalidate(token.id);
 
     // Update login info
