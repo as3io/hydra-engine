@@ -2,7 +2,7 @@ const bcrypt = require('bcrypt');
 const Promise = require('bluebird');
 const sessionService = require('../services/session');
 const User = require('../models/user');
-const TokenRepo = require('./token');
+const tokenGenerator = require('../services/token-generator');
 const mailer = require('../services/mailer');
 
 module.exports = {
@@ -102,14 +102,14 @@ module.exports = {
    * @return {Promise}
    */
   async loginWithMagicToken(jwt) {
-    const token = await TokenRepo.verify('magic-login', jwt);
+    const token = await tokenGenerator.verify('magic-login', jwt);
     const userId = token.payload.uid;
     const user = await this.findById(userId);
     if (!user) throw new Error('No user was found for the provided token.');
 
     // Create session.
     const session = await sessionService.set(user.id);
-    await TokenRepo.invalidate(token.id);
+    await tokenGenerator.invalidate(token.id);
 
     // Update login info
     user.emailVerified = true;
@@ -118,7 +118,7 @@ module.exports = {
   },
 
   createMagicLoginToken(user) {
-    return TokenRepo.create('magic-login', {
+    return tokenGenerator.create('magic-login', {
       uid: user.id,
     }, 60 * 60);
   },
@@ -143,14 +143,14 @@ module.exports = {
    * @return {Promise}
    */
   async resetPassword(jwt, password) {
-    const token = await TokenRepo.verify('password-reset', jwt);
+    const token = await tokenGenerator.verify('password-reset', jwt);
     const userId = token.payload.uid;
 
     const user = await this.findById(userId);
     if (!user) throw new Error('No user was found for the provided token.');
     user.set('password', password);
     await user.save();
-    await TokenRepo.invalidate(token.id);
+    await tokenGenerator.invalidate(token.id);
     return user;
   },
 
@@ -174,7 +174,7 @@ module.exports = {
     const user = await this.findByEmail(email);
     if (!user) return true;
 
-    const token = await TokenRepo.create('password-reset', {
+    const token = await tokenGenerator.create('password-reset', {
       uid: user.id,
     }, 60 * 60);
 

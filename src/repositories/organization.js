@@ -1,7 +1,7 @@
 const Promise = require('bluebird');
 const Model = require('../models/organization');
 const OrganizationMember = require('../models/organization-member');
-const TokenRepo = require('./token');
+const tokenGenerator = require('../services/token-generator');
 const UserRepo = require('./user');
 const mailer = require('../services/mailer');
 
@@ -98,7 +98,7 @@ module.exports = {
       role,
     });
 
-    const token = await TokenRepo.create('user-org-invitation', {
+    const token = await tokenGenerator.create('user-org-invitation', {
       uid: userId,
       oid: organizationId,
     }, 60 * 60 * 24 * 30);
@@ -110,14 +110,14 @@ module.exports = {
   },
 
   async acknowledgeUserInvite(jwt) {
-    const token = await TokenRepo.verify('user-org-invitation', jwt);
+    const token = await tokenGenerator.verify('user-org-invitation', jwt);
     const userId = token.payload.uid;
     const organizationId = token.payload.oid;
     const orgMember = await OrganizationMember.findOne({ userId, organizationId });
     if (!orgMember) throw new Error('No organization membership was found for the provided token.');
     orgMember.acceptedAt = new Date();
     await orgMember.save();
-    await TokenRepo.invalidate(token.id);
+    await tokenGenerator.invalidate(token.id);
     return orgMember;
   },
 };
