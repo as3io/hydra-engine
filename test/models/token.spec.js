@@ -16,11 +16,11 @@ describe('models/token', function() {
   describe('.action', function() {
     ['', ' ', null, undefined].forEach((value) => {
       it(`should be required and be rejected when the value is '${value}'`, function() {
-        return testRequiredField(Token, token, 'action', value);
+        return testRequiredField(token, 'action', value);
       });
     });
     it('should be trimmed.', function() {
-      return testTrimmedField(Token, token, 'action');
+      return testTrimmedField(token, 'action');
     });
   });
 
@@ -28,7 +28,7 @@ describe('models/token', function() {
     describe('.jti', function() {
       it('should be unique', async function() {
         const another = generateToken();
-        await testUniqueField(Token, token, another, 'payload.jti');
+        await testUniqueField(token, another, 'payload.jti');
       });
     });
   });
