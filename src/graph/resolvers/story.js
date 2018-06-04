@@ -54,8 +54,7 @@ module.exports = {
     createStory: async (root, { input }, { auth }) => {
       await auth.checkProjectWrite();
       const { projectId } = auth.tenant;
-      const { payload } = input;
-      return StoryRepo.create({ ...payload, projectId });
+      return StoryRepo.create({ ...input, projectId });
     },
 
     /**
