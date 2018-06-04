@@ -6,6 +6,7 @@ const crypto = require('crypto');
 const uuid = require('uuid/v4');
 const pushId = require('unique-push-id');
 const paginablePlugin = require('../plugins/paginable');
+const repositoryPlugin = require('../plugins/repository');
 
 const apiSchema = new Schema({
   key: {
@@ -85,6 +86,7 @@ const schema = new Schema({
 });
 
 schema.plugin(paginablePlugin);
+schema.plugin(repositoryPlugin);
 
 schema.statics.normalizeEmail = function normalizeEmail(email) {
   if (!email) return '';

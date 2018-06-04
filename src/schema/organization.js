@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
 const paginablePlugin = require('../plugins/paginable');
+const repositoryPlugin = require('../plugins/repository');
 
 const { Schema } = mongoose;
 
@@ -31,6 +32,7 @@ const schema = new Schema({
 }, { timestamps: true });
 
 schema.plugin(paginablePlugin);
+schema.plugin(repositoryPlugin);
 
 schema.pre('save', function setPhotoURL(next) {
   if (!this.photoURL) {

@@ -1,6 +1,7 @@
 const { Schema } = require('mongoose');
 const connection = require('../connections/mongoose');
 const paginablePlugin = require('../plugins/paginable');
+const repositoryPlugin = require('../plugins/repository');
 
 const schema = new Schema({
   name: {
@@ -28,6 +29,7 @@ const schema = new Schema({
 }, { timestamps: true });
 
 schema.plugin(paginablePlugin);
+schema.plugin(repositoryPlugin);
 
 schema.index({ organizationId: 1 });
 

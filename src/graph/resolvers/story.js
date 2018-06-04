@@ -1,6 +1,5 @@
 const { paginationResolvers } = require('@limit0/mongoose-graphql-pagination');
 const Story = require('../../models/story');
-const StoryRepo = require('../../repositories/story');
 
 module.exports = {
   /**
@@ -65,7 +64,7 @@ module.exports = {
       await auth.checkProjectWrite();
       const { projectId } = auth.tenant;
       const { id, payload } = input;
-      return StoryRepo.update(id, projectId, payload);
+      return Story.findAndSetUpdate(id, projectId, payload);
     },
   },
 };

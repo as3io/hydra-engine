@@ -1,6 +1,5 @@
 const { paginationResolvers } = require('@limit0/mongoose-graphql-pagination');
 const Project = require('../../models/project');
-const Repo = require('../../repositories/project');
 const MemberService = require('../../services/organization-member');
 const Organization = require('../../models/organization');
 
@@ -71,7 +70,7 @@ module.exports = {
       const { id, payload } = input;
       const canWrite = await MemberService.canWriteToProject(auth.user.id, organizationId, id);
       if (!canWrite) throw new Error('You do not have permission to write to this project.');
-      return Repo.update(id, payload);
+      return Project.findAndSetUpdate(id, payload);
     },
   },
 };

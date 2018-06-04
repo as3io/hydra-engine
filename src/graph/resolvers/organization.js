@@ -91,7 +91,7 @@ module.exports = {
       const { id, payload } = input;
       const canWrite = await MemberService.canWriteToOrg(auth.user.id, id);
       if (!canWrite) throw new Error('You do not have permission to write to this organization.');
-      return Repo.update(id, payload);
+      return Organization.findAndSetUpdate(id, payload);
     },
   },
 };

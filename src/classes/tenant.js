@@ -1,5 +1,5 @@
-const OrganizationRepo = require('../repositories/organization');
-const ProjectRepo = require('../repositories/project');
+const Organization = require('../models/organization');
+const Project = require('../models/project');
 
 class Tenant {
   constructor({ organizationId, projectId } = {}) {
@@ -9,13 +9,13 @@ class Tenant {
 
   getOrganization() {
     if (this.organization) return this.organization;
-    this.organization = OrganizationRepo.findById(this.organizationId);
+    this.organization = Organization.findById(this.organizationId);
     return this.organization;
   }
 
   getProject() {
     if (this.project) return this.project;
-    this.project = ProjectRepo.findById(this.projectId);
+    this.project = Project.findById(this.projectId);
     return this.project;
   }
 }

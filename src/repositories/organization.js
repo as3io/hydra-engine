@@ -6,21 +6,6 @@ const mailer = require('../services/mailer');
 module.exports = {
   /**
    *
-   * @param {string} id
-   * @param {object} payload
-   * @param {string} payload.name
-   * @return {Promise}
-   */
-  async update(id, { name, description, photoURL } = {}) {
-    if (!id) throw new Error('Unable to update organization: no ID was provided.');
-    const org = await this.findById(id);
-    if (!org) throw new Error(`Unable to update organization: no record was found for ID '${id}'`);
-    org.set({ name, description, photoURL });
-    return org.save();
-  },
-
-  /**
-   *
    */
   async inviteUserToOrg(organization, {
     email,
