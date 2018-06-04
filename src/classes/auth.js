@@ -26,6 +26,7 @@ class Auth {
   }
 
   async checkProjectRead() {
+    this.check();
     const { organizationId, projectId } = this.tenant;
     const isMember = await OrgMemberRepo.isProjectMember(this.user.id, organizationId, projectId);
     if (!isMember) throw new Error('You are not permitted to read from this project.');
@@ -33,6 +34,7 @@ class Auth {
   }
 
   async checkProjectWrite() {
+    this.check();
     const { organizationId, projectId } = this.tenant;
     const canWrite = await OrgMemberRepo.canWriteToProject(this.user.id, organizationId, projectId);
     if (!canWrite) throw new Error('You are not permitted to write to this project.');
@@ -41,6 +43,7 @@ class Auth {
   }
 
   async checkOrgRead() {
+    this.check();
     const { organizationId } = this.tenant;
     const isMember = await OrgMemberRepo.isOrgMember(this.user.id, organizationId);
     if (!isMember) throw new Error('You are not permitted to read from this organization.');
@@ -48,6 +51,7 @@ class Auth {
   }
 
   async checkOrgWrite() {
+    this.check();
     const { organizationId } = this.tenant;
     const canWrite = await OrgMemberRepo.canWriteToOrg(this.user.id, organizationId);
     if (!canWrite) throw new Error('You are not permitted to write to this organization.');
