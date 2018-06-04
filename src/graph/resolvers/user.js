@@ -19,11 +19,6 @@ module.exports = {
   /**
    *
    */
-  UserEdge: paginationResolvers.edge,
-
-  /**
-   *
-   */
   Query: {
     /**
      *

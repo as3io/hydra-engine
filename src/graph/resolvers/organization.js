@@ -29,11 +29,6 @@ module.exports = {
   /**
    *
    */
-  OrganizationEdge: paginationResolvers.edge,
-
-  /**
-   *
-   */
   Query: {
     /**
      *
