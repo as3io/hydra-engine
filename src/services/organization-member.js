@@ -1,7 +1,7 @@
 const OrganizationMember = require('../models/organization-member');
 const Project = require('../models/project');
 
-module.exports = {
+const OrgMemberService = () => ({
   /**
    * Retrieves the membership for the provided user and org IDs.
    * Will NOT error if the membership is not found, and instead will
@@ -186,4 +186,6 @@ module.exports = {
       acceptedAt: new Date(),
     });
   },
-};
+});
+
+module.exports = OrgMemberService();

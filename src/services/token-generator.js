@@ -4,7 +4,7 @@ const Token = require('../models/token');
 
 const { JWT_SECRET } = process.env;
 
-module.exports = {
+const TokenGenerator = () => ({
   /**
    * Creates an encoded JWT for the provided payload.
    * If the `jti` and `iat` values are not present in the payload, they will automatically be added.
@@ -59,4 +59,6 @@ module.exports = {
   invalidate(id) {
     return Token.remove({ _id: id });
   },
-};
+});
+
+module.exports = TokenGenerator();
