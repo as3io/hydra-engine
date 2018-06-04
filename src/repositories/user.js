@@ -162,6 +162,19 @@ module.exports = {
 
   /**
    *
+   * @param {string} id
+   * @param {string} password
+   * @return {Promise}
+   */
+  async setCurrentUserPassword(id, password) {
+    const user = await this.findById(id);
+    if (!user) throw new Error('No user was found!');
+    user.set('password', password);
+    return user.save();
+  },
+
+  /**
+   *
    */
   async sendPasswordResetEmail(email) {
     const user = await this.findByEmail(email);

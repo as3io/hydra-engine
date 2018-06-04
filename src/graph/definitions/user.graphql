@@ -8,6 +8,7 @@ type Query {
 type Mutation {
   createUser(input: CreateUserInput!): User
   loginWithMagicToken(token: String!): Authentication!
+  setCurrentUserPassword(password: String!): Boolean!
   resetPassword(input: ResetPasswordInput!): Boolean!
   sendPasswordResetEmail(email: String!): Boolean!
   loginUser(input: LoginInput!): Authentication
@@ -45,9 +46,11 @@ type User {
   photoURL: String
   hasPassword: Boolean
   memberships: [OrganizationMember]
+  api: UserApiKey
 }
 
 type UserApiKey {
+  id: String!
   key: String!
   secret: String!
 }

@@ -102,6 +102,16 @@ module.exports = {
     /**
      *
      */
+    setCurrentUserPassword: async (root, { password }, { auth }) => {
+      auth.check();
+      const { id } = auth.user;
+      await UserRepo.setCurrentUserPassword(id, password);
+      return true;
+    },
+
+    /**
+     *
+     */
     sendPasswordResetEmail: (root, { email }) => UserRepo.sendPasswordResetEmail(email),
 
     /**
