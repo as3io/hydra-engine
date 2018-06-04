@@ -8,6 +8,7 @@ const schema = new Schema({
   action: {
     type: String,
     required: true,
+    trim: true,
   },
 });
 
