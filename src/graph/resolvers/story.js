@@ -19,7 +19,7 @@ module.exports = {
       await auth.checkProjectRead();
       const { id } = input;
       const { projectId } = auth.tenant;
-      const story = await StoryRepo.findOne({ _id: id, projectId });
+      const story = await Story.findOne({ _id: id, projectId });
       if (!story) throw new Error(`No story record found for ID ${id}.`);
       return story;
     },
@@ -41,7 +41,7 @@ module.exports = {
       await auth.checkProjectRead();
       const { projectId } = auth.tenant;
       const criteria = { published: true, projectId };
-      return StoryRepo.paginate({ criteria, pagination, sort });
+      return Story.paginate({ criteria, pagination, sort });
     },
   },
 

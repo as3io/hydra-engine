@@ -120,7 +120,7 @@ module.exports = {
     deleteSession: async (root, args, { auth }) => {
       auth.check();
       const { id, uid } = auth.session;
-      await UserRepo.delete(id, uid);
+      await UserRepo.deleteSession(id, uid);
       return 'ok';
     },
 

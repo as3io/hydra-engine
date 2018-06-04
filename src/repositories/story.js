@@ -44,35 +44,11 @@ module.exports = {
   },
 
   /**
-   * @param {object} criteria
-   * @return {Promise}
-   */
-  find(criteria) {
-    return Story.find(criteria);
-  },
-
-  /**
-   * @param {object} criteria
-   * @return {Promise}
-   */
-  findOne(criteria) {
-    return Story.findOne(criteria);
-  },
-
-  /**
    * @param {string} id
    * @return {Promise}
    */
   async removeById(id) {
     if (!id) throw new Error('Unable to remove story: no ID was provided.');
     return this.remove({ _id: id });
-  },
-
-  /**
-   * @param {object} criteria
-   * @return {Promise}
-   */
-  remove(criteria) {
-    return Story.remove(criteria);
   },
 };

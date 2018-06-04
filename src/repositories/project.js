@@ -33,27 +33,11 @@ module.exports = {
   },
 
   /**
-   * @param {object} criteria
-   * @return {Promise}
-   */
-  find(criteria) {
-    return Model.find(criteria);
-  },
-
-  /**
    * @param {string} id
    * @return {Promise}
    */
   removeById(id) {
     if (!id) return Promise.reject(new Error('Unable to remove project: no ID was provided.'));
     return this.remove({ _id: id });
-  },
-
-  /**
-   * @param {object} criteria
-   * @return {Promise}
-   */
-  remove(criteria) {
-    return Model.remove(criteria);
   },
 };

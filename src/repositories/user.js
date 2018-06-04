@@ -43,10 +43,6 @@ module.exports = {
     return this.remove({ email: value });
   },
 
-  remove(criteria) {
-    return User.remove(criteria);
-  },
-
   /**
    *
    * @param {string} email
