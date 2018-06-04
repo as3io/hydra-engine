@@ -1,5 +1,3 @@
-const Promise = require('bluebird');
-const Model = require('../models/organization');
 const OrganizationMember = require('../models/organization-member');
 const tokenGenerator = require('../services/token-generator');
 const UserRepo = require('./user');

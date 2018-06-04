@@ -1,6 +1,3 @@
-const Promise = require('bluebird');
-const Model = require('../models/project');
-
 module.exports = {
   /**
    *

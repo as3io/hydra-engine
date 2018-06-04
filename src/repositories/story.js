@@ -1,5 +1,3 @@
-const Story = require('../models/story');
-
 module.exports = {
   /**
    *
