@@ -1,4 +1,5 @@
 const { Schema } = require('mongoose');
+const connection = require('../connections/mongoose');
 const bcrypt = require('bcrypt');
 const validator = require('validator');
 const crypto = require('crypto');
@@ -84,6 +85,17 @@ const schema = new Schema({
 });
 
 schema.plugin(paginablePlugin);
+
+schema.statics.normalizeEmail = function normalizeEmail(email) {
+  if (!email) return '';
+  return String(email).trim().toLowerCase();
+};
+
+schema.statics.findByEmail = async function findByEmail(value) {
+  const email = connection.model('user').normalizeEmail(value);
+  if (!email) throw new Error('Unable to find user: no email address was provided.');
+  return this.findOne({ email });
+};
 
 /**
  * Indexes

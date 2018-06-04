@@ -1,5 +1,4 @@
 const bcrypt = require('bcrypt');
-const Promise = require('bluebird');
 const sessionService = require('../services/session');
 const User = require('../models/user');
 const tokenGenerator = require('../services/token-generator');
@@ -14,22 +13,6 @@ module.exports = {
   /**
    *
    * @param {string} email
-   * @return {Promise}
-   */
-  findByEmail(email) {
-    const value = this.normalizeEmail(email);
-    if (!value) return Promise.reject(new Error('Unable to find user: no email address was provided.'));
-    return User.findOne({ email: value });
-  },
-
-  normalizeEmail(email) {
-    if (!email) return '';
-    return String(email).trim().toLowerCase();
-  },
-
-  /**
-   *
-   * @param {string} email
    * @param {string} password
    * @return {Promise}
    */
@@ -39,7 +22,7 @@ module.exports = {
     if (!password) throw new Error('Unable to login user. No password was provided.');
 
     // Load user from database.
-    const user = await this.findByEmail(email);
+    const user = await User.findByEmail(email);
     if (!user) throw new Error('No user was found for the provided email address.');
 
     if (!user.get('password')) throw new Error('A password has not yet been set. An email has been sent providing further instructions.');
@@ -103,7 +86,7 @@ module.exports = {
    * @param {string} email
    */
   async sendMagicLoginEmail(email) {
-    const user = await this.findByEmail(email);
+    const user = await User.findByEmail(email);
     if (!user) return true;
 
     const token = await this.createMagicLoginToken(user);
@@ -146,7 +129,7 @@ module.exports = {
    *
    */
   async sendPasswordResetEmail(email) {
-    const user = await this.findByEmail(email);
+    const user = await User.findByEmail(email);
     if (!user) return true;
 
     const token = await tokenGenerator.create('password-reset', {

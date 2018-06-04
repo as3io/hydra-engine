@@ -1,6 +1,6 @@
 const OrganizationMember = require('../models/organization-member');
+const User = require('../models/user');
 const tokenGenerator = require('../services/token-generator');
-const UserRepo = require('./user');
 const mailer = require('../services/mailer');
 
 module.exports = {
@@ -29,9 +29,9 @@ module.exports = {
     role,
     projectRoles,
   } = {}) {
-    let user = await UserRepo.findByEmail(email);
+    let user = await User.findByEmail(email);
     if (!user) {
-      user = await UserRepo.create({ email, givenName, familyName });
+      user = await User.create({ email, givenName, familyName });
       await user.save();
     }
 
