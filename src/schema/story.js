@@ -1,7 +1,6 @@
-const mongoose = require('mongoose');
+const { Schema } = require('mongoose');
+const connection = require('../connections/mongoose');
 const slug = require('slug');
-
-const { Schema } = mongoose;
 
 const schema = new Schema({
   title: {
@@ -34,7 +33,7 @@ const schema = new Schema({
     required: true,
     validate: {
       async validator(v) {
-        const doc = await mongoose.model('project').findOne({ _id: v }, { _id: 1 });
+        const doc = await connection.model('project').findOne({ _id: v }, { _id: 1 });
         if (doc) return true;
         return false;
       },
