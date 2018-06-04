@@ -12,7 +12,7 @@ const generateProject = async () => {
   return fixtures(Project, 1, { organizationId }).one();
 };
 
-describe('schema/project', function() {
+describe('models/project', function() {
   before(async function() {
     await Organization.remove();
     await Project.remove();
