@@ -22,29 +22,6 @@ module.exports = {
   },
 
   /**
-   * Find an Model record by ID.
-   *
-   * Will return a rejected promise if no ID was provided.
-   * Will NOT reject the promise if the record cannnot be found.
-   *
-   * @param {string} id
-   * @return {Promise}
-   */
-  async findById(id) {
-    if (!id) throw new Error('Unable to find organization: no ID was provided.');
-    return Model.findOne({ _id: id });
-  },
-
-  /**
-   * @param {string} id
-   * @return {Promise}
-   */
-  removeById(id) {
-    if (!id) return Promise.reject(new Error('Unable to remove organization: no ID was provided.'));
-    return this.remove({ _id: id });
-  },
-
-  /**
    *
    */
   async inviteUserToOrg(organization, {

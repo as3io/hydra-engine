@@ -30,7 +30,7 @@ module.exports = {
       const member = await MemberService.isProjectMember(auth.user.id, organizationId, id);
       if (!member) throw new Error('You do not have permission to read this project.');
 
-      const record = await Repo.findById(id);
+      const record = await Project.findById(id);
       if (!record) throw new Error(`No project record found for ID ${id}.`);
       return record;
     },

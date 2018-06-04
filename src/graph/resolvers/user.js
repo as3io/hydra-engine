@@ -26,7 +26,7 @@ module.exports = {
     user: async (root, { input }, { auth }) => {
       auth.check();
       const { id } = input;
-      const record = await UserRepo.findById(id);
+      const record = await User.findById(id);
       if (!record) throw new Error(`No user record found for ID ${id}.`);
       return record;
     },

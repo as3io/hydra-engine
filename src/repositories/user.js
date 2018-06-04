@@ -29,22 +29,6 @@ module.exports = {
 
   /**
    *
-   * @param {string} id
-   * @return {Promise}
-   */
-  findById(id) {
-    if (!id) return Promise.reject(new Error('Unable to find user: no ID was provided.'));
-    return User.findOne({ _id: id });
-  },
-
-  removeByEmail(email) {
-    const value = this.normalizeEmail(email);
-    if (!value) return Promise.reject(new Error('Unable to remove user: no email address was provided.'));
-    return this.remove({ email: value });
-  },
-
-  /**
-   *
    * @param {string} email
    * @param {string} password
    * @return {Promise}
@@ -95,7 +79,7 @@ module.exports = {
   async loginWithMagicToken(jwt) {
     const token = await tokenGenerator.verify('magic-login', jwt);
     const userId = token.payload.uid;
-    const user = await this.findById(userId);
+    const user = await User.findById(userId);
     if (!user) throw new Error('No user was found for the provided token.');
 
     // Create session.
@@ -137,7 +121,7 @@ module.exports = {
     const token = await tokenGenerator.verify('password-reset', jwt);
     const userId = token.payload.uid;
 
-    const user = await this.findById(userId);
+    const user = await User.findById(userId);
     if (!user) throw new Error('No user was found for the provided token.');
     user.set('password', password);
     await user.save();
@@ -152,7 +136,7 @@ module.exports = {
    * @return {Promise}
    */
   async setCurrentUserPassword(id, password) {
-    const user = await this.findById(id);
+    const user = await User.findById(id);
     if (!user) throw new Error('No user was found!');
     user.set('password', password);
     return user.save();
@@ -182,7 +166,7 @@ module.exports = {
   async retrieveSession(token) {
     const session = await sessionService.get(token);
     // Ensure user still exists/refresh the user data.
-    const user = await this.findById(session.uid);
+    const user = await User.findById(session.uid);
     if (!user) throw new Error('Unable to retrieve session: the provided user could not be found.');
     if (session.api) this.checkApiCredentials(session.api, user);
     return { user, session };

@@ -28,27 +28,4 @@ module.exports = {
     });
     return story.save();
   },
-
-  /**
-   * Find an Story record by ID.
-   *
-   * Will return a rejected promise if no ID was provided.
-   * Will NOT reject the promise if the record cannnot be found.
-   *
-   * @param {string} id
-   * @return {Promise}
-   */
-  async findById(id) {
-    if (!id) throw new Error('Unable to find story: no ID was provided.');
-    return Story.findOne({ _id: id });
-  },
-
-  /**
-   * @param {string} id
-   * @return {Promise}
-   */
-  async removeById(id) {
-    if (!id) throw new Error('Unable to remove story: no ID was provided.');
-    return this.remove({ _id: id });
-  },
 };
