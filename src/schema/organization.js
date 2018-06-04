@@ -6,9 +6,13 @@ const { Schema } = mongoose;
 const schema = new Schema({
   name: {
     type: String,
+    trim: true,
     required: true,
   },
-  description: String,
+  description: {
+    type: String,
+    trim: true,
+  },
   photoURL: {
     type: String,
     trim: true,
@@ -16,7 +20,7 @@ const schema = new Schema({
       validator(v) {
         if (!v) return true;
         return validator.isURL(v, {
-          protocols: ['http', 'https'],
+          protocols: ['https'],
           require_protocol: true,
         });
       },
