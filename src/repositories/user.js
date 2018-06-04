@@ -1,6 +1,6 @@
 const bcrypt = require('bcrypt');
 const Promise = require('bluebird');
-const sessionRepo = require('./session');
+const sessionService = require('../services/session');
 const User = require('../models/user');
 const TokenRepo = require('./token');
 const mailer = require('../services/mailer');
@@ -73,7 +73,7 @@ module.exports = {
     await this.verifyPassword(password, user.get('password'));
 
     // Create session.
-    const session = await sessionRepo.set(user.id);
+    const session = await sessionService.set(user.id);
 
     // Update login info
     await this.updateLoginInfo(user);
@@ -92,7 +92,7 @@ module.exports = {
     if (secret && secret !== user.get('api.secret')) throw new Error('The provided API secret is invalid.');
 
     // Create session.
-    const session = await sessionRepo.set(user.id, { key, secret });
+    const session = await sessionService.set(user.id, { key, secret });
     return { user, session };
   },
 
@@ -108,7 +108,7 @@ module.exports = {
     if (!user) throw new Error('No user was found for the provided token.');
 
     // Create session.
-    const session = await sessionRepo.set(user.id);
+    const session = await sessionService.set(user.id);
     await TokenRepo.invalidate(token.id);
 
     // Update login info
@@ -182,13 +182,30 @@ module.exports = {
     return true;
   },
 
+  /**
+   * Retrieves a user session for the provided JWT token.
+   *
+   * @async
+   * @param {string} token The JWT.
+   */
   async retrieveSession(token) {
-    const session = await sessionRepo.get(token);
+    const session = await sessionService.get(token);
     // Ensure user still exists/refresh the user data.
     const user = await this.findById(session.uid);
     if (!user) throw new Error('Unable to retrieve session: the provided user could not be found.');
     if (session.api) this.checkApiCredentials(session.api, user);
     return { user, session };
+  },
+
+  /**
+   * Deletes a user session.
+   *
+   * @async
+   * @param {string} id The session ID.
+   * @param {string} uid The user ID.
+   */
+  deleteSession(id, uid) {
+    return sessionService.delete(id, uid);
   },
 
   /**

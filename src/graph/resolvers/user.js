@@ -2,7 +2,6 @@ const { paginationResolvers } = require('@limit0/mongoose-graphql-pagination');
 const User = require('../../models/user');
 const UserRepo = require('../../repositories/user');
 const OrganizationMember = require('../../models/organization-member');
-const SessionRepo = require('../../repositories/session');
 
 module.exports = {
   /**
@@ -121,7 +120,7 @@ module.exports = {
     deleteSession: async (root, args, { auth }) => {
       auth.check();
       const { id, uid } = auth.session;
-      await SessionRepo.delete(id, uid);
+      await UserRepo.delete(id, uid);
       return 'ok';
     },
 

@@ -7,7 +7,7 @@ const redis = require('../connections/redis');
 
 const { SESSION_GLOBAL_SECRET, SESSION_NAMESPACE, SESSION_EXPIRATION } = process.env;
 
-module.exports = {
+const Session = () => ({
   /**
    * @async
    * @param {string} id The session ID.
@@ -130,4 +130,6 @@ module.exports = {
   prefixUserId(uid) {
     return `session:uid:${uid}`;
   },
-};
+});
+
+module.exports = Session();
