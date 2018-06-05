@@ -186,4 +186,31 @@ describe('services/session', function() {
       expect(session.token).to.equal(token);
     });
   });
+
+  describe('#delete', function() {
+    beforeEach(async function() {
+      sandbox.spy(redis, 'delAsync');
+      sandbox.spy(redis, 'sremAsync');
+    });
+    afterEach(async function() {
+      sandbox.restore();
+    });
+
+    it('should reject when no id is provided.', async function() {
+      await expect(sessionService.delete()).to.be.rejectedWith(Error, 'Unable to delete session: both a session and user ID are required.');
+    });
+    it('should reject when no uid is provided.', async function() {
+      await expect(sessionService.delete('1234')).to.be.rejectedWith(Error, 'Unable to delete session: both a session and user ID are required.');
+    });
+    it('should deleted the session data from redis.', async function() {
+      const id = '1234';
+      const uid = '5678';
+
+      await sessionService.delete(id, uid);
+      sandbox.assert.calledOnce(redis.delAsync);
+      sandbox.assert.calledWith(redis.delAsync, `session:id:${id}`);
+      sandbox.assert.calledOnce(redis.sremAsync);
+      sandbox.assert.calledWith(redis.sremAsync, `session:uid:${uid}`, id);
+    });
+  });
 });
