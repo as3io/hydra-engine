@@ -3,8 +3,11 @@
   "version": "0.1.0",
   "main": "src/index.js",
   "repository": "https://github.com/cygnusb2b/hydra-engine.git",
-  "author": "Josh Worden <solocommand@gmail.com>",
-  "license": "Proprietary",
+  "contributors": [
+    "Jacob Bare <jacob@limit0.io>",
+    "Josh Worden <solocommand@gmail.com>"
+  ],
+  "license": "MIT",
   "private": true,
   "scripts": {
     "pretest": "yarn run posttest && $npm_package_docker_test_install",
