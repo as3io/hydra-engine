@@ -7,7 +7,7 @@ const Seed = require('../../src/fixtures/seed');
 
 const sandbox = sinon.createSandbox();
 
-const stubHash = () => sandbox.stub(bcrypt, 'hash').resolves('$2a$04$jdkrJXkU92FIF4NcprNKWOcMKoOG28ELDrW2HBpDZFSmY/vxOj4VW');
+const stubBcryptHash = () => sandbox.stub(bcrypt, 'hash').resolves('$2a$04$jdkrJXkU92FIF4NcprNKWOcMKoOG28ELDrW2HBpDZFSmY/vxOj4VW');
 
 describe('services/user', function() {
   describe('#login', function() {
@@ -47,7 +47,47 @@ describe('services/user', function() {
   });
 
   describe('#retrieveSession', function() {
-    it('should be tested');
+    let user;
+    beforeEach(async function() {
+      stubBcryptHash();
+      user = await Seed.users(1);
+      sandbox.stub(sessionService, 'get')
+        .withArgs('token-value').resolves({ uid: user.id })
+        .withArgs('token-value-with-api').resolves({ uid: user.id, api: user.api })
+      ;
+      sandbox.stub(userService, 'checkApiCredentials').callsFake(() => true);
+    });
+    afterEach(async function() {
+      await User.remove();
+      sandbox.restore();
+    });
+
+    it('should reject when the user can no longer be found.', async function() {
+      await User.remove({ _id: user.id });
+      await expect(userService.retrieveSession('token-value')).to.be.rejectedWith(Error, 'Unable to retrieve session: the provided user could not be found.');
+      sandbox.assert.calledOnce(sessionService.get);
+      sandbox.assert.calledWith(sessionService.get, 'token-value');
+    });
+
+    it('should return the user and session objects.', async function() {
+      const promise = userService.retrieveSession('token-value');
+      await expect(promise).to.eventually.be.an('object').with.all.keys(['user', 'session']);
+      const result = await promise;
+      expect(result.user.id.toString()).to.equal(user.id.toString());
+      expect(result.session.uid.toString()).to.equal(user.id.toString());
+    });
+
+    it('should should not check for api credentials when not in the session.', async function() {
+      const promise = userService.retrieveSession('token-value');
+      await expect(promise).to.be.fulfilled;
+      sandbox.assert.notCalled(userService.checkApiCredentials);
+    });
+
+    it('should should check for api credentials when in the session.', async function() {
+      const promise = userService.retrieveSession('token-value-with-api');
+      await expect(promise).to.be.fulfilled;
+      sandbox.assert.calledOnce(userService.checkApiCredentials);
+    });
   });
 
   describe('#deleteSession', function() {
@@ -104,7 +144,7 @@ describe('services/user', function() {
 
   describe('#updateLoginInfo', function() {
     before(async function() {
-      stubHash();
+      stubBcryptHash();
     });
     after(async function() {
       await User.remove();
