@@ -1,10 +1,10 @@
 const { paginationResolvers } = require('@limit0/mongoose-graphql-pagination');
-const Repo = require('../../repositories/organization');
-const OrganizationMember = require('../../models/organization-member');
-const MemberService = require('../../services/organization-member');
 const Organization = require('../../models/organization');
+const OrganizationMember = require('../../models/organization-member');
 const Project = require('../../models/project');
 const User = require('../../models/user');
+const orgService = require('../../services/organization');
+const memberService = require('../../services/organization-member');
 
 module.exports = {
   /**
@@ -36,7 +36,7 @@ module.exports = {
     organization: async (root, { input }, { auth }) => {
       auth.check();
       const { id } = input;
-      const member = await MemberService.isOrgMember(auth.user.id, id);
+      const member = await memberService.isOrgMember(auth.user.id, id);
       if (!member) throw new Error('You do not have permission to read this organization.');
 
       const record = await Organization.findById(id);
@@ -49,7 +49,7 @@ module.exports = {
      */
     allOrganizations: async (root, { pagination, sort }, { auth }) => {
       auth.check();
-      const organizationIds = await MemberService.getUserOrgIds(auth.user.id);
+      const organizationIds = await memberService.getUserOrgIds(auth.user.id);
       const criteria = { _id: { $in: organizationIds } };
       return Organization.paginate({ pagination, sort, criteria });
     },
@@ -67,7 +67,7 @@ module.exports = {
       auth.checkApiWrite();
       const { name } = input;
       const organization = await Organization.create({ name });
-      await MemberService.createOrgOwner(auth.user.id, organization.id);
+      await memberService.createOrgOwner(auth.user.id, organization.id);
       return organization;
     },
 
@@ -77,10 +77,10 @@ module.exports = {
     inviteUserToOrg: async (root, { input }, { auth }) => {
       await auth.checkOrgWrite();
       const organization = await auth.tenant.getOrganization();
-      return Repo.inviteUserToOrg(organization, input);
+      return orgService.inviteUserToOrg(organization, input);
     },
 
-    acknowledgeUserInvite: (root, { token }) => Repo.acknowledgeUserInvite(token),
+    acknowledgeUserInvite: (root, { token }) => orgService.acknowledgeUserInvite(token),
 
     /**
      *
@@ -89,7 +89,7 @@ module.exports = {
       auth.check();
       auth.checkApiWrite();
       const { id, payload } = input;
-      const canWrite = await MemberService.canWriteToOrg(auth.user.id, id);
+      const canWrite = await memberService.canWriteToOrg(auth.user.id, id);
       if (!canWrite) throw new Error('You do not have permission to write to this organization.');
       return Organization.findAndSetUpdate(id, payload);
     },

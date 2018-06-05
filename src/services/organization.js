@@ -3,9 +3,13 @@ const User = require('../models/user');
 const tokenGenerator = require('../services/token-generator');
 const mailer = require('../services/mailer');
 
-module.exports = {
+const OrganizationService = () => ({
   /**
+   * Invites a user to the provided organization.
+   * If the user does not currently exist, it is created.
    *
+   * @param {Organization} organization
+   * @param {object} userParams
    */
   async inviteUserToOrg(organization, {
     email,
@@ -43,6 +47,11 @@ module.exports = {
     return orgMember;
   },
 
+  /**
+   * Acknowledges that a user accepted an org invitation, if the token is valid.
+   *
+   * @param {string} jwt The user invitation JWT.
+   */
   async acknowledgeUserInvite(jwt) {
     const token = await tokenGenerator.verify('user-org-invitation', jwt);
     const userId = token.payload.uid;
@@ -54,4 +63,6 @@ module.exports = {
     await tokenGenerator.invalidate(token.id);
     return orgMember;
   },
-};
+});
+
+module.exports = OrganizationService();
