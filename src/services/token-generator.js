@@ -2,8 +2,6 @@ const jwt = require('jsonwebtoken');
 const uuid = require('uuid/v4');
 const Token = require('../models/token');
 
-const { JWT_SECRET } = process.env;
-
 const TokenGenerator = () => ({
   /**
    * Creates an encoded JWT for the provided payload.
@@ -17,18 +15,19 @@ const TokenGenerator = () => ({
    * @param {number} ttl The token TTL, in seconds
    */
   async create(action, payload = {}, ttl) {
+    if (!action) throw new Error('Unable to create token: no action was provided.');
     const now = new Date();
     const iat = Math.floor(now.valueOf() / 1000);
 
     const exp = ttl ? iat + ttl : undefined;
+    const initial = { jti: uuid(), iat };
+    if (exp) initial.exp = exp;
 
     const toSign = {
-      jti: uuid(),
-      iat,
-      exp,
+      ...initial,
       ...payload,
     };
-    const token = jwt.sign(toSign, JWT_SECRET);
+    const token = jwt.sign(toSign, this.secret);
     await Token.create({ action, payload: toSign });
     return token;
   },
@@ -43,7 +42,7 @@ const TokenGenerator = () => ({
   async verify(action, encoded) {
     if (!action) throw new Error('Unable to verify token: no action was provided.');
     if (!encoded) throw new Error('Unable to verify token: no value was provided.');
-    const verified = jwt.verify(encoded, JWT_SECRET, { algorithms: ['HS256'] });
+    const verified = jwt.verify(encoded, this.secret, { algorithms: ['HS256'] });
 
     const token = await Token.findOne({ 'payload.jti': verified.jti, action });
     if (!token) throw new Error('The provided token was either not found or is no longer valid.');
@@ -56,8 +55,15 @@ const TokenGenerator = () => ({
    * @async
    * @param {string} id
    */
-  invalidate(id) {
+  async invalidate(id) {
+    if (!id) throw new Error('Unable to invalidate token: no ID was provided.');
     return Token.remove({ _id: id });
+  },
+
+  get secret() {
+    const { JWT_SECRET } = process.env;
+    if (!JWT_SECRET) throw new Error('Unable to handle token: no value was provided for the JWT_SECRET.');
+    return JWT_SECRET;
   },
 });
 
