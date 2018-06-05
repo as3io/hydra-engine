@@ -2,8 +2,12 @@ require('../connections');
 const bcrypt = require('bcrypt');
 const userService = require('../../src/services/user');
 const sessionService = require('../../src/services/session');
+const User = require('../../src/models/user');
+const Seed = require('../../src/fixtures/seed');
 
 const sandbox = sinon.createSandbox();
+
+const stubHash = () => sandbox.stub(bcrypt, 'hash').resolves('$2a$04$jdkrJXkU92FIF4NcprNKWOcMKoOG28ELDrW2HBpDZFSmY/vxOj4VW');
 
 describe('services/user', function() {
   describe('#login', function() {
@@ -80,6 +84,25 @@ describe('services/user', function() {
   });
 
   describe('#updateLoginInfo', function() {
-    it('should be tested');
+    before(async function() {
+      stubHash();
+    });
+    after(async function() {
+      await User.remove();
+      sandbox.restore();
+    });
+    it('should updated the user login fields.', async function() {
+      const user = await Seed.users(1);
+      user.set({
+        logins: 0,
+        lastLoggedInAt: undefined,
+      })
+      await user.save();
+      const promise = userService.updateLoginInfo(user);
+      await expect(promise).to.eventually.be.an('object');
+      const result = await promise;
+      expect(result.logins).to.equal(1);
+      expect(result.lastLoggedInAt).to.be.an.instanceOf(Date);
+    });
   });
 });
