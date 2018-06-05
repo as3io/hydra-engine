@@ -12,7 +12,7 @@ const UserService = () => ({
    * @param {string} password The user's (cleartext) password.
    */
   async login(email, password) {
-    // @todo Should login be prevent if email is not verified?
+    // @todo Should login be prevented if email is not verified?
     if (!password) throw new Error('Unable to login user. No password was provided.');
 
     // Load user from database.
