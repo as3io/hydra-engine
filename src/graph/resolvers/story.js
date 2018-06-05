@@ -19,7 +19,7 @@ module.exports = {
       const { id } = input;
       const { projectId } = auth.tenant;
       const story = await Story.findOne({ _id: id, projectId });
-      if (!story) throw new Error(`No story record found for ID ${id}.`);
+      if (!story) throw new Error(`No story record found in project for ID ${id}.`);
       return story;
     },
 
@@ -64,7 +64,10 @@ module.exports = {
       await auth.checkProjectWrite();
       const { projectId } = auth.tenant;
       const { id, payload } = input;
-      return Story.findAndSetUpdate(id, projectId, payload);
+      const story = await Story.findOne({ _id: id, projectId });
+      if (!story) throw new Error(`No story record found in project for ID ${id}.`);
+      story.set(payload);
+      return story.save();
     },
   },
 };
