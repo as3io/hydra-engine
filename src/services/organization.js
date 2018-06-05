@@ -1,3 +1,4 @@
+const Organization = require('../models/organization');
 const OrganizationMember = require('../models/organization-member');
 const User = require('../models/user');
 const tokenGenerator = require('../services/token-generator');
@@ -18,6 +19,8 @@ const OrganizationService = () => ({
     role,
     projectRoles,
   } = {}) {
+    if (!email) throw new Error('Unable to invite user to org: No email address was provided.');
+    if (!(organization instanceof Organization)) throw new Error('Unable to invite user to org: No organization was provided.');
     let user = await User.findByEmail(email);
     if (!user) {
       user = await User.create({ email, givenName, familyName });
