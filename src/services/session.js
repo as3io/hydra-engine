@@ -1,11 +1,8 @@
 const Promise = require('bluebird');
 const jwt = require('jsonwebtoken');
-const uuidv4 = require('uuid/v4');
-const uuidv5 = require('uuid/v5');
+const uuid = require('../utils/wrap-uuid');
 const bcrypt = require('bcrypt');
 const redis = require('../connections/redis');
-
-const { SESSION_GLOBAL_SECRET, SESSION_NAMESPACE, SESSION_EXPIRATION } = process.env;
 
 const Session = () => ({
   /**
@@ -13,7 +10,7 @@ const Session = () => ({
    * @param {string} id The session ID.
    * @param {string} uid The user ID.
    */
-  delete(id, uid) {
+  async delete(id, uid) {
     if (!id || !uid) throw new Error('Unable to delete session: both a session and user ID are required.');
     const delSession = redis.delAsync(this.prefixSessionId(id));
     const removeId = redis.sremAsync(this.prefixUserId(uid), id);
@@ -61,20 +58,20 @@ const Session = () => ({
    * @param {?object} api Optional API key/secret (if using the API)
    */
   async set(uid, api) {
-    if (!uid) throw new Error('The user ID is required.');
+    if (!uid) throw new Error('Unable to set session: no user ID was provided.');
 
     const now = new Date();
     const iat = Math.floor(now.valueOf() / 1000);
 
-    const userSecret = await bcrypt.hash(uuidv4(), 5);
+    const userSecret = await bcrypt.hash(uuid.v4(), 5);
 
     const ts = now.valueOf();
     const sid = this.createSessionId(uid, ts);
-    const exp = iat + Number(SESSION_EXPIRATION);
+    const exp = iat + Number(this.expires);
     const secret = this.createSecret(userSecret);
     const token = jwt.sign({ jti: sid, exp, iat }, secret);
 
-    await redis.setexAsync(this.prefixSessionId(sid), SESSION_EXPIRATION, JSON.stringify({
+    await redis.setexAsync(this.prefixSessionId(sid), this.expires, JSON.stringify({
       id: sid,
       ts,
       uid,
@@ -84,7 +81,7 @@ const Session = () => ({
 
     const memberKey = this.prefixUserId(uid);
     const addUserId = redis.saddAsync(memberKey, sid);
-    const updateExpires = redis.expireAsync(memberKey, SESSION_EXPIRATION);
+    const updateExpires = redis.expireAsync(memberKey, this.expires);
     await Promise.join(addUserId, updateExpires);
 
     // Return the public session.
@@ -98,13 +95,35 @@ const Session = () => ({
     };
   },
 
+  get globalSecret() {
+    const { SESSION_GLOBAL_SECRET } = process.env;
+    if (!SESSION_GLOBAL_SECRET) throw new Error('No value was provided for the SESSION_GLOBAL_SECRET');
+    return SESSION_GLOBAL_SECRET;
+  },
+
+  get namespace() {
+    const { SESSION_NAMESPACE } = process.env;
+    if (!this.isUUID(SESSION_NAMESPACE)) throw new Error('An invalid value was provided for the SESSION_NAMESPACE');
+    return SESSION_NAMESPACE;
+  },
+
+  get expires() {
+    const { SESSION_EXPIRATION } = process.env;
+    if (!SESSION_EXPIRATION) throw new Error('No value was provided for the SESSION_EXPIRATION');
+    return SESSION_EXPIRATION;
+  },
+
+  isUUID(value) {
+    return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(value);
+  },
+
   /**
    * @private
    * @param {string} uid
    * @param {number} timestamp
    */
   createSessionId(uid, timestamp) {
-    return uuidv5(`${uid}.${timestamp}`, SESSION_NAMESPACE);
+    return uuid.v5(`${uid}.${timestamp}`, this.namespace);
   },
 
   /**
@@ -112,7 +131,7 @@ const Session = () => ({
    * @param {string} userSecret
    */
   createSecret(userSecret) {
-    return `${userSecret}.${SESSION_GLOBAL_SECRET}`;
+    return `${userSecret}.${this.globalSecret}`;
   },
 
   /**
