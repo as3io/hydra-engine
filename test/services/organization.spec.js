@@ -6,22 +6,26 @@ const Project = require('../../src/models/project');
 const Token = require('../../src/models/token');
 const mailer = require('../../src/services/mailer');
 const orgService = require('../../src/services/organization');
+const tokenGenerator = require('../../src/services/token-generator');
 
 const sandbox = sinon.createSandbox();
 
-describe.only('services/organization', function() {
+describe('services/organization', function() {
+  before(async function() {
+    await Token.remove();
+    await Organization.remove();
+    await OrganizationMember.remove();
+    await User.remove();
+  });
+  after(async function() {
+    await Organization.remove();
+    await Token.remove();
+    await User.remove();
+    await OrganizationMember.remove();
+  });
 
   describe('#inviteUserToOrg', function() {
-    before(async function() {
-      await Token.remove();
-      await Organization.remove();
-      await OrganizationMember.remove();
-      await User.remove();
-    });
-    after(async function() {
-      await Organization.remove();
-      await Token.remove();
-    });
+
 
     let payload;
     let organization;
@@ -112,6 +116,45 @@ describe.only('services/organization', function() {
   });
 
   describe('#acknowledgeUserInvite', function() {
+    let organization;
+    let user;
+    beforeEach(async function() {
+      organization = await Seed.organizations(1);
+      user = await Seed.users(1);
+      sandbox.stub(tokenGenerator, 'verify').resolves({
+        id: '1234',
+        payload: {
+          uid: user.id.toString(),
+          oid: organization.id.toString(),
+        }
+      });
+      sandbox.stub(tokenGenerator, 'invalidate').resolves();
+    });
+    afterEach(async function() {
+      sandbox.restore();
+    });
+    after(async function() {
+      await Organization.remove();
+      await OrganizationMember.remove();
+      await User.remove();
+    });
 
+    it('should reject when no org membership was found for the token.', async function() {
+      await expect(orgService.acknowledgeUserInvite('some-token')).to.be.rejectedWith(Error, 'No organization membership was found for the provided token.');
+      sinon.assert.calledOnce(tokenGenerator.verify);
+      sinon.assert.calledWith(tokenGenerator.verify, 'user-org-invitation', 'some-token');
+      sinon.assert.notCalled(tokenGenerator.invalidate);
+    });
+    it('should update the org member accepted date and invalidate the token.', async function() {
+      const member = await OrganizationMember.create({ userId: user.id, organizationId: organization.id, acceptedAt: null });
+      expect(member.acceptedAt).to.be.null;
+      const promise = orgService.acknowledgeUserInvite('some-token');
+      await expect(promise).to.eventually.be.an('object');
+      const result = await promise;
+      expect(result.id.toString()).to.equal(member.id.toString());
+      expect(result.acceptedAt).to.be.an.instanceOf(Date);
+      sinon.assert.calledOnce(tokenGenerator.invalidate);
+      sinon.assert.calledWith(tokenGenerator.invalidate, '1234');
+    });
   });
 });
