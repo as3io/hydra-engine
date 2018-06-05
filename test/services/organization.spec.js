@@ -1,3 +1,4 @@
+require('../connections');
 const Seed = require('../../src/fixtures/seed');
 const Organization = require('../../src/models/organization');
 const OrganizationMember = require('../../src/models/organization-member');

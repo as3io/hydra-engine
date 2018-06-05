@@ -1,3 +1,4 @@
+require('../connections');
 const generator = require('../../src/services/token-generator');
 const Token = require('../../src/models/token');
 const jwt = require('jsonwebtoken');

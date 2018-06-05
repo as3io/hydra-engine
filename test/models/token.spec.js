@@ -1,3 +1,4 @@
+require('../connections');
 const Token = require('../../src/models/token');
 const { testUniqueField, testRequiredField, testTrimmedField } = require('./utils');
 
