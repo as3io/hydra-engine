@@ -72,7 +72,7 @@ const UserService = () => ({
   /**
    * Creates a "magic login" JWT for the provided user.
    *
-   * @param {object} user The user document.
+   * @param {User} user The user document.
    */
   createMagicLoginToken(user) {
     return tokenGenerator.create('magic-login', {
@@ -129,7 +129,7 @@ const UserService = () => ({
   /**
    * Sends the welcome/verification email for a new user.
    *
-   * @param {object} user The user document.
+   * @param {User} user The user document.
    */
   async sendWelcomeVerification(user) {
     const token = await this.createMagicLoginToken(user);
@@ -137,7 +137,11 @@ const UserService = () => ({
   },
 
   /**
+   * Sends the "reset password" email to a user.
+   * If the user is not found, the method will still return `true` in order to
+   * mask which users exist.
    *
+   * @param {string} email The user's email address.
    */
   async sendPasswordResetEmail(email) {
     const user = await User.findByEmail(email);
@@ -154,7 +158,6 @@ const UserService = () => ({
   /**
    * Retrieves a user session for the provided JWT token.
    *
-   * @async
    * @param {string} token The JWT.
    */
   async retrieveSession(token) {
@@ -169,7 +172,6 @@ const UserService = () => ({
   /**
    * Deletes a user session.
    *
-   * @async
    * @param {string} id The session ID.
    * @param {string} uid The user ID.
    */
@@ -178,7 +180,10 @@ const UserService = () => ({
   },
 
   /**
+   * Checks that the provided API credentials are still valid.
    *
+   * @param {object} credentials The API credentials (key and secret).
+   * @param {User} user The user document
    */
   checkApiCredentials(credentials, user) {
     if (credentials.key !== user.get('api.key')) throw new Error('The provided API key is no longer valid.');
@@ -188,9 +193,10 @@ const UserService = () => ({
   },
 
   /**
+   * Verifies a cleartext password against its encoded counterpart.
    *
-   * @param {string} clear
-   * @param {string} encoded
+   * @param {string} clear The cleartext password
+   * @param {string} encoded The encoded/encrypted password.
    */
   async verifyPassword(clear, encoded) {
     const valid = await bcrypt.compare(clear, encoded);
@@ -199,6 +205,7 @@ const UserService = () => ({
   },
 
   /**
+   * Updates a user's login info.
    *
    * @param {User} user
    */
