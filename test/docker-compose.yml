@@ -15,6 +15,7 @@ services:
       MONGO_DSN: mongodb://mongo:27017/hydra
       REDIS_DSN: redis://redis:6379/0
       PORT: 8100
+      JWT_SECRET: somenotsecretkey
   redis:
     image: redis:alpine
     volumes:

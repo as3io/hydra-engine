@@ -2,6 +2,8 @@ require('../connections');
 const bcrypt = require('bcrypt');
 const userService = require('../../src/services/user');
 const sessionService = require('../../src/services/session');
+const mailer = require('../../src/services/mailer');
+const tokenGenerator = require('../../src/services/token-generator');
 const User = require('../../src/models/user');
 const Seed = require('../../src/fixtures/seed');
 
@@ -43,7 +45,30 @@ describe('services/user', function() {
   });
 
   describe('#sendPasswordResetEmail', function() {
-    it('should be tested');
+    let user;
+    beforeEach(async function() {
+      stubBcryptHash();
+      user = await Seed.users(1);
+      sandbox.spy(tokenGenerator, 'create');
+      sandbox.stub(mailer, 'sendPasswordReset').resolves();
+    });
+    afterEach(async function() {
+      await User.remove();
+      sandbox.restore();
+    });
+    it('should return true, but not send an email when the user cannot be found.', async function() {
+      await expect(userService.sendPasswordResetEmail('some bad email')).to.eventually.be.true;
+      sandbox.assert.notCalled(tokenGenerator.create);
+      sandbox.assert.notCalled(mailer.sendPasswordReset);
+    });
+    it('should send the password reset email.', async function() {
+      await expect(userService.sendPasswordResetEmail(user.email)).to.eventually.be.true;
+      sandbox.assert.calledOnce(tokenGenerator.create);
+      sandbox.assert.calledWith(tokenGenerator.create, 'password-reset', { uid: user.id }, 3600);
+      sandbox.assert.calledOnce(mailer.sendPasswordReset);
+      const token = await tokenGenerator.create.returnValues[0];
+      sandbox.assert.calledWith(mailer.sendPasswordReset, sinon.match.object, token);
+    });
   });
 
   describe('#retrieveSession', function() {
