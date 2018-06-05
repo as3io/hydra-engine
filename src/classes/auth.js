@@ -61,7 +61,8 @@ class Auth {
 
   async getOrgMembership() {
     this.check();
-    const member = await MemberService.getMembership(this.user.id, this.tenant.organizationId);
+    const { organizationId } = this.tenant;
+    const member = await MemberService.getMembership(this.user.id, organizationId);
     if (!member) throw new Error('You are not a member of this organization.');
     return member;
   }
