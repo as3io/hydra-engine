@@ -41,7 +41,23 @@ describe('services/user', function() {
   });
 
   describe('#sendWelcomeVerification', function() {
-    it('should be tested');
+    let user;
+    beforeEach(async function() {
+      stubBcryptHash();
+      user = await Seed.users(1);
+      sandbox.stub(userService, 'createMagicLoginToken').resolves('a-token-value');
+      sandbox.stub(mailer, 'sendWelcomeVerification').resolves();
+    });
+    afterEach(async function() {
+      await User.remove();
+      sandbox.restore();
+    });
+    it('should send the welcome verification email.', async function() {
+      await expect(userService.sendWelcomeVerification(user)).to.be.fulfilled;
+      sandbox.assert.calledOnce(userService.createMagicLoginToken);
+      sandbox.assert.calledOnce(mailer.sendWelcomeVerification);
+      sandbox.assert.calledWith(mailer.sendWelcomeVerification, sinon.match.object, 'a-token-value');
+    });
   });
 
   describe('#sendPasswordResetEmail', function() {
