@@ -36,6 +36,6 @@ volumes:
       io.as3.env: "test"
   redis:
     labels:
-      io.as3.appname: "hydra-graph"
+      io.as3.appname: "hydra-engine"
       io.as3.discard: "true"
       io.as3.env: "test"
