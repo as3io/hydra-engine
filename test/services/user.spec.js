@@ -65,7 +65,26 @@ describe('services/user', function() {
   });
 
   describe('#checkApiCredentials', function() {
-    it('should be tested');
+    it('should throw when the API key changes.', async function() {
+      const credentials = { key: '1234' };
+      const user = new User({ api: { key: '5678' } });
+      expect(() => userService.checkApiCredentials(credentials, user)).to.throw(Error, 'The provided API key is no longer valid.');
+    });
+    it('should throw when the API key is not set on the user.', async function() {
+      const credentials = { key: '1234' };
+      const user = new User();
+      expect(() => userService.checkApiCredentials(credentials, user)).to.throw(Error, 'The provided API key is no longer valid.');
+    });
+    it('should pass when the keys match and no secret is provided.', async function() {
+      const credentials = { key: '1234' };
+      const user = new User({ api: { key: '1234', secret: 'abc' } });
+      expect(userService.checkApiCredentials(credentials, user)).to.equal(true);
+    });
+    it('should throw when the keys match but the secrets are different.', async function() {
+      const credentials = { key: '1234', secret: '987' };
+      const user = new User({ api: { key: '1234', secret: 'abc' } });
+      expect(() => userService.checkApiCredentials(credentials, user)).to.throw(Error, 'The provided API secret is no longer valid.');
+    });
   });
 
   describe('#verifyPassword', function() {

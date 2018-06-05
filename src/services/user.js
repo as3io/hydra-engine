@@ -190,6 +190,7 @@ const UserService = () => ({
     if (credentials.secret && credentials.secret !== user.get('api.secret')) {
       throw new Error('The provided API secret is no longer valid.');
     }
+    return true;
   },
 
   /**
