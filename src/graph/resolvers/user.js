@@ -1,6 +1,6 @@
 const { paginationResolvers } = require('@limit0/mongoose-graphql-pagination');
 const User = require('../../models/user');
-const UserRepo = require('../../repositories/user');
+const userService = require('../../services/user');
 const OrganizationMember = require('../../models/organization-member');
 
 module.exports = {
@@ -49,7 +49,7 @@ module.exports = {
      */
     checkSession: async (root, { input }) => {
       const { token } = input;
-      const { user, session } = await UserRepo.retrieveSession(token);
+      const { user, session } = await userService.retrieveSession(token);
       return { user, session };
     },
   },
@@ -68,7 +68,7 @@ module.exports = {
     createUser: async (root, { input }) => {
       const { payload } = input;
       const user = await User.create(payload);
-      await UserRepo.sendWelcomeVerification(user);
+      await userService.sendWelcomeVerification(user);
       return user;
     },
 
@@ -77,25 +77,25 @@ module.exports = {
      */
     loginUser: (root, { input }) => {
       const { email, password } = input;
-      return UserRepo.login(email, password);
+      return userService.login(email, password);
     },
 
     loginWithApiKey: (root, { input }) => {
       const { key, secret } = input;
-      return UserRepo.loginWithApiKey(key, secret);
+      return userService.loginWithApiKey(key, secret);
     },
 
     /**
      *
      */
-    loginWithMagicToken: (root, { token }) => UserRepo.loginWithMagicToken(token),
+    loginWithMagicToken: (root, { token }) => userService.loginWithMagicToken(token),
 
     /**
      *
      */
     resetPassword: async (root, { input }) => {
       const { token, password } = input;
-      await UserRepo.resetPassword(token, password);
+      await userService.resetPassword(token, password);
       return true;
     },
 
@@ -105,14 +105,14 @@ module.exports = {
     setCurrentUserPassword: async (root, { password }, { auth }) => {
       auth.check();
       const { id } = auth.user;
-      await UserRepo.setCurrentUserPassword(id, password);
+      await userService.setCurrentUserPassword(id, password);
       return true;
     },
 
     /**
      *
      */
-    sendPasswordResetEmail: (root, { email }) => UserRepo.sendPasswordResetEmail(email),
+    sendPasswordResetEmail: (root, { email }) => userService.sendPasswordResetEmail(email),
 
     /**
      *
@@ -120,13 +120,13 @@ module.exports = {
     deleteSession: async (root, args, { auth }) => {
       auth.check();
       const { id, uid } = auth.session;
-      await UserRepo.deleteSession(id, uid);
+      await userService.deleteSession(id, uid);
       return 'ok';
     },
 
     /**
      *
      */
-    sendMagicLoginEmail: (root, { email }) => UserRepo.sendMagicLoginEmail(email),
+    sendMagicLoginEmail: (root, { email }) => userService.sendMagicLoginEmail(email),
   },
 };

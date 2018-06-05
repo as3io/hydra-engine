@@ -1,24 +1,18 @@
 const bcrypt = require('bcrypt');
-const sessionService = require('../services/session');
 const User = require('../models/user');
+const sessionService = require('../services/session');
 const tokenGenerator = require('../services/token-generator');
 const mailer = require('../services/mailer');
 
-module.exports = {
-  async sendWelcomeVerification(user) {
-    const token = await this.createMagicLoginToken(user);
-    return mailer.sendWelcomeVerification(user, token);
-  },
-
+const UserService = () => ({
   /**
+   * Logs in a user via their email+password credentials.
    *
-   * @param {string} email
-   * @param {string} password
-   * @return {Promise}
+   * @param {string} email The user's email address.
+   * @param {string} password The user's (cleartext) password.
    */
   async login(email, password) {
-    // @todo Need to determine whether email address is verified!
-    // Or does that get handled elsewhere?
+    // @todo Should login be prevent if email is not verified?
     if (!password) throw new Error('Unable to login user. No password was provided.');
 
     // Load user from database.
@@ -39,10 +33,10 @@ module.exports = {
   },
 
   /**
+   * Logs in a user via their API crendentials.
    *
-   * @param {string} key
-   * @param {string} secret
-   * @return {Promise}
+   * @param {string} key The user's API key.
+   * @param {string} secret The user's API secret.
    */
   async loginWithApiKey(key, secret) {
     const user = await User.findOne({ 'api.key': key });
@@ -55,9 +49,9 @@ module.exports = {
   },
 
   /**
+   * Logs in a user via a "magic login" token.
    *
-   * @param {string} jwt
-   * @return {Promise}
+   * @param {string} jwt The magic login JWT.
    */
   async loginWithMagicToken(jwt) {
     const token = await tokenGenerator.verify('magic-login', jwt);
@@ -75,6 +69,11 @@ module.exports = {
     return { user, session };
   },
 
+  /**
+   * Creates a "magic login" JWT for the provided user.
+   *
+   * @param {object} user The user document.
+   */
   createMagicLoginToken(user) {
     return tokenGenerator.create('magic-login', {
       uid: user.id,
@@ -82,8 +81,11 @@ module.exports = {
   },
 
   /**
+   * Sends the "magic login" email to a user.
+   * If the user is not found, the method will still return `true` in order to
+   * mask which users exist.
    *
-   * @param {string} email
+   * @param {string} email The user's email address.
    */
   async sendMagicLoginEmail(email) {
     const user = await User.findByEmail(email);
@@ -95,10 +97,10 @@ module.exports = {
   },
 
   /**
+   * Resets a user's password if the provided password reset JWT is valid.
    *
-   * @param {string} jwt
-   * @param {string} password
-   * @return {Promise}
+   * @param {string} jwt The reset password JWT.
+   * @param {string} password The new, cleartext password.
    */
   async resetPassword(jwt, password) {
     const token = await tokenGenerator.verify('password-reset', jwt);
@@ -116,13 +118,22 @@ module.exports = {
    *
    * @param {string} id
    * @param {string} password
-   * @return {Promise}
    */
   async setCurrentUserPassword(id, password) {
     const user = await User.findById(id);
     if (!user) throw new Error('No user was found!');
     user.set('password', password);
     return user.save();
+  },
+
+  /**
+   * Sends the welcome/verification email for a new user.
+   *
+   * @param {object} user The user document.
+   */
+  async sendWelcomeVerification(user) {
+    const token = await this.createMagicLoginToken(user);
+    return mailer.sendWelcomeVerification(user, token);
   },
 
   /**
@@ -180,7 +191,6 @@ module.exports = {
    *
    * @param {string} clear
    * @param {string} encoded
-   * @return {Promise}
    */
   async verifyPassword(clear, encoded) {
     const valid = await bcrypt.compare(clear, encoded);
@@ -191,11 +201,12 @@ module.exports = {
   /**
    *
    * @param {User} user
-   * @return {Promise}
    */
   updateLoginInfo(user) {
     user.set('logins', user.get('logins') + 1);
     user.set('lastLoggedInAt', new Date());
     return user.save();
   },
-};
+});
+
+module.exports = UserService();

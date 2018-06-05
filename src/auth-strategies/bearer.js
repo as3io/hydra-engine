@@ -1,8 +1,8 @@
 const { Strategy } = require('passport-http-bearer');
-const UserRepo = require('../repositories/user');
+const userService = require('../services/user');
 
 module.exports = new Strategy((token, next) => {
-  UserRepo.retrieveSession(token).then(data => next(null, data)).catch(() => {
+  userService.retrieveSession(token).then(data => next(null, data)).catch(() => {
     next(new Error('No active user session was found. Did you login?'));
   });
 });
