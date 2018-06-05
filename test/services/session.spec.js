@@ -141,4 +141,49 @@ describe('services/session', function() {
       expect(session.api).to.deep.equal(api);
     });
   });
+
+  describe('#get', function() {
+    let sid;
+    beforeEach(async function() {
+      sid = uuid.v4();
+      sandbox.stub(sessionService, 'createSessionId').callsFake(() => sid);
+      sandbox.stub(jwt, 'verify').callsFake(() => ({
+        iat: 12345,
+        exp: 67890,
+      }));
+    });
+    afterEach(async function() {
+      sandbox.restore();
+    });
+    it('should reject when no token is provided.', async function() {
+      await expect(sessionService.get()).to.be.rejectedWith(Error, 'Unable to get session: no token was provided.');
+    });
+    it('should reject when the token is improperly formatted.', async function() {
+      await expect(sessionService.get('badformat')).to.be.rejectedWith(Error, 'Unable to get session: invalid token format.');
+    });
+    it('should reject when no token could be found.', async function() {
+      const { id, token } = await sessionService.set('1234');
+      await redis.delAsync(`session:id:${id}`);
+      await expect(sessionService.get(token)).to.be.rejectedWith('Unable to get session: no token found in storage.');
+    });
+    it('should verify the token.', async function() {
+      const { token } = await sessionService.set('1234');
+      await expect(sessionService.get(token)).to.be.fulfilled;
+      sandbox.assert.calledOnce(jwt.verify);
+      sandbox.assert.calledWith(jwt.verify, token);
+    });
+    it('should return the session data.', async function() {
+      const { token } = await sessionService.set('1234');
+      const promise = sessionService.get(token);
+      await expect(promise).to.eventually.be.an('object');
+      const session = await promise;
+      expect(session).to.have.all.keys(['id', 'uid', 'cre', 'exp', 'api', 'token']);
+      expect(session.id).to.equal(sid);
+      expect(session.uid).to.equal('1234');
+      expect(session.cre).to.equal(12345);
+      expect(session.exp).to.equal(67890);
+      expect(session.api).to.be.undefined;
+      expect(session.token).to.equal(token);
+    });
+  });
 });
