@@ -9,53 +9,35 @@ const OrgMemberService = require('../../src/factories/organization-member');
 const memberService = OrgMemberService();
 const sandbox = sinon.createSandbox();
 
-const testUserIdError = async (methodName) => {
-  await expect(memberService[methodName]('', '1234')).to.be.rejectedWith(Error, 'Unable to retrieve organization membership: No user ID was provided')
-};
-
-const testOrgIdError = async (methodName) => {
-  await expect(memberService[methodName]('1234')).to.be.rejectedWith(Error, 'Unable to retrieve organization membership: No organization ID was provided');
-};
-
-const fakeOrganizationId = '5b15368aa5ac4f0047dabd15';
-
 describe('factories/organization-member', function() {
-  after(async function() {
-    await OrganizationMember.remove();
-    await Organization.remove();
-    await User.remove();
-    await Project.remove();
-  });
-
   describe('#getMembership', function() {
     beforeEach(async function() {
-      sandbox.spy(OrganizationMember, 'findOne');
+      sandbox.stub(OrganizationMember, 'findOne')
+        .withArgs({ userId: '1234', organizationId: '1234' }).resolves({})
+        .withArgs({ userId: '5678', organizationId: '5678' }).resolves(null)
+      ;
     });
     afterEach(async function() {
       sandbox.restore();
     });
 
     it('should reject when no user id is provided.', async function() {
-      await testUserIdError('getMembership');
+      await expect(memberService.getMembership('', '1234')).to.be.rejectedWith(Error, 'Unable to retrieve organization membership: No user ID was provided');
       sandbox.assert.notCalled(OrganizationMember.findOne);
     });
     it('should reject when no org id is provided.', async function() {
-      await testOrgIdError('getMembership');
+      await expect(memberService.getMembership('1234')).to.be.rejectedWith(Error, 'Unable to retrieve organization membership: No organization ID was provided');
       sandbox.assert.notCalled(OrganizationMember.findOne);
     });
     it('should resolve to null when the membership cannot be found.', async function() {
-      const userId = '5b1050d68dd51b05976c9dbf';
-      const organizationId = '5b15368aa5ac4f0047dabd15';
-      await expect(memberService.getMembership(userId, organizationId)).to.eventually.be.null;
+      await expect(memberService.getMembership('5678', '5678')).to.eventually.be.null;
       sandbox.assert.calledOnce(OrganizationMember.findOne);
-      sandbox.assert.calledWith(OrganizationMember.findOne, { organizationId, userId });
+      sandbox.assert.calledWith(OrganizationMember.findOne, { organizationId: '5678', userId: '5678' });
     });
     it('should resolve with the org member document.', async function() {
-      const member = await Seed.organizationMembers(1);
-      const { userId, organizationId } = member;
-      await expect(memberService.getMembership(userId, organizationId)).to.eventually.be.an('object');
+      await expect(memberService.getMembership('1234', '1234')).to.eventually.be.an('object');
       sandbox.assert.calledOnce(OrganizationMember.findOne);
-      sandbox.assert.calledWith(OrganizationMember.findOne, { organizationId, userId });
+      sandbox.assert.calledWith(OrganizationMember.findOne, { organizationId: '1234', userId: '1234' });
     });
   });
 
@@ -96,53 +78,118 @@ describe('factories/organization-member', function() {
   });
 
   describe('#getOrgRole', function() {
-    it('should reject when no user id is provided.', async function() {
-      await testUserIdError('getOrgRole');
+    beforeEach(async function() {
+      sandbox.stub(memberService, 'getMembership')
+        .withArgs('1234', '1234').resolves({})
+        .withArgs('5678', '5678').resolves(null)
+        .withArgs('7890', '7890').resolves({ role: 'User' })
+      ;
     });
-    it('should reject when no org id is provided.', async function() {
-      await testOrgIdError('getOrgRole');
+    afterEach(async function() {
+      sandbox.restore();
     });
+
     it('should resolve to null when no membership is found.', async function() {
-      const member = await Seed.organizationMembers(1);
-      await expect(memberService.getOrgRole(member.userId, fakeOrganizationId)).to.eventually.be.null;
+      await expect(memberService.getOrgRole('5678', '5678')).to.eventually.equal(null);
+      sandbox.assert.calledOnce(memberService.getMembership);
+      sandbox.assert.calledWith(memberService.getMembership, '5678', '5678');
     });
     it('should resolve to the role when set on the member.', async function() {
-      const member = await Seed.organizationMembers(1);
-      await expect(memberService.getOrgRole(member.userId, member.organizationId)).to.eventually.equal(member.role);
+      await expect(memberService.getOrgRole('7890', '7890')).to.eventually.equal('User');
+      sandbox.assert.calledOnce(memberService.getMembership);
+      sandbox.assert.calledWith(memberService.getMembership, '7890', '7890');
+    });
+    it('should resolve to null when member is found by no role is assigned.', async function() {
+      await expect(memberService.getOrgRole('1234', '1234')).to.eventually.equal(null);
+      sandbox.assert.calledOnce(memberService.getMembership);
+      sandbox.assert.calledWith(memberService.getMembership, '1234', '1234');
     });
   });
 
   describe('#isOrgMember', function() {
-    it('should reject when no user id is provided.', async function() {
-      await testUserIdError('isOrgMember');
+    beforeEach(async function() {
+      sandbox.stub(memberService, 'getOrgRole')
+        .withArgs('1234', '1234').resolves('Member')
+        .withArgs('5678', '5678').resolves(null)
+      ;
     });
-    it('should reject when no org id is provided.', async function() {
-      await testOrgIdError('isOrgMember');
+    afterEach(async function() {
+      sandbox.restore();
     });
-    it('should resolve to true when an org role is found.');
-    it('should resolve to false when an org role is not found.');
+    it('should resolve to true when an org role is found.', async function() {
+      await expect(memberService.isOrgMember('1234', '1234')).to.eventually.equal(true);
+      sandbox.assert.calledOnce(memberService.getOrgRole);
+      sandbox.assert.calledWith(memberService.getOrgRole, '1234', '1234');
+    });
+    it('should resolve to false when an org role is not found.', async function() {
+      await expect(memberService.isOrgMember('5678', '5678')).to.eventually.equal(false);
+      sandbox.assert.calledOnce(memberService.getOrgRole);
+      sandbox.assert.calledWith(memberService.getOrgRole, '5678', '5678');
+    });
   });
 
   describe('#canWriteToOrg', function() {
-    it('should reject when no user id is provided.', async function() {
-      await testUserIdError('canWriteToOrg');
+    beforeEach(async function() {
+      sandbox.stub(memberService, 'getOrgRole')
+        .withArgs('1234', '1234').resolves('Member')
+        .withArgs('5678', '5678').resolves(null)
+        .withArgs('7890', '7890').resolves('Administrator')
+      ;
     });
-    it('should reject when no org id is provided.', async function() {
-      await testOrgIdError('canWriteToOrg');
+    afterEach(async function() {
+      sandbox.restore();
     });
-    it('should resolve to true when the org role is an admin.');
-    it('should resolve to false when the org role is not an admin.');
+    it('should resolve to false when the org role is not an admin.', async function() {
+      await expect(memberService.canWriteToOrg('1234', '1234')).to.eventually.equal(false);
+      sandbox.assert.calledOnce(memberService.getOrgRole);
+      sandbox.assert.calledWith(memberService.getOrgRole, '1234', '1234');
+    });
+    it('should resolve to false when the org role is empty.', async function() {
+      await expect(memberService.canWriteToOrg('5678', '5678')).to.eventually.equal(false);
+      sandbox.assert.calledOnce(memberService.getOrgRole);
+      sandbox.assert.calledWith(memberService.getOrgRole, '5678', '5678');
+    });
+    it('should resolve to true when the org role is an admin.', async function() {
+      await expect(memberService.canWriteToOrg('7890', '7890')).to.eventually.equal(true);
+      sandbox.assert.calledOnce(memberService.getOrgRole);
+      sandbox.assert.calledWith(memberService.getOrgRole, '7890', '7890');
+    });
   });
 
   describe('#getProjectRole', function() {
-    it('should reject when no project id is provided.');
-    it('should reject when no user id is provided.');
-    it('should reject when no org id is provided.');
-    it('should resolve with null when not a project member.');
-    it('should resolve with the org admin role if org admin.');
-    it('should resolve with null when no project role could be found.');
-    it('should resolve with null when a project is found but is not set.');
-    it('should resolve with the project role.');
+    const cases = [
+      { resolves: null, expected: null },
+      { resolves: {}, expected: null },
+      { resolves: { role: 'User' }, expected: null },
+      { resolves: { projectRoles: [] }, expected: null },
+      { resolves: { projectRoles: [ { projectId: 'no-match' } ] }, expected: null },
+      { resolves: { projectRoles: [ { projectId: 'pid' } ] }, expected: null },
+      { resolves: { role: 'Owner' }, expected: 'Owner' },
+      { resolves: { projectRoles: [ { role: 'Member', projectId: 'pid' } ] }, expected: 'Member' },
+    ];
+
+    beforeEach(async function() {
+      const stub = sandbox.stub(memberService, 'getMembership');
+      cases.forEach((obj, index) => {
+        stub.withArgs(`uid-${index}`, `oid-${index}`).resolves(obj.resolves);
+      });
+    });
+    afterEach(async function() {
+      sandbox.restore();
+    });
+
+    it('should reject when no project id is provided.', async function() {
+      await expect(memberService.getProjectRole('1234', '1234')).to.be.rejectedWith(Error, 'Unable to retrieve project role: no project ID was provided.');
+      sandbox.assert.notCalled(memberService.getMembership);
+    });
+
+    cases.forEach((obj, index) => {
+      it(`should return ${obj.expected} when membership is ${JSON.stringify(obj.resolves)}`, async function() {
+        await expect(memberService.getProjectRole(`uid-${index}`, `oid-${index}`, 'pid')).to.eventually.equal(obj.expected);
+        sandbox.assert.calledOnce(memberService.getMembership);
+        sandbox.assert.calledWith(memberService.getMembership, `uid-${index}`, `oid-${index}`);
+      });
+    });
   });
 
   describe('#isProjectMember', function() {
@@ -169,24 +216,12 @@ describe('factories/organization-member', function() {
   });
 
   describe('#getUserProjectIds', function() {
-    it('should reject when no user id is provided.', async function() {
-      await testUserIdError('getUserProjectIds');
-    });
-    it('should reject when no org id is provided.', async function() {
-      await testOrgIdError('getUserProjectIds');
-    });
     it('should resolve with an empty array when no org role can be found.');
     it('should resolve with the org project ids directly when user is an org admin');
     it('should resolve with the project roles');
   });
 
   describe('#createOrgOwner', function() {
-    it('should reject when no user id is provided.', async function() {
-      await testUserIdError('createOrgOwner');
-    });
-    it('should reject when no org id is provided.', async function() {
-      await testOrgIdError('createOrgOwner');
-    });
     it('should reject when the user is already a member of the org.');
     it('should create the org member as an owner.');
   });

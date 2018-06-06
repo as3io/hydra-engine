@@ -65,7 +65,7 @@ const prototype = {
   async getOrgRole(userId, organizationId) {
     const member = await this.getMembership(userId, organizationId);
     if (!member) return null;
-    return member.role;
+    return member.role || null;
   },
 
   /**
@@ -108,6 +108,7 @@ const prototype = {
     const { role, projectRoles } = member;
     // Use the organization role if an org admin.
     if (this.isOrgAdmin(role)) return role;
+    if (!Array.isArray(projectRoles)) return null;
     const found = projectRoles.find(r => `${r.projectId}` === `${projectId}`);
     if (!found) return null;
     return found.role || null;
