@@ -179,6 +179,9 @@ const prototype = {
    * @param {string} organizationId
    */
   async createOrgOwner(userId, organizationId) {
+    const member = await this.getMembership(userId, organizationId);
+    if (member) throw new Error('The provided user is already a member of the organization.');
+
     return OrganizationMember.create({
       userId,
       organizationId,
