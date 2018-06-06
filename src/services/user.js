@@ -19,7 +19,10 @@ const UserService = () => ({
     const user = await User.findByEmail(email);
     if (!user) throw new Error('No user was found for the provided email address.');
 
-    if (!user.get('password')) throw new Error('A password has not yet been set. An email has been sent providing further instructions.');
+    if (!user.get('password')) {
+      await this.sendMagicLoginEmail(email);
+      throw new Error('A password has not yet been set. An email has been sent providing further instructions.');
+    }
 
     // Verify password.
     await this.verifyPassword(password, user.get('password'));

@@ -114,11 +114,13 @@ schema.virtual('toAddress').get(function toAddress() {
 schema.pre('save', function setPassword(next) {
   if (!this.isModified('password')) {
     next();
-  } else {
+  } else if (this.password) {
     bcrypt.hash(this.password, 13).then((hash) => {
       this.password = hash;
       next();
     }).catch(next);
+  } else {
+    next();
   }
 });
 schema.pre('save', function setPhotoURL(next) {

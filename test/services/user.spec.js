@@ -13,7 +13,62 @@ const stubBcryptHash = () => sandbox.stub(bcrypt, 'hash').resolves('$2a$04$jdkrJ
 
 describe('services/user', function() {
   describe('#login', function() {
-    it('should be tested');
+    let user;
+    beforeEach(async function() {
+      stubBcryptHash();
+      user = await Seed.users(1);
+      sandbox.stub(userService, 'sendMagicLoginEmail').resolves();
+      sandbox.stub(userService, 'verifyPassword').resolves();
+      sandbox.stub(userService, 'updateLoginInfo').resolves();
+      sandbox.spy(sessionService, 'set');
+    });
+    afterEach(async function() {
+      await User.remove();
+      sandbox.restore();
+    });
+
+    it('should reject when no password is provided.', async function() {
+      await expect(userService.login(user.email)).to.be.rejectedWith(Error, 'Unable to login user. No password was provided.');
+      sandbox.assert.notCalled(userService.sendMagicLoginEmail);
+      sandbox.assert.notCalled(userService.verifyPassword);
+      sandbox.assert.notCalled(sessionService.set);
+      sandbox.assert.notCalled(userService.updateLoginInfo);
+    });
+    it('should reject when no user could be found for the provided email address.', async function() {
+      await expect(userService.login('bademail', 'some-password')).to.be.rejectedWith(Error, 'No user was found for the provided email address.');
+      sandbox.assert.notCalled(userService.sendMagicLoginEmail);
+      sandbox.assert.notCalled(userService.verifyPassword);
+      sandbox.assert.notCalled(sessionService.set);
+      sandbox.assert.notCalled(userService.updateLoginInfo);
+    });
+    it('should reject and send a magic link login email when no password has been set.', async function() {
+      user.password = undefined;
+      await user.save();
+      await expect(userService.login(user.email, 'some-password')).to.be.rejectedWith(Error, 'A password has not yet been set. An email has been sent providing further instructions.');
+      sandbox.assert.calledOnce(userService.sendMagicLoginEmail);
+      sandbox.assert.calledWith(userService.sendMagicLoginEmail, user.email);
+      sandbox.assert.notCalled(userService.verifyPassword);
+      sandbox.assert.notCalled(sessionService.set);
+      sandbox.assert.notCalled(userService.updateLoginInfo);
+    });
+    it('should verify the password.', async function() {
+      await expect(userService.login(user.email, 'some-password')).to.be.fulfilled;
+      sandbox.assert.calledOnce(userService.verifyPassword);
+      sandbox.assert.calledWith(userService.verifyPassword, 'some-password', user.password);
+    });
+    it('should create the user session.', async function() {
+      await expect(userService.login(user.email, 'some-password')).to.be.fulfilled;
+      sandbox.assert.calledOnce(sessionService.set);
+      sandbox.assert.calledWith(sessionService.set, user.id);
+    });
+    it('should update the user login info.', async function() {
+      await expect(userService.login(user.email, 'some-password')).to.be.fulfilled;
+      sandbox.assert.calledOnce(userService.updateLoginInfo);
+    });
+    it('should return the user and session object.', async function() {
+      await expect(userService.login(user.email, 'some-password')).to.eventually.be.an('object').with.all.keys(['user', 'session']);
+      sandbox.assert.notCalled(userService.sendMagicLoginEmail);
+    });
   });
 
   describe('#loginWithApiKey', function() {
