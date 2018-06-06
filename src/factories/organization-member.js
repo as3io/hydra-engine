@@ -169,6 +169,7 @@ const prototype = {
     // For non org admins, only return specifically assigned project IDs.
     const member = await this.getMembership(userId, organizationId);
     const { projectRoles } = member;
+    if (!Array.isArray(projectRoles)) return [];
     return projectRoles.map(r => r.projectId.toString());
   },
 

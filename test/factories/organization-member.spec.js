@@ -273,14 +273,105 @@ describe('factories/organization-member', function() {
   });
 
   describe('#getUserProjectIds', function() {
-    it('should resolve with an empty array when no org role can be found.');
-    it('should resolve with the org project ids directly when user is an org admin');
-    it('should resolve with the project roles');
+    beforeEach(async function() {
+      sandbox.stub(memberService, 'getOrgRole')
+        .withArgs('1234', '5678').resolves(null)
+        .withArgs('5678', '1234').resolves('Owner')
+        .withArgs('5678', '7890').resolves('Administrator')
+        .withArgs('7890', '5678').resolves('Member')
+        .withArgs('7890', '1234').resolves('Member')
+        .withArgs('1234', '7890').resolves('Member')
+      ;
+      sandbox.stub(Project, 'find')
+        .withArgs({ organizationId: '1234' }, { _id: 1 }).resolves([])
+        .withArgs({ organizationId: '7890' }, { _id: 1 }).resolves([
+          { id: '1234' },
+          { id: { toString: () => '5678' } },
+        ])
+      ;
+      sandbox.stub(memberService, 'getMembership')
+        .withArgs('7890', '5678').resolves({})
+        .withArgs('7890', '1234').resolves({ projectRoles: [] })
+        .withArgs('1234', '7890').resolves({ projectRoles: [
+          { projectId: '5678' },
+          { projectId: { toString: () => '7890' } },
+        ] })
+      ;
+    });
+    afterEach(async function() {
+      sandbox.restore();
+    });
+    it('should resolve with an empty array when no org role can be found.', async function() {
+      await expect(memberService.getUserProjectIds('1234', '5678')).to.eventually.deep.equal([]);
+      sandbox.assert.calledOnce(memberService.getOrgRole);
+      sandbox.assert.calledWith(memberService.getOrgRole, '1234', '5678');
+    });
+    it('should resolve with an empty array when an org admin but no projects for the org could be found.', async function() {
+      await expect(memberService.getUserProjectIds('5678', '1234')).to.eventually.deep.equal([]);
+      sandbox.assert.calledOnce(memberService.getOrgRole);
+      sandbox.assert.calledWith(memberService.getOrgRole, '5678', '1234');
+      sandbox.assert.calledOnce(Project.find);
+      sandbox.assert.calledWith(Project.find, { organizationId: '1234' }, { _id: 1 });
+    });
+    it('should resolve with an array of project IDs from projects.', async function() {
+      await expect(memberService.getUserProjectIds('5678', '7890')).to.eventually.deep.equal(['1234', '5678']);
+      sandbox.assert.calledOnce(memberService.getOrgRole);
+      sandbox.assert.calledWith(memberService.getOrgRole, '5678', '7890');
+      sandbox.assert.calledOnce(Project.find);
+      sandbox.assert.calledWith(Project.find, { organizationId: '7890' }, { _id: 1 });
+    });
+    it('should resolve with an empty array if project roles are not an array.', async function() {
+      await expect(memberService.getUserProjectIds('7890', '5678')).to.eventually.deep.equal([]);
+      sandbox.assert.calledOnce(memberService.getOrgRole);
+      sandbox.assert.calledWith(memberService.getOrgRole, '7890', '5678');
+      sandbox.assert.calledOnce(memberService.getMembership);
+      sandbox.assert.calledWith(memberService.getMembership, '7890', '5678');
+    });
+    it('should resolve with an empty array if project roles are an an empty array.', async function() {
+      await expect(memberService.getUserProjectIds('7890', '1234')).to.eventually.deep.equal([]);
+      sandbox.assert.calledOnce(memberService.getOrgRole);
+      sandbox.assert.calledWith(memberService.getOrgRole, '7890', '1234');
+      sandbox.assert.calledOnce(memberService.getMembership);
+      sandbox.assert.calledWith(memberService.getMembership, '7890', '1234');
+    });
+    it('should resolve with an array of project IDs from the project roles.', async function() {
+      await expect(memberService.getUserProjectIds('1234', '7890')).to.eventually.deep.equal(['5678', '7890']);
+      sandbox.assert.calledOnce(memberService.getOrgRole);
+      sandbox.assert.calledWith(memberService.getOrgRole, '1234', '7890');
+      sandbox.assert.calledOnce(memberService.getMembership);
+      sandbox.assert.calledWith(memberService.getMembership, '1234', '7890');
+    });
   });
 
   describe('#createOrgOwner', function() {
-    it('should reject when the user is already a member of the org.');
-    it('should create the org member as an owner.');
+    beforeEach(async function() {
+      sandbox.stub(memberService, 'getMembership')
+        .withArgs('1234', '5678').resolves({})
+        .withArgs('5678', '1234').resolves(null)
+      ;
+      sandbox.stub(OrganizationMember, 'create').resolves({ id: '8765' });
+    });
+    afterEach(async function() {
+      sandbox.restore();
+    });
+    it('should reject when the user is already a member of the org.', async function() {
+      await expect(memberService.createOrgOwner('1234', '5678')).to.be.rejectedWith(Error, 'The provided user is already a member of the organization.');
+      sandbox.assert.calledOnce(memberService.getMembership);
+      sandbox.assert.calledWith(memberService.getMembership, '1234', '5678');
+      sandbox.assert.notCalled(OrganizationMember.create);
+    });
+    it('should create the org member as an owner.', async function() {
+      await expect(memberService.createOrgOwner('5678', '1234')).to.eventually.be.an('object').with.property('id', '8765');
+      sandbox.assert.calledOnce(memberService.getMembership);
+      sandbox.assert.calledWith(memberService.getMembership, '5678', '1234');
+      sandbox.assert.calledOnce(OrganizationMember.create);
+      sandbox.assert.calledWith(OrganizationMember.create, {
+        userId: '5678',
+        organizationId: '1234',
+        role: 'Owner',
+        acceptedAt: sinon.match.date,
+      });
+    });
   });
 
 });
