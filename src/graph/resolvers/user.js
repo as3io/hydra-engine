@@ -104,8 +104,9 @@ module.exports = {
      */
     setCurrentUserPassword: async (root, { password }, { auth }) => {
       auth.check();
-      const { id } = auth.user;
-      await userService.setCurrentUserPassword(id, password);
+      const { user } = auth;
+      user.set({ password });
+      await user.save();
       return true;
     },
 

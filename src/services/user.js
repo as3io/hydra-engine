@@ -115,18 +115,6 @@ const UserService = () => ({
   },
 
   /**
-   *
-   * @param {string} id
-   * @param {string} password
-   */
-  async setCurrentUserPassword(id, password) {
-    const user = await User.findById(id);
-    if (!user) throw new Error('No user was found!');
-    user.set('password', password);
-    return user.save();
-  },
-
-  /**
    * Sends the welcome/verification email for a new user.
    *
    * @param {User} user The user document.

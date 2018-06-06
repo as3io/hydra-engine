@@ -36,10 +36,6 @@ describe('services/user', function() {
     it('should be tested');
   });
 
-  describe('#setCurrentUserPassword', function() {
-    it('should be tested');
-  });
-
   describe('#sendWelcomeVerification', function() {
     let user;
     beforeEach(async function() {
