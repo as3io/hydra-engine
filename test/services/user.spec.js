@@ -21,7 +21,51 @@ describe('services/user', function() {
   });
 
   describe('#loginWithMagicToken', function() {
-    it('should be tested');
+    let user;
+    beforeEach(async function() {
+      stubBcryptHash();
+      user = await Seed.users(1);
+      sandbox.stub(tokenGenerator, 'verify').resolves({ id: 'token-id', payload: { uid: user.id } });
+      sandbox.stub(tokenGenerator, 'invalidate').resolves();
+      sandbox.spy(userService, 'updateLoginInfo');
+      sandbox.spy(sessionService, 'set');
+    });
+    afterEach(async function() {
+      await User.remove();
+      sandbox.restore();
+    });
+
+    it('should reject when the user cannot be found.', async function() {
+      await User.remove({ _id: user.id });
+      await expect(userService.loginWithMagicToken('some-token')).to.be.rejectedWith(Error, 'No user was found for the provided token.');
+      sandbox.assert.calledOnce(tokenGenerator.verify);
+      sandbox.assert.calledWith(tokenGenerator.verify, 'magic-login', 'some-token');
+      sandbox.assert.notCalled(sessionService.set);
+      sandbox.assert.notCalled(tokenGenerator.invalidate);
+      sandbox.assert.notCalled(userService.updateLoginInfo);
+    });
+    it('should set the session on success.', async function() {
+      await expect(userService.loginWithMagicToken('some-token')).to.eventually.be.an('object').with.all.keys(['user', 'session']);
+      sandbox.assert.calledOnce(sessionService.set);
+      sandbox.assert.calledWith(sessionService.set, user.id);
+    });
+    it('should update the user login info on success.', async function() {
+      await expect(userService.loginWithMagicToken('some-token')).to.eventually.be.an('object');
+      sandbox.assert.calledOnce(userService.updateLoginInfo);
+    });
+    it('should invlidate the token on success.', async function() {
+      await expect(userService.loginWithMagicToken('some-token')).to.eventually.be.an('object');
+      sandbox.assert.calledOnce(tokenGenerator.invalidate);
+      sandbox.assert.calledWith(tokenGenerator.invalidate, 'token-id');
+    });
+    it('should set the user email as verified.', async function() {
+      user.emailVerified = false;
+      await user.save();
+      const result = await userService.loginWithMagicToken('some-token');
+      expect(result.user.id.toString()).to.equal(user.id.toString());
+      expect(result.user.emailVerified).to.be.true;
+    });
+
   });
 
   describe('#createMagicLoginToken', function() {

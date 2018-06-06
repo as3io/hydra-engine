@@ -16,6 +16,9 @@ services:
       REDIS_DSN: redis://redis:6379/0
       PORT: 8100
       JWT_SECRET: somenotsecretkey
+      SESSION_GLOBAL_SECRET: notarealkey
+      SESSION_NAMESPACE: 96b6ad34-0c2a-440b-8d7b-3b9094bd2250
+      SESSION_EXPIRATION: 300
   redis:
     image: redis:alpine
     volumes:
