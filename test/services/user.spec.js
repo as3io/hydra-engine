@@ -29,7 +29,30 @@ describe('services/user', function() {
   });
 
   describe('#sendMagicLoginEmail', function() {
-    it('should be tested');
+    let user;
+    beforeEach(async function() {
+      stubBcryptHash();
+      user = await Seed.users(1);
+      sandbox.stub(userService, 'createMagicLoginToken').resolves('some-token-value');
+      sandbox.stub(mailer, 'sendMagicLogin').resolves();
+    });
+    afterEach(async function() {
+      await User.remove();
+      sandbox.restore();
+    });
+    it('should resolve to true even when the user is not found, but not send the email.', async function() {
+      await User.remove({ _id: user.id });
+      await expect(userService.sendMagicLoginEmail(user.email)).to.eventually.be.true;
+      sandbox.assert.notCalled(userService.createMagicLoginToken);
+      sandbox.assert.notCalled(mailer.sendMagicLogin);
+    });
+    it('should create the login token and send the email.', async function() {
+      await expect(userService.sendMagicLoginEmail(user.email)).to.eventually.be.true;
+      sandbox.assert.calledOnce(userService.createMagicLoginToken);
+      sandbox.assert.calledWith(userService.createMagicLoginToken, sinon.match.object);
+      sandbox.assert.calledOnce(mailer.sendMagicLogin);
+      sandbox.assert.calledWith(mailer.sendMagicLogin, sinon.match.object, 'some-token-value');
+    });
   });
 
   describe('#resetPassword', function() {
