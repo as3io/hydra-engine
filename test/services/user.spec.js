@@ -33,7 +33,38 @@ describe('services/user', function() {
   });
 
   describe('#resetPassword', function() {
-    it('should be tested');
+    let user;
+    beforeEach(async function() {
+      stubBcryptHash();
+      user = await Seed.users(1);
+      sandbox.stub(tokenGenerator, 'verify').resolves({ id: '1234', payload: { uid: user.id } });
+      sandbox.stub(tokenGenerator, 'invalidate').resolves();
+      sandbox.spy(User.prototype, 'save');
+      sandbox.spy(User.prototype, 'set');
+    });
+    afterEach(async function() {
+      await User.remove();
+      sandbox.restore();
+    });
+    it('should verify the JWT token and invalidate when successful.', async function() {
+      await expect(userService.resetPassword('some-token', 'new-password')).to.fulfilled;
+      sandbox.assert.calledOnce(tokenGenerator.verify);
+      sandbox.assert.calledWith(tokenGenerator.verify, 'password-reset', 'some-token');
+      sandbox.assert.calledOnce(tokenGenerator.invalidate);
+      sandbox.assert.calledWith(tokenGenerator.invalidate, '1234');
+    });
+    it('should reject when no user can be found.', async function() {
+      await User.remove({ _id: user.id });
+      await expect(userService.resetPassword('some-token', 'new-password')).to.be.rejectedWith(Error, 'No user was found for the provided token.');
+    });
+    it('should reset the password.', async function() {
+      const promise = userService.resetPassword('some-token', 'new-password');
+      await expect(promise).to.eventually.be.an('object');
+      const result = await promise;
+      sandbox.assert.calledOnce(User.prototype.save);
+      sandbox.assert.calledWith(User.prototype.set, 'password', 'new-password');
+      expect(result.password).to.equal('$2a$04$jdkrJXkU92FIF4NcprNKWOcMKoOG28ELDrW2HBpDZFSmY/vxOj4VW');
+    });
   });
 
   describe('#sendWelcomeVerification', function() {
