@@ -18,8 +18,6 @@ services:
       MONGO_DSN: mongodb://mongo:27017/hydra
       REDIS_DSN: redis://redis:6379/0
       PORT: 2112
-      MONGOOSE_DEBUG: ${MONGOOSE_DEBUG}
-      DEBUG: ${DEBUG}
   redis:
     image: redis:alpine
   mongo:
