@@ -25,7 +25,17 @@ describe('services/user', function() {
   });
 
   describe('#createMagicLoginToken', function() {
-    it('should be tested');
+    beforeEach(async function() {
+      sandbox.stub(tokenGenerator, 'create').resolves('some-token-value');
+    });
+    afterEach(async function() {
+      sandbox.restore();
+    });
+    it('should create the token.', async function() {
+      await expect(userService.createMagicLoginToken({ id: '1234' })).to.eventually.equal('some-token-value');
+      sandbox.assert.calledOnce(tokenGenerator.create);
+      sandbox.assert.calledWith(tokenGenerator.create, 'magic-login', { uid: '1234' }, 3600);
+    });
   });
 
   describe('#sendMagicLoginEmail', function() {
