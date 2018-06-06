@@ -193,11 +193,25 @@ describe('factories/organization-member', function() {
   });
 
   describe('#isProjectMember', function() {
-    it('should reject when no project id is provided.');
-    it('should reject when no user id is provided.');
-    it('should reject when no org id is provided.');
-    it('should resolve to true when a project role is found');
-    it('should resolve to false when a a project role is not found');
+    beforeEach(async function() {
+      sandbox.stub(memberService, 'getProjectRole')
+        .withArgs('1234', '5678', '7890').resolves('Member')
+        .withArgs('7890', '1234', '5678').resolves(null)
+      ;
+    });
+    afterEach(async function() {
+      sandbox.restore();
+    });
+    it('should resolve to true when a project role is found', async function() {
+      await expect(memberService.isProjectMember('1234', '5678', '7890')).to.eventually.equal(true);
+      sandbox.assert.calledOnce(memberService.getProjectRole);
+      sandbox.assert.calledWith(memberService.getProjectRole, '1234', '5678', '7890');
+    });
+    it('should resolve to false when a a project role is not found', async function() {
+      await expect(memberService.isProjectMember('7890', '1234', '5678')).to.eventually.equal(false);
+      sandbox.assert.calledOnce(memberService.getProjectRole);
+      sandbox.assert.calledWith(memberService.getProjectRole, '7890', '1234', '5678');
+    });
   });
 
   describe('#canWriteToProject', function() {
