@@ -33,7 +33,7 @@ const prototype = {
    * @return {string[]}
    */
   getProjectAdminRoles() {
-    return ['Owner', 'Administrator'];
+    return ['Owner', 'Administrator', 'Developer'];
   },
 
   /**

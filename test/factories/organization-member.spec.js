@@ -49,7 +49,7 @@ describe('factories/organization-member', function() {
 
   describe('#getProjectAdminRoles', function() {
     it('should return an array of roles.', async function() {
-      expect(memberService.getProjectAdminRoles()).to.deep.equal(['Owner', 'Administrator']);
+      expect(memberService.getProjectAdminRoles()).to.deep.equal(['Owner', 'Administrator', 'Developer']);
     });
   });
 
@@ -215,12 +215,31 @@ describe('factories/organization-member', function() {
   });
 
   describe('#canWriteToProject', function() {
-    it('should reject when no project id is provided.');
-    it('should reject when no user id is provided.');
-    it('should reject when no org id is provided.');
-    it('should resolve to true when the org role is an admin.');
-    it('should resolve to true when the project role is an admin.');
-    it('should resolve to false when the role is not an admin.');
+    beforeEach(async function() {
+      sandbox.stub(memberService, 'getProjectRole')
+        .withArgs('1234', '5678', '7890').resolves('Member')
+        .withArgs('7890', '1234', '5678').resolves('Owner')
+        .withArgs('5678', '7890', '1234').resolves('Developer')
+      ;
+    });
+    afterEach(async function() {
+      sandbox.restore();
+    });
+    it('should resolve to false when the role is not an admin.', async function() {
+      await expect(memberService.canWriteToProject('1234', '5678', '7890')).to.eventually.equal(false);
+      sandbox.assert.calledOnce(memberService.getProjectRole);
+      sandbox.assert.calledWith(memberService.getProjectRole, '1234', '5678', '7890');
+    });
+    it('should resolve to true when the org role is an admin.', async function() {
+      await expect(memberService.canWriteToProject('7890', '1234', '5678')).to.eventually.equal(true);
+      sandbox.assert.calledOnce(memberService.getProjectRole);
+      sandbox.assert.calledWith(memberService.getProjectRole, '7890', '1234', '5678');
+    });
+    it('should resolve to true when the project role is an admin.', async function() {
+      await expect(memberService.canWriteToProject('5678', '7890', '1234')).to.eventually.equal(true);
+      sandbox.assert.calledOnce(memberService.getProjectRole);
+      sandbox.assert.calledWith(memberService.getProjectRole, '5678', '7890', '1234');
+    });
   });
 
   describe('#getUserOrgIds', function() {
