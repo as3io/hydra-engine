@@ -17,7 +17,36 @@ describe('services/user', function() {
   });
 
   describe('#loginWithApiKey', function() {
-    it('should be tested');
+    let user;
+    beforeEach(async function() {
+      stubBcryptHash();
+      user = await Seed.users(1);
+      user.set('api', { key: 'foo', secret: 'bar' });
+      await user.save();
+      sandbox.spy(sessionService, 'set');
+    });
+    afterEach(async function() {
+      await User.remove();
+      sandbox.restore();
+    });
+    it('should reject when the user cannot be found by key.', async function() {
+      await expect(userService.loginWithApiKey('bad-key')).to.be.rejectedWith(Error, 'No user was found for the provided API key.');
+      sandbox.assert.notCalled(sessionService.set);
+    });
+    it('should reject when the secret is provided by does not match the user secret.', async function() {
+      await expect(userService.loginWithApiKey('foo', 'bad-secret')).to.be.rejectedWith(Error, 'The provided API secret is invalid.');
+      sandbox.assert.notCalled(sessionService.set);
+    });
+    it('should create the session with the API credentials with a secret.', async function() {
+      await expect(userService.loginWithApiKey('foo', 'bar')).to.eventually.be.an('object').with.all.keys(['user', 'session']);
+      sandbox.assert.calledOnce(sessionService.set);
+      sandbox.assert.calledWith(sessionService.set, user.id, { key: 'foo', secret: 'bar' });
+    });
+    it('should create the session with the API credentials without a secret.', async function() {
+      await expect(userService.loginWithApiKey('foo')).to.eventually.be.an('object').with.all.keys(['user', 'session']);
+      sandbox.assert.calledOnce(sessionService.set);
+      sandbox.assert.calledWith(sessionService.set, user.id, { key: 'foo', secret: undefined });
+    });
   });
 
   describe('#loginWithMagicToken', function() {
