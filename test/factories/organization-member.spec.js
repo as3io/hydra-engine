@@ -243,9 +243,33 @@ describe('factories/organization-member', function() {
   });
 
   describe('#getUserOrgIds', function() {
-    it('should reject when no user id is provided.');
-    it('should resolve with an empty array when not found.');
-    it('should resolve with an array of stringified org ids when found.');
+    beforeEach(async function() {
+      sandbox.stub(OrganizationMember, 'find')
+        .withArgs({ userId: '1234' }, { organizationId: 1 }).resolves([])
+        .withArgs({ userId: '5678' }, { organizationId: 1 }).resolves([
+          { organizationId: '1234' },
+          { organizationId: { toString: () => '5678' } },
+        ])
+      ;
+    });
+    afterEach(async function() {
+      sandbox.restore();
+    });
+
+    it('should reject when no user id is provided.', async function() {
+      await expect(memberService.getUserOrgIds()).to.be.rejectedWith(Error, 'Unable to retrieve user organizations. No user ID was provided.');
+      sandbox.assert.notCalled(OrganizationMember.find);
+    });
+    it('should resolve with an empty array when not found.', async function() {
+      await expect(memberService.getUserOrgIds('1234')).to.eventually.deep.equal([]);
+      sandbox.assert.calledOnce(OrganizationMember.find);
+      sandbox.assert.calledWith(OrganizationMember.find, { userId: '1234' }, { organizationId: 1 });
+    });
+    it('should resolve with an array of stringified org ids when found.', async function() {
+      await expect(memberService.getUserOrgIds('5678')).to.eventually.deep.equal(['1234', '5678']);
+      sandbox.assert.calledOnce(OrganizationMember.find);
+      sandbox.assert.calledWith(OrganizationMember.find, { userId: '5678' }, { organizationId: 1 });
+    });
   });
 
   describe('#getUserProjectIds', function() {
