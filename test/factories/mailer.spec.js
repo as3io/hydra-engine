@@ -12,6 +12,34 @@ const mailer = Mailer({
 
 
 describe('factories/mailer', function() {
+  it('should throw when no app name is provided.', async function() {
+    expect(() => Mailer({
+      baseURI: 'https://google.com',
+      fromAddress: 'John Doe <jdoe@google.com>',
+      apiKey: 'some-api-key',
+    })).to.throw(Error, 'Unable to initialize the mailer: no value was provided for the app name.');
+  });
+  it('should throw when no base URI is provided.', async function() {
+    expect(() => Mailer({
+      appName: 'Cool app',
+      fromAddress: 'John Doe <jdoe@google.com>',
+      apiKey: 'some-api-key',
+    })).to.throw(Error, 'Unable to initialize the mailer: no value was provided for the base URI.');
+  });
+  it('should throw when no from address is provided.', async function() {
+    expect(() => Mailer({
+      appName: 'Cool app',
+      baseURI: 'https://google.com',
+      apiKey: 'some-api-key',
+    })).to.throw(Error, 'Unable to initialize the mailer: no value was provided for the from address.');
+  });
+  it('should throw when no api key is provided.', async function() {
+    expect(() => Mailer({
+      appName: 'Cool app',
+      baseURI: 'https://google.com',
+      fromAddress: 'John Doe <jdoe@google.com>',
+    })).to.throw(Error, 'Unable to initialize the mailer: no value was provided for the API key.');
+  });
 
   describe('#send', function() {
     let values;

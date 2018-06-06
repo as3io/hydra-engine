@@ -74,7 +74,7 @@ module.exports = ({
 } = {}) => {
   const prefix = 'Unable to initialize the mailer';
   if (!appName) throw new Error(`${prefix}: no value was provided for the app name.`);
-  if (!baseURI) throw new Error(`${prefix}: no value was provided for the base URI`);
+  if (!baseURI) throw new Error(`${prefix}: no value was provided for the base URI.`);
   if (!fromAddress) throw new Error(`${prefix}: no value was provided for the from address.`);
   if (!apiKey) throw new Error(`${prefix}: no value was provided for the API key.`);
   const obj = create(prototype);
