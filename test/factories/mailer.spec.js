@@ -1,4 +1,5 @@
 const sgMail = require('@sendgrid/mail');
+const emailTemplates = require('../../src/email-templates');
 const Mailer = require('../../src/factories/mailer');
 
 const sandbox = sinon.createSandbox();
@@ -82,19 +83,129 @@ describe('factories/mailer', function() {
   });
 
   describe('#sendWelcomeVerification', function() {
-    it('should best tested.');
+    const user = { toAddress: 'Jane Doe <jd@foo.com>' };
+    beforeEach(async function() {
+      sandbox.stub(emailTemplates, 'render').resolves('<h1>Hello World!</h1>');
+      sandbox.stub(mailer, 'send').resolves();
+    });
+    afterEach(async function() {
+      sandbox.restore();
+    });
+
+    it('should render the template.', async function() {
+      await expect(mailer.sendWelcomeVerification(user, 'some-token')).to.be.fulfilled;
+      sandbox.assert.calledOnce(emailTemplates.render);
+      sandbox.assert.calledWith(emailTemplates.render, 'welcome', {
+        user,
+        subject: 'Welcome to Cool app',
+        href: 'https://google.com/actions/magic-login/some-token',
+      });
+    });
+
+    it('should send the email.', async function() {
+      await expect(mailer.sendWelcomeVerification(user, 'some-token')).to.be.fulfilled;
+      sandbox.assert.calledOnce(mailer.send);
+      sandbox.assert.calledWith(mailer.send, {
+        to: user.toAddress,
+        subject: 'Welcome to Cool app',
+        html: '<h1>Hello World!</h1>',
+      });
+    });
   });
 
   describe('#sendOrganizationInvitation', function() {
-    it('should best tested.');
+    const user = { toAddress: 'Jane Doe <jd@foo.com>' };
+    const organization = { name: 'Foo Org' };
+    beforeEach(async function() {
+      sandbox.stub(emailTemplates, 'render').resolves('<h1>Hello World!</h1>');
+      sandbox.stub(mailer, 'send').resolves();
+    });
+    afterEach(async function() {
+      sandbox.restore();
+    });
+
+    it('should render the template.', async function() {
+      await expect(mailer.sendOrganizationInvitation(organization, user, 'some-token')).to.be.fulfilled;
+      sandbox.assert.calledOnce(emailTemplates.render);
+      sandbox.assert.calledWith(emailTemplates.render, 'organization-invite', {
+        organization,
+        user,
+        subject: `You have been invited to the ${organization.name} organization.`,
+        href: 'https://google.com/actions/organization-invite/some-token',
+      });
+    });
+
+    it('should send the email.', async function() {
+      await expect(mailer.sendOrganizationInvitation(organization, user, 'some-token')).to.be.fulfilled;
+      sandbox.assert.calledOnce(mailer.send);
+      sandbox.assert.calledWith(mailer.send, {
+        to: user.toAddress,
+        subject: `You have been invited to the ${organization.name} organization.`,
+        html: '<h1>Hello World!</h1>',
+      });
+    });
   });
 
   describe('#sendMagicLogin', function() {
-    it('should best tested.');
+    const user = { toAddress: 'Jane Doe <jd@foo.com>' };
+    beforeEach(async function() {
+      sandbox.stub(emailTemplates, 'render').resolves('<h1>Hello World!</h1>');
+      sandbox.stub(mailer, 'send').resolves();
+    });
+    afterEach(async function() {
+      sandbox.restore();
+    });
+
+    it('should render the template.', async function() {
+      await expect(mailer.sendMagicLogin(user, 'some-token')).to.be.fulfilled;
+      sandbox.assert.calledOnce(emailTemplates.render);
+      sandbox.assert.calledWith(emailTemplates.render, 'magic-login', {
+        user,
+        subject: 'Your Cool app magic login link',
+        href: 'https://google.com/actions/magic-login/some-token',
+      });
+    });
+
+    it('should send the email.', async function() {
+      await expect(mailer.sendMagicLogin(user, 'some-token')).to.be.fulfilled;
+      sandbox.assert.calledOnce(mailer.send);
+      sandbox.assert.calledWith(mailer.send, {
+        to: user.toAddress,
+        subject: 'Your Cool app magic login link',
+        html: '<h1>Hello World!</h1>',
+      });
+    });
   });
 
   describe('#sendPasswordReset', function() {
-    it('should best tested.');
+    const user = { toAddress: 'Jane Doe <jd@foo.com>' };
+    beforeEach(async function() {
+      sandbox.stub(emailTemplates, 'render').resolves('<h1>Hello World!</h1>');
+      sandbox.stub(mailer, 'send').resolves();
+    });
+    afterEach(async function() {
+      sandbox.restore();
+    });
+
+    it('should render the template.', async function() {
+      await expect(mailer.sendPasswordReset(user, 'some-token')).to.be.fulfilled;
+      sandbox.assert.calledOnce(emailTemplates.render);
+      sandbox.assert.calledWith(emailTemplates.render, 'reset-password', {
+        user,
+        subject: 'Your Cool app password reset request',
+        href: 'https://google.com/actions/reset-password/some-token',
+      });
+    });
+
+    it('should send the email.', async function() {
+      await expect(mailer.sendPasswordReset(user, 'some-token')).to.be.fulfilled;
+      sandbox.assert.calledOnce(mailer.send);
+      sandbox.assert.calledWith(mailer.send, {
+        to: user.toAddress,
+        subject: 'Your Cool app password reset request',
+        html: '<h1>Hello World!</h1>',
+      });
+    });
   });
 
 });
