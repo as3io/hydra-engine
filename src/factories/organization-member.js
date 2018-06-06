@@ -65,7 +65,7 @@ const prototype = {
   async getOrgRole(userId, organizationId) {
     const member = await this.getMembership(userId, organizationId);
     if (!member) return null;
-    return member.role || null;
+    return member.role;
   },
 
   /**

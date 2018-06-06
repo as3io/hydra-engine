@@ -17,6 +17,8 @@ const testOrgIdError = async (methodName) => {
   await expect(memberService[methodName]('1234')).to.be.rejectedWith(Error, 'Unable to retrieve organization membership: No organization ID was provided');
 };
 
+const fakeOrganizationId = '5b15368aa5ac4f0047dabd15';
+
 describe('factories/organization-member', function() {
   after(async function() {
     await OrganizationMember.remove();
@@ -100,9 +102,14 @@ describe('factories/organization-member', function() {
     it('should reject when no org id is provided.', async function() {
       await testOrgIdError('getOrgRole');
     });
-    it('should resolve to null when no membership is found.');
-    it('should resolve to the role when set on the member.');
-    it('should resolve to null when the membership is found but no role was assigned.');
+    it('should resolve to null when no membership is found.', async function() {
+      const member = await Seed.organizationMembers(1);
+      await expect(memberService.getOrgRole(member.userId, fakeOrganizationId)).to.eventually.be.null;
+    });
+    it('should resolve to the role when set on the member.', async function() {
+      const member = await Seed.organizationMembers(1);
+      await expect(memberService.getOrgRole(member.userId, member.organizationId)).to.eventually.equal(member.role);
+    });
   });
 
   describe('#isOrgMember', function() {
@@ -112,8 +119,8 @@ describe('factories/organization-member', function() {
     it('should reject when no org id is provided.', async function() {
       await testOrgIdError('isOrgMember');
     });
-    it('should resolve to true when an org role is found');
-    it('should resolve to false when an org role is not found');
+    it('should resolve to true when an org role is found.');
+    it('should resolve to false when an org role is not found.');
   });
 
   describe('#canWriteToOrg', function() {
