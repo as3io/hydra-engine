@@ -48,6 +48,7 @@ describe('factories/organization', function() {
     it('should reject when no email address was provided.', async function() {
       delete payload.email;
       await expect(orgService.inviteUserToOrg(organization, payload)).to.be.rejectedWith(Error, 'Unable to invite user to org: No email address was provided.');
+      await expect(orgService.inviteUserToOrg(organization)).to.be.rejectedWith(Error, 'Unable to invite user to org: No email address was provided.');
     });
     it('should create a new user when not found.', async function() {
       const promise = orgService.inviteUserToOrg(organization, payload);

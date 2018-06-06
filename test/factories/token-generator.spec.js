@@ -7,6 +7,10 @@ const sandbox = sinon.createSandbox();
 const secret = 'some-secret';
 
 describe('factories/token-generator', function() {
+  it('should throw when no arguments are provided.', async function() {
+    expect(() => TokenGenerator()).to.throw(Error, /^Unable to initialize the token/);
+  });
+
   it('should error when a secret is not provided.', async function() {
     expect(() => TokenGenerator()).to.throw(Error, 'Unable to initialize the token generator: no value was provided for the secret.');
     expect(() => TokenGenerator({ secret: '' })).to.throw(Error, 'Unable to initialize the token generator: no value was provided for the secret.');
@@ -53,7 +57,7 @@ describe('factories/token-generator', function() {
     });
 
     it('should not set an exp value if the ttl is undefined.', async function() {
-      const promise = generator.create('some-action', { foo: 'bar' });
+      const promise = generator.create('some-action');
       await expect(promise).to.eventually.be.a('string');
       const token = await Token.findOne({ action: 'some-action' });
       expect(token).to.be.an('object');

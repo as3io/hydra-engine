@@ -13,6 +13,9 @@ const mailer = Mailer({
 
 
 describe('factories/mailer', function() {
+  it('should throw when no arguments are provided.', async function() {
+    expect(() => Mailer()).to.throw(Error, /^Unable to initialize the mailer/);
+  });
   it('should throw when no app name is provided.', async function() {
     expect(() => Mailer({
       baseURI: 'https://google.com',

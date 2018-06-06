@@ -12,6 +12,9 @@ const sessionService = Session({
 const sandbox = sinon.createSandbox();
 
 describe('factories/session', function() {
+  it('should throw when no arguments are provided.', async function() {
+    expect(() => Session()).to.throw(Error, /^Unable to initialize the session/);
+  });
   it('should throw when no global secret is provided.', async function() {
     expect(() => Session({
       namespace: '139ec234-0c43-4629-a7bf-689549615721',
