@@ -1,26 +1,26 @@
 const sgMail = require('@sendgrid/mail');
+const env = require('../utils/get-env');
 const emailTemplates = require('../email-templates');
 
 const {
-  SENDGRID_API_KEY,
-  SENDGRID_FROM,
   APP_BASE_URI,
   APP_NAME,
 } = process.env;
 
 module.exports = {
   async send({ to, subject, html }) {
-    if (!SENDGRID_API_KEY) throw new Error('Required environment variable "SENDGRID_API_KEY" was not set.');
-    if (!SENDGRID_FROM) throw new Error('Required environment variable "SENDGRID_FROM" was not set.');
+    if (!to) throw new Error('Unable to send email: no to address was provided.');
+    if (!subject) throw new Error('Unable to send email: no subject was provided.');
+    if (!html) throw new Error('Unable to send email: no body was provided.');
 
     const payload = {
       to,
-      from: SENDGRID_FROM,
+      from: env.get('SENDGRID_FROM', true),
       subject,
       html,
     };
 
-    sgMail.setApiKey(SENDGRID_API_KEY);
+    sgMail.setApiKey(env.get('SENDGRID_API_KEY', true));
     return sgMail.send(payload);
   },
 
