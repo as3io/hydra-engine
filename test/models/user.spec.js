@@ -164,4 +164,31 @@ describe('models/user', function() {
     });
   });
 
+  describe('#findByEmail', function() {
+    beforeEach(async function() {
+      sandbox.stub(User, 'findOne').resolves();
+      sandbox.spy(User, 'normalizeEmail');
+    });
+    afterEach(async function() {
+      sandbox.restore();
+    });
+
+    it('should normalize the email address', async function() {
+      await expect(User.findByEmail('foo@bar.com')).to.be.fulfilled;
+      sandbox.assert.calledOnce(User.normalizeEmail);
+      sandbox.assert.calledWith(User.normalizeEmail, 'foo@bar.com');
+    });
+    [null, undefined, '', false].forEach((value) => {
+      it(`should reject when the value is '${value}'`, async function() {
+        await expect(User.findByEmail(value)).to.be.rejectedWith(Error, 'Unable to find user: no email address was provided.');
+        sandbox.assert.notCalled(User.findOne);
+      });
+    });
+    it('should query using the email address.', async function() {
+      await expect(User.findByEmail('foo@bar.com')).to.be.fulfilled;
+      sandbox.assert.calledOnce(User.findOne);
+      sandbox.assert.calledWith(User.findOne, { email: 'foo@bar.com' });
+    });
+  });
+
 });
