@@ -150,4 +150,18 @@ describe('models/user', function() {
     });
   });
 
+  describe('#normalizeEmail', function() {
+    [null, undefined, '', false].forEach((value) => {
+      it(`should return an empty string when the value is '${value}'`, async function() {
+        expect(User.normalizeEmail(value)).to.equal('');
+      });
+    });
+    it('should lower case the value.', async function() {
+      expect(User.normalizeEmail('Foo@Bar.com')).to.equal('foo@bar.com');
+    });
+    it('should trim the value.', async function() {
+      expect(User.normalizeEmail(' foo@bar.com   ')).to.equal('foo@bar.com');
+    });
+  });
+
 });
