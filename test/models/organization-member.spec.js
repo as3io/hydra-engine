@@ -60,4 +60,50 @@ describe('models/organization-member', function() {
     });
   });
 
+  describe('.role', async () => {
+    [null, undefined, ''].forEach((value) => {
+      it(`should be required and be rejected when the value is '${value}'.`, function() {
+        return testRequiredField(member, 'role', value);
+      });
+    });
+
+    it('should set the default role to member.', async function() {
+      const doc = new OrganizationMember();
+      expect(doc.role).to.equal('Member');
+    });
+  });
+
+  describe('.projectRoles', function() {
+    it('should allow an empty array', async function() {
+      member.projectRoles = [];
+      await expect(member.save()).to.be.fulfilled;
+    });
+  });
+
+  describe('.projectRoles.0.projectId', async function() {
+    [null, undefined].forEach((value) => {
+      it(`should be required and be rejected when the value is '${value}'.`, function() {
+        return testRequiredField(member, 'projectRoles.0.projectId', value);
+      });
+    });
+    it('should reject when the project ID cannot be found.', function() {
+      const id = '5b1050d68dd51b05976c9dbf';
+      return testRefOne(member, 'projectRoles.0.projectId', id, `No project found for ID ${id}`);
+    });
+  });
+
+  describe('.projectRoles.0.role', async () => {
+    [null, undefined, ''].forEach((value) => {
+      it(`should be required and be rejected when the value is '${value}'.`, function() {
+        return testRequiredField(member, 'role', value);
+      });
+    });
+
+    it('should set the default role to member.', async function() {
+      const doc = new OrganizationMember();
+      doc.set('projectRoles.0', {});
+      expect(doc.get('projectRoles.0.role')).to.equal('Member');
+    });
+  });
+
 });

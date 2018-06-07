@@ -1,17 +1,6 @@
 const { Schema } = require('mongoose');
 const connection = require('../connections/mongoose');
 
-const role = {
-  type: String,
-  required: true,
-  default: 'Member',
-  enum: [
-    'Owner',
-    'Administrator',
-    'Member',
-  ],
-};
-
 const projectRole = new Schema({
   projectId: {
     type: Schema.Types.ObjectId,
@@ -26,7 +15,17 @@ const projectRole = new Schema({
       message: 'No project found for ID {VALUE}',
     },
   },
-  role,
+  role: {
+    type: String,
+    required: true,
+    default: 'Member',
+    enum: [
+      'Owner',
+      'Administrator',
+      'Member',
+      'Developer',
+    ],
+  },
 });
 
 const schema = new Schema({
@@ -56,7 +55,16 @@ const schema = new Schema({
       message: 'No organization found for ID {VALUE}',
     },
   },
-  role,
+  role: {
+    type: String,
+    required: true,
+    default: 'Member',
+    enum: [
+      'Owner',
+      'Administrator',
+      'Member',
+    ],
+  },
   invitedAt: {
     type: Date,
     default: () => new Date(),
