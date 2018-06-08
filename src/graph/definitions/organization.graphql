@@ -1,15 +1,13 @@
 type Query {
   allOrganizations(pagination: PaginationInput = {}, sort: OrganizationSortInput = {}): OrganizationConnection!
-  # searchOrganizations(pagination: PaginationInput = {}, search: OrganizationSearchInput!): OrganizationConnection!
-  # userOrganizations(pagination: PaginationInput = {}, sort: OrganizationSortInput = {}): OrganizationConnection!
   organization(input: ModelIdInput!): Organization!
 }
 
 type Mutation {
   createOrganization(input: CreateOrganizationInput!): Organization!
   updateOrganization(input: UpdateOrganizationInput!): Organization!
-  organizationInviteAccept(input: AcceptOrganizationInviteInput!): OrganizationMembership
-  configureOrganization(input: OrganizationConfigInput!): Organization!
+  inviteUserToOrg(input: OrganizationInviteInput!): OrganizationMember!
+  acknowledgeUserInvite(token: String!): OrganizationMember!
 }
 
 enum OrganizationSortField {
@@ -25,19 +23,22 @@ type Organization {
   createdAt: Date
   updatedAt: Date
   photoURL: String
-  members: [OrganizationMembership]
+  members: [OrganizationMember]
   projects: [Project]
-  accepted: Boolean
-  role: String
-  keys: [Key]
 }
 
-type OrganizationMembership {
+type OrganizationMember {
   user: User!
-  role: Roles
-  projects: [ProjectRole]
-  invited: Date
-  accepted: Date
+  organization: Organization!
+  role: RolesForOrganization
+  projectRoles: [ProjectRole]
+  invitedAt: Date
+  acceptedAt: Date
+}
+
+type ProjectRole {
+  project: Project!
+  role: RolesForProject
 }
 
 type OrganizationConnection {
@@ -51,23 +52,17 @@ type OrganizationEdge {
   cursor: Cursor!
 }
 
-
-input AcceptOrganizationInviteInput {
-  organization: String!
+input OrganizationInviteInput {
+  email: String!
+  givenName: String!
+  familyName: String!
+  role: RolesForOrganization!
+  projectRoles: [ProjectInviteRoleInput]
 }
 
-input OrganizationSearchInput {
-  typeahead: OrganizationTypeAheadInput!
-}
-
-input OrganizationTypeAheadInput {
-  field: OrganizationTypeAheadField!
-  term: String!
-}
-
-enum OrganizationTypeAheadField {
-  name
-  email
+input ProjectInviteRoleInput {
+  projectId: String!
+  role: RolesForProject!
 }
 
 input OrganizationSortInput {
@@ -75,22 +70,18 @@ input OrganizationSortInput {
   order: Int! = -1
 }
 
-input OrganizationPayloadInput {
-  name: String
-}
-
 input CreateOrganizationInput {
-  payload: OrganizationPayloadInput!
+  name: String!
+  description: String
 }
 
 input UpdateOrganizationInput {
   id: String!
-  payload: OrganizationPayloadInput!
+  payload: UpdateOrganizationPayload!
 }
 
-input OrganizationConfigInput {
-  organizationId: String!
-  name: String
+input UpdateOrganizationPayload {
+  name: String!
   description: String
   photoURL: String
 }

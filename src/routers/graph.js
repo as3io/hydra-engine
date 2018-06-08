@@ -4,6 +4,7 @@ const helmet = require('helmet');
 const passport = require('passport');
 const { graphqlExpress } = require('apollo-server-express');
 const Auth = require('../classes/auth');
+const Tenant = require('../classes/tenant');
 const schema = require('../graph/schema');
 
 /**
@@ -27,21 +28,36 @@ const schema = require('../graph/schema');
  */
 const authenticate = (req, res, next) => {
   passport.authenticate('bearer', { session: false }, (err, { user, session } = {}) => {
-    req.auth = new Auth({ user, session, err });
+    const { tenant } = req;
+    req.auth = new Auth({
+      user,
+      session,
+      tenant,
+      err,
+    });
     next();
   })(req, res, next);
+};
+
+const loadTenancy = (req, res, next) => {
+  req.tenant = new Tenant({
+    organizationId: req.get('X-Organization'),
+    projectId: req.get('X-Project'),
+  });
+  next();
 };
 
 const router = Router();
 
 router.use(
   helmet(),
+  loadTenancy,
   authenticate,
   bodyParser.json(),
-  graphqlExpress(req => ({
-    schema,
-    context: { auth: req.auth },
-  })),
+  graphqlExpress((req) => {
+    const { auth } = req;
+    return { schema, context: { auth } };
+  }),
 );
 
 module.exports = router;

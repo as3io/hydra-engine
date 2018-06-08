@@ -9,7 +9,8 @@ describe('fixtures/generators', function() {
     'user',
     'project',
     'organization',
-    'content',
+    'organization-member',
+    'story',
   ];
   it(`should only contain the ${cases.join(', ')} properties`, function(done) {
     expect(generators).to.have.keys(cases);

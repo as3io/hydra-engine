@@ -1,8 +1,7 @@
 const { paginationResolvers } = require('@limit0/mongoose-graphql-pagination');
-const Key = require('../../models/key');
-const UserRepo = require('../../repositories/user');
-const Organization = require('../../models/organization');
-const SessionRepo = require('../../repositories/session');
+const User = require('../../models/user');
+const userService = require('../../services/user');
+const OrganizationMember = require('../../models/organization-member');
 
 module.exports = {
   /**
@@ -10,18 +9,12 @@ module.exports = {
    */
   User: {
     hasPassword: user => !(!user.password),
-    organizations: user => Organization.find({ 'members.user': user.id }),
-    keys: ({ id }) => Key.find({ user: id }),
+    memberships: user => OrganizationMember.find({ userId: user.id }),
   },
   /**
    *
    */
   UserConnection: paginationResolvers.connection,
-
-  /**
-   *
-   */
-  UserEdge: paginationResolvers.edge,
 
   /**
    *
@@ -33,7 +26,7 @@ module.exports = {
     user: async (root, { input }, { auth }) => {
       auth.check();
       const { id } = input;
-      const record = await UserRepo.findById(id);
+      const record = await User.findById(id);
       if (!record) throw new Error(`No user record found for ID ${id}.`);
       return record;
     },
@@ -43,7 +36,7 @@ module.exports = {
      */
     allUsers: (root, { pagination, sort }, { auth }) => {
       auth.check();
-      return UserRepo.paginate({ pagination, sort });
+      return User.paginate({ pagination, sort });
     },
 
     /**
@@ -56,17 +49,27 @@ module.exports = {
      */
     checkSession: async (root, { input }) => {
       const { token } = input;
-      const { user, session } = await UserRepo.retrieveSession(token);
+      const { user, session } = await userService.retrieveSession(token);
       return { user, session };
     },
   },
   Mutation: {
+    generateUserApiKey: async (root, args, { auth }) => {
+      auth.check();
+      const { user } = auth;
+      user.api = {};
+      await user.save();
+      return user.api;
+    },
+
     /**
      *
      */
-    createUser: (root, { input }) => {
+    createUser: async (root, { input }) => {
       const { payload } = input;
-      return UserRepo.create(payload);
+      const user = await User.create(payload);
+      await userService.sendWelcomeVerification(user);
+      return user;
     },
 
     /**
@@ -74,59 +77,57 @@ module.exports = {
      */
     loginUser: (root, { input }) => {
       const { email, password } = input;
-      return UserRepo.login(email, password);
+      return userService.login(email, password);
+    },
+
+    loginWithApiKey: (root, { input }) => {
+      const { key, secret } = input;
+      return userService.loginWithApiKey(key, secret);
     },
 
     /**
      *
      */
-    loginFromToken: (root, { input }) => {
-      const { token } = input;
-      return UserRepo.loginFromToken(token);
+    loginWithMagicToken: (root, { token }) => userService.loginWithMagicToken(token),
+
+    /**
+     *
+     */
+    resetPassword: async (root, { input }) => {
+      const { token, password } = input;
+      await userService.resetPassword(token, password);
+      return true;
     },
 
     /**
      *
      */
-    setPassword: (root, { input }, { auth }) => {
-      const { password } = input;
-      return UserRepo.setPassword(auth.session.uid, password);
+    setCurrentUserPassword: async (root, { password }, { auth }) => {
+      auth.check();
+      const { user } = auth;
+      user.set({ password });
+      await user.save();
+      return true;
     },
 
     /**
      *
      */
-    sendPasswordReset: (root, { input }) => {
-      const { email } = input;
-      return UserRepo.sendPasswordReset(email);
-    },
+    sendPasswordResetEmail: (root, { email }) => userService.sendPasswordResetEmail(email),
 
     /**
      *
      */
     deleteSession: async (root, args, { auth }) => {
-      if (auth.isValid()) {
-        await SessionRepo.delete(auth.session);
-      }
+      auth.check();
+      const { id, uid } = auth.session;
+      await userService.deleteSession(id, uid);
       return 'ok';
     },
 
     /**
      *
      */
-    organizationInvite: async (root, { input }, { auth }) => {
-      auth.check();
-      const { organization, payload } = input;
-      // role.check(Roles.Administrator || Roles.Owner);
-      return UserRepo.organizationInvite(organization, payload);
-    },
-
-    /**
-     *
-     */
-    magicLogin: (root, { input }) => {
-      const { email } = input;
-      return UserRepo.magicLogin(email);
-    },
+    sendMagicLoginEmail: (root, { email }) => userService.sendMagicLoginEmail(email),
   },
 };

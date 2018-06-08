@@ -1,7 +1,8 @@
 const mongoose = require('mongoose');
 const bluebird = require('bluebird');
+const env = require('../../env');
 
-const { MONGO_DSN, MONGOOSE_DEBUG } = process.env;
+const { MONGO_DSN, MONGOOSE_DEBUG } = env;
 mongoose.set('debug', Boolean(MONGOOSE_DEBUG));
 mongoose.Promise = bluebird;
 
@@ -12,10 +13,7 @@ const connection = mongoose.createConnection(MONGO_DSN, {
 });
 
 connection.once('open', () => {
-  /* istanbul ignore if */
-  if (process.env.NODE_ENV !== 'test') {
-    process.stdout.write(`Successful MongoDB connection to '${MONGO_DSN}']n`);
-  }
+  process.stdout.write(`Successful MongoDB connection to '${MONGO_DSN}'\n`);
 });
 
 module.exports = connection;

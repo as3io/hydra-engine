@@ -1,10 +1,25 @@
+const { Schema } = require('mongoose');
+const connection = require('../connections/mongoose');
 const bcrypt = require('bcrypt');
-const mongoose = require('mongoose');
 const validator = require('validator');
 const crypto = require('crypto');
 const uuid = require('uuid/v4');
+const pushId = require('unique-push-id');
+const paginablePlugin = require('../plugins/paginable');
+const repositoryPlugin = require('../plugins/repository');
 
-const { Schema } = mongoose;
+const apiSchema = new Schema({
+  key: {
+    type: String,
+    required: true,
+    default: () => uuid(),
+  },
+  secret: {
+    type: String,
+    required: true,
+    default: () => pushId(),
+  },
+});
 
 const schema = new Schema({
   email: {
@@ -22,10 +37,9 @@ const schema = new Schema({
       },
     ],
   },
-  keys: [{
-    type: Schema.Types.ObjectId,
-    ref: 'key',
-  }],
+  api: {
+    type: apiSchema,
+  },
   givenName: {
     type: String,
     required: true,
@@ -53,11 +67,6 @@ const schema = new Schema({
     required: true,
     default: false,
   },
-  token: {
-    type: String,
-    // @todo make this a JWT to ensure it can expire
-    default: () => uuid(),
-  },
   photoURL: {
     type: String,
     trim: true,
@@ -76,10 +85,28 @@ const schema = new Schema({
   timestamps: true,
 });
 
+schema.plugin(paginablePlugin);
+schema.plugin(repositoryPlugin);
+
+schema.statics.normalizeEmail = function normalizeEmail(email) {
+  if (!email) return '';
+  return String(email).trim().toLowerCase();
+};
+
+schema.statics.findByEmail = async function findByEmail(value) {
+  const email = connection.model('user').normalizeEmail(value);
+  if (!email) throw new Error('Unable to find user: no email address was provided.');
+  return this.findOne({ email });
+};
+
 /**
  * Indexes
  */
 schema.index({ email: 1, isEmailVerified: 1 });
+
+schema.virtual('toAddress').get(function toAddress() {
+  return `${this.givenName} ${this.familyName} <${this.email}>`;
+});
 
 /**
  * Hooks.
@@ -87,11 +114,13 @@ schema.index({ email: 1, isEmailVerified: 1 });
 schema.pre('save', function setPassword(next) {
   if (!this.isModified('password')) {
     next();
-  } else {
+  } else if (this.password) {
     bcrypt.hash(this.password, 13).then((hash) => {
       this.password = hash;
       next();
     }).catch(next);
+  } else {
+    next();
   }
 });
 schema.pre('save', function setPhotoURL(next) {

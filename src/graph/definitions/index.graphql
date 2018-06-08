@@ -1,8 +1,7 @@
-# import * from 'key.graphql'
 # import * from 'user.graphql'
-# import * from 'content.graphql'
 # import * from 'organization.graphql'
 # import * from 'project.graphql'
+# import * from 'story.graphql'
 
 scalar Date
 scalar Cursor
@@ -13,14 +12,7 @@ type Query {
 
 type PageInfo {
   hasNextPage: Boolean!
-  hasPrevPage: Boolean!
   endCursor: Cursor
-  startCursor: Cursor
-}
-
-input PaginationCriteriaInput {
-  organization: String
-  project: String
 }
 
 input PaginationInput {
@@ -32,18 +24,14 @@ input ModelIdInput {
   id: String!
 }
 
-enum Roles {
+enum RolesForOrganization {
   Owner
   Administrator
   Member
 }
-enum ProjectRoles {
-  Administrator
-  Developer
-  Editor
-}
 
-type ProjectRole {
-  project: Project!
-  role: ProjectRoles
+enum RolesForProject {
+  Owner
+  Administrator
+  Member
 }

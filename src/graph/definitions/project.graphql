@@ -1,14 +1,11 @@
 type Query {
-  allProjects(criteria: PaginationCriteriaInput = {}, pagination: PaginationInput = {}, sort: ProjectSortInput = {}): ProjectConnection!
-  # searchProjects(pagination: PaginationInput = {}, search: ProjectSearchInput!): ProjectConnection!
-  # userProjects(pagination: PaginationInput = {}, sort: ProjectSortInput = {}): ProjectConnection!
+  allProjects(pagination: PaginationInput = {}, sort: ProjectSortInput = {}): ProjectConnection!
   project(input: ModelIdInput!): Project!
 }
 
 type Mutation {
   createProject(input: CreateProjectInput!): Project!
   updateProject(input: UpdateProjectInput!): Project!
-  configureProject(input: ProjectConfigInput!): Project!
 }
 
 enum ProjectSortField {
@@ -24,7 +21,6 @@ type Project {
   createdAt: Date
   updatedAt: Date
   organization: Organization!
-  keys: [Key]
 }
 
 type ProjectConnection {
@@ -38,41 +34,22 @@ type ProjectEdge {
   cursor: Cursor!
 }
 
-input ProjectSearchInput {
-  typeahead: ProjectTypeAheadInput!
-}
-
-input ProjectTypeAheadInput {
-  field: ProjectTypeAheadField!
-  term: String!
-}
-
-enum ProjectTypeAheadField {
-  name
-  email
-}
-
 input ProjectSortInput {
   field: ProjectSortField! = name
   order: Int! = -1
 }
 
-input ProjectPayloadInput {
-  name: String
-  organization: String
-}
-
 input CreateProjectInput {
-  payload: ProjectPayloadInput!
+  name: String!
+  description: String
 }
 
 input UpdateProjectInput {
   id: String!
-  payload: ProjectPayloadInput!
+  payload: UpdateProjectPayload!
 }
 
-input ProjectConfigInput {
-  projectId: String!
-  name: String
+input UpdateProjectPayload {
+  name: String!
   description: String
 }

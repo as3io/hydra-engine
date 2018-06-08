@@ -1,49 +1,30 @@
 const { paginationResolvers } = require('@limit0/mongoose-graphql-pagination');
-const Repo = require('../../repositories/organization');
-const Model = require('../../models/organization');
+const Organization = require('../../models/organization');
+const OrganizationMember = require('../../models/organization-member');
 const Project = require('../../models/project');
 const User = require('../../models/user');
-const Key = require('../../models/key');
+const orgService = require('../../services/organization');
+const memberService = require('../../services/organization-member');
 
 module.exports = {
   /**
    *
    */
   Organization: {
-    projects: ({ id }) => Project.find({ organization: id }),
-    accepted: (org, _args, { auth }) => {
-      const { uid } = auth.session;
-      for (let i = 0; i < org.members.length; i += 1) {
-        const member = org.members[i];
-        if (member.user == uid && member.accepted) return true; // eslint-disable-line eqeqeq
-      }
-      return false;
-    },
-    role: (org, _args, { auth }) => {
-      const { uid } = auth.session;
-      for (let i = 0; i < org.members.length; i += 1) {
-        const member = org.members[i];
-        if (member.user == uid) return member.role; // eslint-disable-line eqeqeq
-      }
-      return null;
-    },
-    keys: ({ id }) => Key.find({ organization: id }),
+    projects: ({ id }) => Project.find({ organizationId: id }),
+    members: ({ id }) => OrganizationMember.find({ organizationId: id }),
   },
   /**
    *
    */
-  OrganizationMembership: {
-    user: orgMember => User.findById(orgMember.user),
+  OrganizationMember: {
+    user: orgMember => User.findById(orgMember.userId),
+    organization: orgMember => Organization.findById(orgMember.organizationId),
   },
   /**
    *
    */
   OrganizationConnection: paginationResolvers.connection,
-
-  /**
-   *
-   */
-  OrganizationEdge: paginationResolvers.edge,
 
   /**
    *
@@ -55,21 +36,22 @@ module.exports = {
     organization: async (root, { input }, { auth }) => {
       auth.check();
       const { id } = input;
-      const record = await Repo.findById(id);
+      const member = await memberService.isOrgMember(auth.user.id, id);
+      if (!member) throw new Error('You do not have permission to read this organization.');
+
+      const record = await Organization.findById(id);
       if (!record) throw new Error(`No organization record found for ID ${id}.`);
       return record;
     },
 
     /**
-     * @todo Implement filtering by what the user has access to
+     *
      */
-    allOrganizations: (root, { pagination, sort }, { auth }) => {
+    allOrganizations: async (root, { pagination, sort }, { auth }) => {
       auth.check();
-      return Repo.paginate({ pagination, sort });
-      // const criteria = {
-      //   "members.user": auth.uid,
-      // };
-      // return Repo.paginate({ criteria, pagination, sort });
+      const organizationIds = await memberService.getUserOrgIds(auth.user.id);
+      const criteria = { _id: { $in: organizationIds } };
+      return Organization.paginate({ pagination, sort, criteria });
     },
   },
 
@@ -80,46 +62,36 @@ module.exports = {
     /**
      *
      */
-    createOrganization: (root, { input }, { auth }) => {
+    createOrganization: async (root, { input }, { auth }) => {
       auth.check();
-      const { payload } = input;
-      payload.members = [{
-        user: auth.user._id,
-        role: 'Owner',
-        accepted: new Date(),
-      }];
-      return Repo.create(payload);
+      auth.checkApiWrite();
+      const { name } = input;
+      const organization = await Organization.create({ name });
+      await memberService.createOrgOwner(auth.user.id, organization.id);
+      return organization;
     },
 
     /**
      *
      */
-    updateOrganization: (root, { input }, { auth }) => {
+    inviteUserToOrg: async (root, { input }, { auth }) => {
+      await auth.checkOrgWrite();
+      const organization = await auth.tenant.getOrganization();
+      return orgService.inviteUserToOrg(organization, input);
+    },
+
+    acknowledgeUserInvite: (root, { token }) => orgService.acknowledgeUserInvite(token),
+
+    /**
+     *
+     */
+    updateOrganization: async (root, { input }, { auth }) => {
       auth.check();
+      auth.checkApiWrite();
       const { id, payload } = input;
-      return Repo.update(id, payload);
-    },
-
-    /**
-     *
-     */
-    configureOrganization: async (root, { input }, { auth }) => {
-      auth.check();
-      const model = await Model.findById(input.organizationId);
-      const { name, description, photoURL } = input;
-      model.set('name', name);
-      model.set('description', description);
-      model.set('photoURL', photoURL);
-      return model.save();
-    },
-
-    /**
-     *
-     */
-    organizationInviteAccept: (root, { input }, { auth }) => {
-      auth.check();
-      const { organization } = input;
-      Repo.acceptInvitation(organization, auth.session.uid);
+      const canWrite = await memberService.canWriteToOrg(auth.user.id, id);
+      if (!canWrite) throw new Error('You do not have permission to write to this organization.');
+      return Organization.findAndSetUpdate(id, payload);
     },
   },
 };

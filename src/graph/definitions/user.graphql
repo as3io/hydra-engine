@@ -7,13 +7,15 @@ type Query {
 
 type Mutation {
   createUser(input: CreateUserInput!): User
-  loginFromToken(input: AuthTokenInput!): Authentication
-  setPassword(input: SetPasswordInput!): User
-  sendPasswordReset(input: ResetPasswordInput!): User
+  loginWithMagicToken(token: String!): Authentication!
+  setCurrentUserPassword(password: String!): Boolean!
+  resetPassword(input: ResetPasswordInput!): Boolean!
+  sendPasswordResetEmail(email: String!): Boolean!
   loginUser(input: LoginInput!): Authentication
   deleteSession: String
-  organizationInvite(input: OrganizationInviteInput!): OrganizationMembership
-  magicLogin(input: MagicLoginInput!): User
+  sendMagicLoginEmail(email: String!): Boolean!
+  loginWithApiKey(input: ApiLoginInput!): Authentication!
+  generateUserApiKey: UserApiKey!
 }
 
 enum UserSortField {
@@ -43,8 +45,14 @@ type User {
   logins: Int
   photoURL: String
   hasPassword: Boolean
-  organizations: [Organization]
-  keys: [Key]
+  memberships: [OrganizationMember]
+  api: UserApiKey
+}
+
+type UserApiKey {
+  id: String!
+  key: String!
+  secret: String!
 }
 
 type UserConnection {
@@ -56,6 +64,11 @@ type UserConnection {
 type UserEdge {
   node: User!
   cursor: Cursor!
+}
+
+input ApiLoginInput {
+  key: String!
+  secret: String
 }
 
 input NewUserPayloadInput {
@@ -70,38 +83,9 @@ input CreateUserInput {
   payload: NewUserPayloadInput
 }
 
-input OrganizationInviteInput {
-  organization: String!
-  payload: OrganizationInvitePayload!
-}
-
-input MagicLoginInput {
-  email: String!
-}
-
-input OrganizationInvitePayload {
-  email: String!
-  givenName: String!
-  familyName: String!
-  role: Roles!
-  projectRoles: [ProjectRoleInput]
-}
-
-input ProjectRoleInput {
-  id: String!
-  role: ProjectRoles!
-}
-
-input AuthTokenInput {
-  token: String!
-}
-
-input SetPasswordInput {
-  password: String!
-}
-
 input ResetPasswordInput {
-  email: String!
+  token: String!
+  password: String!
 }
 
 input SessionTokenInput {

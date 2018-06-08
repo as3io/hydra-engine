@@ -15,6 +15,15 @@ services:
       MONGO_DSN: mongodb://mongo:27017/hydra
       REDIS_DSN: redis://redis:6379/0
       PORT: 8100
+      JWT_SECRET: somenotsecretkey
+      SESSION_GLOBAL_SECRET: notarealkey
+      SESSION_NAMESPACE: 96b6ad34-0c2a-440b-8d7b-3b9094bd2250
+      SESSION_EXPIRATION: 300
+      BASE_URI_APP: http://domain.com
+      BASE_URI_SERVER: http://domain.com
+      SENDGRID_API_KEY: sendgrid
+      SENDGRID_FROM: Jane Doe <jdoe@gmail.com>
+      APP_NAME: Hydra
   redis:
     image: redis:alpine
     volumes:
@@ -36,6 +45,6 @@ volumes:
       io.as3.env: "test"
   redis:
     labels:
-      io.as3.appname: "hydra-graph"
+      io.as3.appname: "hydra-engine"
       io.as3.discard: "true"
       io.as3.env: "test"

@@ -1,52 +1,20 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
+const paginablePlugin = require('../plugins/paginable');
+const repositoryPlugin = require('../plugins/repository');
 
 const { Schema } = mongoose;
-
-const role = {
-  type: String,
-  required: true,
-  default: 'Member',
-  enum: [
-    'Owner',
-    'Administrator',
-    'Member',
-  ],
-};
-
-const projectRole = new Schema({
-  project: {
-    type: Schema.Types.ObjectId,
-    ref: 'project',
-  },
-  role,
-});
-
-const orgMember = new Schema({
-  user: {
-    type: Schema.Types.ObjectId,
-    ref: 'user',
-  },
-  role,
-  invited: {
-    type: Date,
-    default: () => new Date(),
-  },
-  accepted: Date,
-  projects: [projectRole],
-});
 
 const schema = new Schema({
   name: {
     type: String,
+    trim: true,
     required: true,
   },
-  keys: [{
-    type: Schema.Types.ObjectId,
-    ref: 'key',
-  }],
-  description: String,
-  members: [orgMember],
+  description: {
+    type: String,
+    trim: true,
+  },
   photoURL: {
     type: String,
     trim: true,
@@ -54,7 +22,7 @@ const schema = new Schema({
       validator(v) {
         if (!v) return true;
         return validator.isURL(v, {
-          protocols: ['http', 'https'],
+          protocols: ['https'],
           require_protocol: true,
         });
       },
@@ -62,6 +30,9 @@ const schema = new Schema({
     },
   },
 }, { timestamps: true });
+
+schema.plugin(paginablePlugin);
+schema.plugin(repositoryPlugin);
 
 schema.pre('save', function setPhotoURL(next) {
   if (!this.photoURL) {
